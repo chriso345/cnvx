@@ -1,0 +1,19 @@
+[workspace]
+members = ["crates/*"]
+default-members = ["crates/cnvx-cli"]
+resolver = "2"
+
+[workspace.package]
+version = "0.0.0"
+authors = ["chriso345"]
+edition = "2024"
+repository = "https://github.com/chriso345/cnvx"
+license = "MIT"
+keywords = ["optimization", "linear-programming", "convex"]
+readme = "README.md"
+
+[workspace.dependencies]
+cnvx = { path = "crates/cnvx", version = "0.0.0" }
+cnvx-cli = { path = "crates/cnvx-cli", version = "0.0.0" }
+
+[workspace.lints]
