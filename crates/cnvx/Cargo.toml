@@ -9,7 +9,15 @@ license = { workspace = true }
 keywords = { workspace = true }
 readme = { workspace = true }
 
+[features]
+default = ["lp"]
+lp = ["cnvx-lp"]
+# mop = ["lp", "cnvx-mop"]
+# sat = ["cnvx-sat"]
+
 [dependencies]
+cnvx-core = { workspace = true }
+cnvx-lp = { workspace = true, optional = true }
 
 [lints]
 workspace = true

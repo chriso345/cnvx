@@ -5,10 +5,25 @@ version = 4
 [[package]]
 name = "cnvx"
 version = "0.0.0"
+dependencies = [
+ "cnvx-core",
+ "cnvx-lp",
+]
 
 [[package]]
 name = "cnvx-cli"
 version = "0.0.0"
 dependencies = [
  "cnvx",
+]
+
+[[package]]
+name = "cnvx-core"
+version = "0.0.0"
+
+[[package]]
+name = "cnvx-lp"
+version = "0.0.0"
+dependencies = [
+ "cnvx-core",
 ]

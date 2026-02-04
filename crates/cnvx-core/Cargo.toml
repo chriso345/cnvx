@@ -1,5 +1,5 @@
 [package]
-name = "cnvx-cli"
+name = "cnvx-core"
 description = ""
 version = { workspace = true }
 authors = { workspace = true }
@@ -10,9 +10,6 @@ keywords = { workspace = true }
 readme = { workspace = true }
 
 [dependencies]
-cnvx = { workspace = true }
-# cnvx-core = { workspace = true }
-# cnvx-lp = { workspace = true, optional = true }
 
 [lints]
 workspace = true
