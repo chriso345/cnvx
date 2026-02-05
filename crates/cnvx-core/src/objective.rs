@@ -1,6 +1,6 @@
 use crate::LinExpr;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum Sense {
     Minimize,
     Maximize,

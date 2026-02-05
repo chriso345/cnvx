@@ -107,12 +107,16 @@ impl Add<f64> for LinExpr {
 }
 
 impl LinExpr {
-    pub fn le(self, rhs: f64) -> Constraint {
+    pub fn leq(self, rhs: f64) -> Constraint {
         Constraint::leq(self, rhs)
     }
 
-    pub fn ge(self, rhs: f64) -> Constraint {
+    pub fn geq(self, rhs: f64) -> Constraint {
         Constraint::geq(self, rhs)
+    }
+
+    pub fn eq(self, rhs: f64) -> Constraint {
+        Constraint::eq(self, rhs)
     }
 }
 

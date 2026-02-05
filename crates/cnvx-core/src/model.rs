@@ -6,16 +6,24 @@ pub struct Model {
     pub(crate) vars: Vec<Var>,
     pub(crate) constraints: Vec<Constraint>,
     pub(crate) objective: Option<Objective>, // TODO: Replace with Vec<Objective> for multi-objective
+
+    pub logging: bool,
 }
 
 impl Model {
     pub fn new() -> Self {
-        Self::default()
+        Self { logging: true, ..Default::default() }
     }
 
     pub fn add_var(&mut self) -> VarBuilder<'_> {
         let id = VarId(self.vars.len());
-        self.vars.push(Var { id, lb: None, ub: None, is_integer: false });
+        self.vars.push(Var {
+            id,
+            lb: Some(0.0),
+            ub: None,
+            is_integer: false,
+            is_artificial: false,
+        });
         VarBuilder { model: self, var: id }
     }
 

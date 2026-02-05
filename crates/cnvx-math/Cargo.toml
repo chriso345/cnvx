@@ -1,5 +1,5 @@
 [package]
-name = "cnvx-lp"
+name = "cnvx-math"
 description = ""
 version = { workspace = true }
 authors = { workspace = true }
@@ -10,8 +10,6 @@ keywords = { workspace = true }
 readme = { workspace = true }
 
 [dependencies]
-cnvx-core = { workspace = true }
-cnvx-math = { workspace = true }
 
 [lints]
 workspace = true

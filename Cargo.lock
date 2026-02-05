@@ -26,4 +26,9 @@ name = "cnvx-lp"
 version = "0.0.0"
 dependencies = [
  "cnvx-core",
+ "cnvx-math",
 ]
+
+[[package]]
+name = "cnvx-math"
+version = "0.0.0"

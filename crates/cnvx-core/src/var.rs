@@ -10,6 +10,7 @@ pub struct Var {
     pub lb: Option<f64>,
     pub ub: Option<f64>,
     pub is_integer: bool,
+    pub is_artificial: bool,
 }
 
 // Builder handle for ergonomic API
@@ -21,14 +22,18 @@ pub struct VarBuilder<'a> {
 impl<'a> VarBuilder<'a> {
     /// Set lower bound
     pub fn lower_bound(self, lb: f64) -> Self {
-        self.model.vars[self.var.0].lb = Some(lb);
-        self
+        _ = lb;
+        panic!("Lower bound not implemented yet");
+        // self.model.vars[self.var.0].lb = Some(lb);
+        // self
     }
 
     /// Set upper bound
     pub fn upper_bound(self, ub: f64) -> Self {
-        self.model.vars[self.var.0].ub = Some(ub);
-        self
+        _ = ub;
+        panic!("Upper bound not implemented yet");
+        // self.model.vars[self.var.0].ub = Some(ub);
+        // self
     }
 
     /// Mark as integer variable

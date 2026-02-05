@@ -17,5 +17,6 @@ cnvx = { path = "crates/cnvx", version = "0.0.0" }
 cnvx-cli = { path = "crates/cnvx-cli", version = "0.0.0" }
 cnvx-core = { path = "crates/cnvx-core", version = "0.0.0" }
 cnvx-lp = { path = "crates/cnvx-lp", version = "0.0.0" }
+cnvx-math = { path = "crates/cnvx-math", version = "0.0.0" }
 
 [workspace.lints]
