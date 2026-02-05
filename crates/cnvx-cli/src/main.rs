@@ -5,23 +5,26 @@ fn main() -> Result<(), SolveError> {
 
     let mut model = Model::new();
 
-    // let x = model.add_var().lower_bound(0.0).finish();
-    // let y = model.add_var().binary().finish();
-    let x = model.add_var().finish();
-    let y = model.add_var().finish();
+    let x1 = model.add_var().finish();
+    let x2 = model.add_var().finish();
+    let x3 = model.add_var().finish();
 
-    model.add_objective(Objective::maximize(3.0 * x + 2.0 * y).name("profit"));
+    // Maximize Z = 3*x1 + 5*x2 + 2*x3
+    model.add_objective(Objective::maximize(3.0 * x1 + 5.0 * x2 + 2.0 * x3).name("Z"));
 
-    model += (x + y).eq(4.0);
-    model += (2.0 * x + 3.0 * y).eq(9.0);
+    // Constraints:
+    model += (x1 + 2.0 * x2 + (-1.0) * x3).eq(4.0);
+    model += (2.0 * x1 + (-1.0) * x2 + 3.0 * x3).leq(10.0);
+    model += (-1.0 * x1 + x2 + x3).geq(2.0);
 
     let solver = SimplexSolver::default();
     let sol = solver.solve(&model)?;
 
     println!(
-        "Solution: x = {}, y = {}, objective = {}",
-        sol.value(x),
-        sol.value(y),
+        "Solution: x1 = {}, x2 = {}, x3 = {}, objective = {}",
+        sol.value(x1),
+        sol.value(x2),
+        sol.value(x3),
         sol.objective_value.unwrap_or_default()
     );
 

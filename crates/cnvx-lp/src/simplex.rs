@@ -1,6 +1,9 @@
+use std::ops::Neg;
+
 use cnvx_core::*;
 use cnvx_math::{DenseMatrix, Matrix};
 
+#[derive(Debug)]
 pub struct SimplexSolver {
     pub tolerance: f64,
     pub max_iterations: usize,
@@ -12,15 +15,25 @@ impl Default for SimplexSolver {
     }
 }
 
-#[allow(dead_code)]
+impl Solver for SimplexSolver {
+    fn solve(&self, model: &Model) -> Result<Solution, SolveError> {
+        crate::validate::check_lp(model)?;
+
+        let mut state = SimplexState::<DenseMatrix>::new(model);
+        let (values, obj) = state.solve_lp(self.max_iterations, self.tolerance)?;
+
+        Ok(Solution { values, objective_value: Some(obj) })
+    }
+}
+
 #[derive(Debug)]
+#[allow(dead_code)]
 pub struct SimplexState<'model, M: Matrix> {
     pub model: &'model Model,
     pub iteration: usize,
 
     pub basis: Vec<usize>,
     pub non_basis: Vec<usize>,
-
     pub x_b: Vec<f64>,
 
     pub a: M,
@@ -28,71 +41,30 @@ pub struct SimplexState<'model, M: Matrix> {
     pub c: Vec<f64>,
 
     pub objective: f64,
-
     minimise: bool,
 }
 
-impl Solver for SimplexSolver {
-    fn solve(&self, model: &Model) -> Result<Solution, SolveError> {
-        crate::validate::check_lp(model)?;
-
-        let mut state = SimplexState::<DenseMatrix>::new(model);
-
-        let m = state.a.rows();
-        let n = state.a.cols();
-        state.basis = (0..m).collect();
-        state.non_basis = (m..n).collect();
-
-        let mut bmat = DenseMatrix::new(m, m);
-        for i in 0..m {
-            for j in 0..m {
-                bmat.set(i, j, state.a.get(i, state.basis[j]));
-            }
-        }
-        let mut xb = state.b.clone();
-        if let Err(e) = bmat.gaussian_elimination(&mut xb) {
-            return Err(SolveError::InvalidModel(format!(
-                "cannot solve initial basis: {}",
-                e
-            )));
-        }
-        for &v in &xb {
-            if v < -self.tolerance {
-                return Err(SolveError::Infeasible);
-            }
-        }
-        state.x_b = xb;
-
-        state
-            .remove_artificial_from_basis()
-            .map_err(|s| SolveError::InvalidModel(s))?;
-
-        state.rsm(&mut bmat, self.max_iterations, self.tolerance)?;
-
-        let mut sol = vec![0.0; n];
-        for i in 0..m {
-            sol[state.basis[i]] = state.x_b[i];
-        }
-        let mut obj = 0.0;
-        for i in 0..m {
-            obj += state.c[state.basis[i]] * state.x_b[i];
-        }
-        if state.minimise {
-            obj = -obj;
-        }
-        Ok(Solution { values: sol, objective_value: Some(obj) })
-    }
-}
-
-impl<'model, M: Matrix> SimplexState<'model, M> {
-    pub fn new(model: &'model Model) -> Self {
+impl<'m, M: Matrix + Clone> SimplexState<'m, M> {
+    pub fn new(model: &'m Model) -> Self {
         let n_vars = model.vars().len();
-        let n_constraints = model.constraints().len();
-        let mut a = M::new(n_constraints, n_vars);
-        let mut b = vec![0.0; n_constraints];
-        let mut c = vec![0.0; n_vars];
+        let n_cons = model.constraints().len();
+
+        let mut b = vec![0.0; n_cons];
+
+        let mut n_total = n_vars;
+        for cons in model.constraints().iter() {
+            match cons.cmp {
+                Cmp::Le | Cmp::Leq | Cmp::Ge | Cmp::Geq => n_total += 1,
+                Cmp::Eq => {}
+            }
+        }
+
+        let mut a = M::new(n_cons, n_total);
+        let mut c = vec![0.0; n_total];
+
         let minimise =
             model.objective().map(|o| o.sense == Sense::Minimize).unwrap_or(false);
+
         if let Some(obj) = model.objective() {
             for term in &obj.expr.terms {
                 c[term.var.0] = match obj.sense {
@@ -101,18 +73,32 @@ impl<'model, M: Matrix> SimplexState<'model, M> {
                 };
             }
         }
+
+        let mut extra_idx = n_vars;
         for (i, cons) in model.constraints().iter().enumerate() {
             b[i] = cons.rhs;
             for term in &cons.expr.terms {
-                a[i][term.var.0] = term.coeff;
+                a.set(i, term.var.0, term.coeff);
+            }
+            match cons.cmp {
+                Cmp::Le | Cmp::Leq => {
+                    a.set(i, extra_idx, 1.0);
+                    extra_idx += 1;
+                }
+                Cmp::Ge | Cmp::Geq => {
+                    a.set(i, extra_idx, -1.0);
+                    extra_idx += 1;
+                }
+                Cmp::Eq => {}
             }
         }
+
         Self {
             model,
             iteration: 0,
             basis: Vec::new(),
             non_basis: (0..n_vars).collect(),
-            x_b: vec![0.0; n_constraints],
+            x_b: vec![0.0; n_cons],
             a,
             b,
             c,
@@ -121,116 +107,352 @@ impl<'model, M: Matrix> SimplexState<'model, M> {
         }
     }
 
-    pub fn rsm(
+    pub fn solve_lp(
+        &mut self,
+        max_iter: usize,
+        tol: f64,
+    ) -> Result<(Vec<f64>, f64), SolveError> {
+        self.init_basis();
+        let orig_n = self.a.cols();
+
+        if self.try_phase2(max_iter, tol)? {
+            return Ok(self.extract_solution(orig_n));
+        }
+
+        self.phase1(orig_n, max_iter, tol)?;
+        self.phase2(max_iter, tol)?;
+
+        Ok(self.extract_solution(orig_n))
+    }
+
+    fn try_phase2(&mut self, max_iter: usize, tol: f64) -> Result<bool, SolveError> {
+        let mut bmat = self.build_bmat();
+        match self.compute_basic_solution(&mut bmat) {
+            Ok(xb) if xb.iter().all(|&v| v >= -tol) => {
+                self.x_b = xb;
+                self.remove_artificial_from_basis(&mut bmat, self.a.cols())
+                    .map_err(SolveError::InvalidModel)?;
+                self.run_simplex(&mut bmat, max_iter, tol)?;
+                Ok(true)
+            }
+            _ => Ok(false),
+        }
+    }
+
+    fn phase1(
+        &mut self,
+        orig_n: usize,
+        max_iter: usize,
+        tol: f64,
+    ) -> Result<(), SolveError> {
+        let (orig_a, orig_c, mut bmat) = self.setup_phase1(orig_n);
+        self.run_simplex(&mut bmat, max_iter, tol)?;
+
+        let sum_art: f64 = self
+            .basis
+            .iter()
+            .enumerate()
+            .map(|(i, &v)| self.c[v] * self.x_b[i])
+            .sum::<f64>()
+            .neg();
+
+        if sum_art > tol {
+            return Err(SolveError::Infeasible);
+        }
+
+        self.remove_artificial_from_basis(&mut bmat, orig_n)
+            .map_err(SolveError::InvalidModel)?;
+
+        self.a = orig_a;
+        self.c = orig_c;
+        Ok(())
+    }
+
+    fn phase2(&mut self, max_iter: usize, tol: f64) -> Result<(), SolveError> {
+        let mut bmat = self.build_bmat();
+        self.run_simplex(&mut bmat, max_iter, tol)
+    }
+
+    pub fn init_basis(&mut self) {
+        let m = self.a.rows();
+        let n = self.a.cols();
+
+        let mut basis = vec![None; m];
+        let mut used = vec![false; n];
+
+        for j in 0..n {
+            let mut one_row = None;
+            let mut ok = true;
+            for i in 0..m {
+                let v = self.a.get(i, j);
+                if v.abs() > 1e-12 {
+                    if (v - 1.0).abs() < 1e-12 {
+                        if one_row.is_some() {
+                            ok = false;
+                            break;
+                        }
+                        one_row = Some(i);
+                    } else {
+                        ok = false;
+                        break;
+                    }
+                }
+            }
+            if ok {
+                if let Some(r) = one_row {
+                    if basis[r].is_none() {
+                        basis[r] = Some(j);
+                        used[j] = true;
+                    }
+                }
+            }
+        }
+
+        if basis.iter().all(|b| b.is_some()) {
+            self.basis = basis.into_iter().map(|b| b.unwrap()).collect();
+            self.non_basis = (0..n).filter(|j| !used[*j]).collect();
+        } else {
+            self.basis = (0..m).collect();
+            self.non_basis = (m..n).collect();
+        }
+    }
+
+    pub fn build_bmat(&self) -> DenseMatrix {
+        let m = self.a.rows();
+        let mut bmat = DenseMatrix::new(m, m);
+        for i in 0..m {
+            for j in 0..m {
+                bmat.set(i, j, self.a.get(i, self.basis[j]));
+            }
+        }
+        bmat
+    }
+
+    pub fn compute_basic_solution(
+        &self,
+        bmat: &mut DenseMatrix,
+    ) -> Result<Vec<f64>, String> {
+        let mut xb = self.b.clone();
+        bmat.gaussian_elimination(&mut xb)
+            .map_err(|e| format!("gauss failed: {e}"))?;
+        Ok(xb)
+    }
+
+    fn run_simplex(
         &mut self,
         bmat: &mut DenseMatrix,
         max_iter: usize,
         tol: f64,
     ) -> Result<(), SolveError> {
-        let m = bmat.rows();
-        for iter in 0..max_iter {
+        let current_iter = self.iteration;
+        for iter in current_iter..max_iter {
             self.iteration = iter;
 
-            let mut cb = vec![0.0; m];
-            for i in 0..m {
-                cb[i] = self.c[self.basis[i]];
-            }
-
-            let mut bt = DenseMatrix::new(m, m);
-            for i in 0..m {
-                for j in 0..m {
-                    bt.set(i, j, bmat.get(j, i));
-                }
-            }
-            let mut pi = cb.clone();
-            if let Err(e) = bt.gaussian_elimination(&mut pi) {
-                return Err(SolveError::Other(format!("dual solve failed: {}", e)));
-            }
-
-            let mut entering: Option<(usize, usize, f64)> = None;
-            for (nb_pos, &col_idx) in self.non_basis.iter().enumerate() {
-                let mut a_s = vec![0.0; m];
-                for i in 0..m {
-                    a_s[i] = self.a.get(i, col_idx);
-                }
-                let mut dot = 0.0;
-                for i in 0..m {
-                    dot += pi[i] * a_s[i];
-                }
-                let rc = self.c[col_idx] - dot;
-                if rc > tol {
-                    if entering.is_none() || rc > entering.unwrap().2 {
-                        entering = Some((nb_pos, col_idx, rc));
-                    }
-                }
-            }
-            if entering.is_none() {
+            let pi = self.compute_duals(bmat)?;
+            let Some((nb_pos, entering)) = self.choose_entering(&pi, tol) else {
                 return Ok(());
-            }
-            let (enter_pos, s_col, _rc) = entering.unwrap();
+            };
 
-            let mut a_s = vec![0.0; m];
-            for i in 0..m {
-                a_s[i] = self.a.get(i, s_col);
-            }
-            let mut d = a_s.clone();
-            if let Err(e) = bmat.gaussian_elimination(&mut d) {
-                return Err(SolveError::Other(format!("direction solve failed: {}", e)));
-            }
+            let d = self.compute_direction(bmat, entering)?;
+            let (leave_row, theta) = self.choose_leaving(&d, tol)?;
 
-            let mut theta = f64::INFINITY;
-            let mut leave: Option<usize> = None;
-            for i in 0..m {
-                if d[i] > tol {
-                    let ratio = self.x_b[i] / d[i];
-                    if ratio < theta {
-                        theta = ratio;
-                        leave = Some(i);
-                    }
-                }
-            }
-            if leave.is_none() {
-                return Err(SolveError::Unbounded);
-            }
-            let leave = leave.unwrap();
-
-            for i in 0..m {
-                self.x_b[i] = self.x_b[i] - theta * d[i];
-                if self.x_b[i].abs() < 1e-12 {
-                    self.x_b[i] = 0.0;
-                }
-            }
-            self.x_b[leave] = theta;
-
-            let entering_var = s_col;
-            let leaving_var = self.basis[leave];
-            self.update_b(bmat, enter_pos, leave, entering_var, leaving_var);
-
-            self.objective = 0.0;
-            for i in 0..m {
-                self.objective += self.c[self.basis[i]] * self.x_b[i];
-            }
+            self.update_primal(&d, leave_row, theta);
+            self.pivot(bmat, nb_pos, leave_row, entering);
+            self.update_objective();
         }
+
         Err(SolveError::Other("max iterations reached".into()))
     }
 
-    pub fn update_b(
+    fn compute_duals(&self, bmat: &DenseMatrix) -> Result<Vec<f64>, SolveError> {
+        let m = bmat.rows();
+        let mut pi = (0..m).map(|i| self.c[self.basis[i]]).collect::<Vec<_>>();
+
+        let mut bt = DenseMatrix::new(m, m);
+        for i in 0..m {
+            for j in 0..m {
+                bt.set(i, j, bmat.get(j, i));
+            }
+        }
+
+        bt.gaussian_elimination(&mut pi)
+            .map_err(|e| SolveError::Other(format!("dual solve failed: {e}")))?;
+
+        Ok(pi)
+    }
+
+    fn choose_entering(&self, pi: &[f64], tol: f64) -> Option<(usize, usize)> {
+        self.non_basis
+            .iter()
+            .enumerate()
+            .filter_map(|(pos, &j)| {
+                let rc = self.c[j]
+                    - (0..pi.len()).map(|i| pi[i] * self.a.get(i, j)).sum::<f64>();
+                (rc > tol).then_some((pos, j, rc))
+            })
+            .max_by(|a, b| a.2.partial_cmp(&b.2).unwrap())
+            .map(|(pos, j, _)| (pos, j))
+    }
+
+    fn compute_direction(
+        &self,
+        bmat: &mut DenseMatrix,
+        entering: usize,
+    ) -> Result<Vec<f64>, SolveError> {
+        let mut d = (0..bmat.rows()).map(|i| self.a.get(i, entering)).collect::<Vec<_>>();
+
+        bmat.gaussian_elimination(&mut d)
+            .map_err(|e| SolveError::Other(format!("direction solve failed: {e}")))?;
+
+        Ok(d)
+    }
+
+    fn choose_leaving(&self, d: &[f64], tol: f64) -> Result<(usize, f64), SolveError> {
+        (0..d.len())
+            .filter(|&i| d[i] > tol)
+            .map(|i| (i, self.x_b[i] / d[i]))
+            .min_by(|a, b| a.1.partial_cmp(&b.1).unwrap())
+            .ok_or(SolveError::Unbounded)
+    }
+
+    fn update_primal(&mut self, d: &[f64], leave: usize, theta: f64) {
+        for i in 0..self.x_b.len() {
+            self.x_b[i] -= theta * d[i];
+            if self.x_b[i].abs() < 1e-12 {
+                self.x_b[i] = 0.0;
+            }
+        }
+        self.x_b[leave] = theta;
+    }
+
+    fn pivot(
         &mut self,
         bmat: &mut DenseMatrix,
         enter_pos: usize,
         leave_row: usize,
-        entering_var: usize,
-        leaving_var: usize,
+        entering: usize,
     ) {
-        self.basis[leave_row] = entering_var;
-        self.non_basis[enter_pos] = leaving_var;
+        let leaving = self.basis[leave_row];
+        self.basis[leave_row] = entering;
+        self.non_basis[enter_pos] = leaving;
+
         for i in 0..bmat.rows() {
-            let v = self.a.get(i, entering_var);
-            bmat.set(i, leave_row, v);
+            bmat.set(i, leave_row, self.a.get(i, entering));
         }
     }
 
-    pub fn remove_artificial_from_basis(&mut self) -> Result<(), String> {
+    fn update_objective(&mut self) {
+        self.objective = self
+            .basis
+            .iter()
+            .enumerate()
+            .map(|(i, &v)| self.c[v] * self.x_b[i])
+            .sum();
+    }
+
+    pub fn setup_phase1(&mut self, orig_n: usize) -> (M, Vec<f64>, DenseMatrix) {
+        let m = self.a.rows();
+        let n = self.a.cols();
+
+        let mut a_aug = M::new(m, n + m);
+        let mut b_aug = self.b.clone();
+
+        for i in 0..m {
+            if b_aug[i] < 0.0 {
+                b_aug[i] = -b_aug[i];
+                for j in 0..n {
+                    a_aug.set(i, j, -self.a.get(i, j));
+                }
+            } else {
+                for j in 0..n {
+                    a_aug.set(i, j, self.a.get(i, j));
+                }
+            }
+
+            for j in 0..m {
+                a_aug.set(i, n + j, if i == j { 1.0 } else { 0.0 });
+            }
+        }
+
+        let mut c_aug = vec![0.0; n + m];
+        for j in 0..m {
+            c_aug[n + j] = -1.0;
+        }
+
+        let orig_a = self.a.clone();
+        let orig_c = self.c.clone();
+
+        self.a = a_aug;
+        self.c = c_aug;
+        self.basis = (orig_n..orig_n + m).collect();
+        self.non_basis = (0..orig_n).collect();
+        self.x_b = b_aug;
+
+        let mut bmat = DenseMatrix::new(m, m);
+        for i in 0..m {
+            for j in 0..m {
+                bmat.set(i, j, self.a.get(i, self.basis[j]));
+            }
+        }
+
+        (orig_a, orig_c, bmat)
+    }
+
+    pub fn remove_artificial_from_basis(
+        &mut self,
+        bmat: &mut DenseMatrix,
+        orig_n: usize,
+    ) -> Result<(), String> {
+        let m = bmat.rows();
+        for row in 0..m {
+            if self.basis[row] >= orig_n {
+                let mut pivot = None;
+                for (nb_pos, &j) in self.non_basis.iter().enumerate() {
+                    if j < orig_n && self.a.get(row, j).abs() > 1e-12 {
+                        pivot = Some((nb_pos, j));
+                        break;
+                    }
+                }
+
+                if let Some((nb_pos, j)) = pivot {
+                    let leaving = self.basis[row];
+                    self.basis[row] = j;
+                    self.non_basis[nb_pos] = leaving;
+                    for i in 0..m {
+                        bmat.set(i, row, self.a.get(i, j));
+                    }
+                } else if self.x_b[row].abs() > 1e-12 {
+                    return Err(
+                        "artificial variable left in basis with non-zero value".into()
+                    );
+                }
+            }
+        }
         Ok(())
+    }
+
+    pub fn extract_solution(&self, orig_n: usize) -> (Vec<f64>, f64) {
+        let m = self.a.rows();
+        let mut sol = vec![0.0; orig_n];
+
+        for i in 0..m {
+            if self.basis[i] < orig_n {
+                sol[self.basis[i]] = self.x_b[i];
+            }
+        }
+
+        let mut obj = self
+            .basis
+            .iter()
+            .enumerate()
+            .filter(|(_, v)| **v < orig_n)
+            .map(|(i, v)| self.c[*v] * self.x_b[i])
+            .sum::<f64>();
+
+        if self.minimise {
+            obj = -obj;
+        }
+
+        (sol, obj)
     }
 }
