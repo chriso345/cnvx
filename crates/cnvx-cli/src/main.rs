@@ -20,13 +20,8 @@ fn main() -> Result<(), SolveError> {
     let solver = SimplexSolver::default();
     let sol = solver.solve(&model)?;
 
-    println!(
-        "Solution: x1 = {}, x2 = {}, x3 = {}, objective = {}",
-        sol.value(x1),
-        sol.value(x2),
-        sol.value(x3),
-        sol.objective_value.unwrap_or_default()
-    );
+    println!("{}", sol);
+    println!("x1 = {}, x2 = {}, x3 = {}", sol.value(x1), sol.value(x2), sol.value(x3));
 
     Ok(())
 }
