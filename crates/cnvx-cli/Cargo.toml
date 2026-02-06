@@ -11,8 +11,8 @@ readme = { workspace = true }
 
 [dependencies]
 cnvx = { workspace = true }
-# cnvx-core = { workspace = true }
-# cnvx-lp = { workspace = true, optional = true }
+cnvx-core = { workspace = true }
+clap = { workspace = true, features = ["derive"] }
 
 [lints]
 workspace = true

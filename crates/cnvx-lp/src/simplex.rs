@@ -99,7 +99,7 @@ impl<'m, M: Matrix + Clone> SimplexState<'m, M> {
         let mut n_total = n_vars;
         for cons in model.constraints().iter() {
             match cons.cmp {
-                Cmp::Leq | Cmp::Geq => n_total += 2,
+                Cmp::Leq | Cmp::Geq => n_total += 1,
                 Cmp::Eq => {}
             }
         }
@@ -219,6 +219,13 @@ impl<'m, M: Matrix + Clone> SimplexState<'m, M> {
 
         self.a = orig_a;
         self.c = orig_c;
+        let mut used = vec![false; orig_n];
+        for &b in &self.basis {
+            if b < orig_n {
+                used[b] = true;
+            }
+        }
+        self.non_basis = (0..orig_n).filter(|&j| !used[j]).collect();
         Ok(())
     }
 
@@ -496,6 +503,18 @@ impl<'m, M: Matrix + Clone> SimplexState<'m, M> {
                     return Err(
                         "artificial variable left in basis with non-zero value".into()
                     );
+                } else {
+                    for (nb_pos, &j) in self.non_basis.iter().enumerate() {
+                        if j < orig_n && self.a.get(row, j).abs() < 1e-12 {
+                            let leaving = self.basis[row];
+                            self.basis[row] = j;
+                            self.non_basis[nb_pos] = leaving;
+                            for i in 0..m {
+                                bmat.set(i, row, self.a.get(i, j));
+                            }
+                            break;
+                        }
+                    }
                 }
             }
         }
