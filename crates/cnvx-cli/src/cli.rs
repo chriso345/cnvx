@@ -1,42 +1,57 @@
-use crate::command::solve::command_run;
+use crate::{
+    solve::solve_file,
+    style::{CLI_STYLING, after_help},
+};
 use clap::{Parser, Subcommand};
 
 /// CNVX CLI
 #[derive(Parser, Debug)]
-#[command(name = "cnvx")]
-#[command(about = "CNVX optimization CLI", long_about = None)]
+#[command(
+    name = "cnvx",
+    about = "A CLI for modeling and solving optimization problems",
+    disable_help_flag = true,
+    disable_help_subcommand = false,
+    infer_subcommands = true,
+    after_help = after_help()
+)]
+#[clap(styles = CLI_STYLING)]
 pub struct Cli {
     #[command(subcommand)]
-    pub command: Commands,
+    pub command: Option<Commands>,
 }
 
 #[derive(Subcommand, Debug)]
 pub enum Commands {
-    /// Show version
+    /// Display the current CNVX version
+    #[command()]
     Version,
 
-    /// Solve a model file
+    /// Load and solve an optimization model from a file
+    #[command(long_about = "Load and solve an optimization model from a file. \
+                  Currently, CNVX only supports single-objective linear problems. \
+                  Supported formats:\n\
+                  - GNU Math Programming Language (.gmpl)\n\
+                  - Mathematical Programming System (.mps)\n\n\
+                  This command parses the model file, constructs the optimization problem, \
+                  and prints the solution to the console.")]
     Solve {
-        /// Path to the model file (GMPL or AMPL)
+        /// Path to the model file to solve. Supported formats: .gmpl, .mps
         file: String,
     },
-
-    /// Start REPL (unimplemented)
-    Repl,
 }
 
 pub fn cli() -> Result<(), Box<dyn std::error::Error>> {
     let cli = Cli::parse();
 
     match &cli.command {
-        Commands::Version => {
+        Some(Commands::Version) => {
             println!("CNVX version {}", env!("CARGO_PKG_VERSION"));
         }
-        Commands::Solve { file } => {
-            command_run(file)?;
+        Some(Commands::Solve { file }) => {
+            solve_file(file)?;
         }
-        Commands::Repl => {
-            println!("REPL not implemented yet");
+        None => {
+            todo!("interactive mode not implemented yet");
         }
     }
 

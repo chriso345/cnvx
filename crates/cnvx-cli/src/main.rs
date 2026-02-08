@@ -1,5 +1,6 @@
-mod command;
 mod lang;
+mod solve;
+mod style;
 
 mod cli;
 

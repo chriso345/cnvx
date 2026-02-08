@@ -4,7 +4,7 @@ use cnvx_core::Solver;
 use crate::lang::{AMPLLanguage, GMPLLanguage, LanguageParser, MPSLanguage};
 use std::fs;
 
-pub fn command_run(file: &str) -> Result<(), Box<dyn std::error::Error>> {
+pub fn solve_file(file: &str) -> Result<(), Box<dyn std::error::Error>> {
     let contents = fs::read_to_string(file)?;
     let ext = file.split('.').last().unwrap_or("");
 
