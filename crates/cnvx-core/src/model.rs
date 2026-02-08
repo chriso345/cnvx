@@ -36,15 +36,12 @@ pub struct Model {
     /// Optional objective function. Currently supports only a single objective.
     /// TODO: Replace with `Vec<Objective>` for multi-objective optimization.
     pub objective: Option<Objective>,
-
-    /// Enables logging during model construction or solving.
-    pub logging: bool,
 }
 
 impl Model {
     /// Creates a new model with logging enabled by default.
     pub fn new() -> Self {
-        Self { logging: true, ..Default::default() }
+        Self { ..Default::default() }
     }
 
     /// Adds a new variable to the model and returns a [`VarBuilder`] for ergonomic configuration.

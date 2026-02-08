@@ -21,3 +21,20 @@ cnvx-math = { path = "crates/cnvx-math", version = "0.0.0" }
 clap = { version = "4.5.57", features = ["derive"] }
 
 [workspace.lints]
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+debug = 0
+overflow-checks = false
+panic = "abort"
+incremental = true
+strip = true
+
+[profile.test]
+opt-level = 0
+debug = 2
+overflow-checks = true
+panic = "unwind"
+incremental = true

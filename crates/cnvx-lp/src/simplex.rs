@@ -27,11 +27,22 @@ pub struct SimplexSolver {
 
     /// The maximum number of simplex iterations before terminating with an error.
     pub max_iterations: usize,
+
+    /// Whether to log iteration details during the simplex algorithm.
+    pub logging: bool,
+
+    /// Interval at which to log iteration details if logging is enabled.
+    pub log_interval: usize,
 }
 
 impl Default for SimplexSolver {
     fn default() -> Self {
-        Self { tolerance: 1e-8, max_iterations: 1000 }
+        Self {
+            tolerance: 1e-8,
+            max_iterations: 1000,
+            logging: false,
+            log_interval: 10,
+        }
     }
 }
 
@@ -39,8 +50,15 @@ impl Solver for SimplexSolver {
     fn solve(&self, model: &Model) -> Result<Solution, SolveError> {
         crate::validate::check_lp(model)?;
 
-        let mut state = SimplexState::<DenseMatrix>::new(model);
+        let mut state = SimplexState::<DenseMatrix>::new(model, self);
         let (values, obj) = state.solve_lp(self.max_iterations, self.tolerance)?;
+
+        if self.logging {
+            println!(
+                "Simplex finished with status {:?} in {} iterations. Objective value: {}",
+                state.status, state.iteration, obj
+            );
+        }
 
         Ok(Solution {
             values,
@@ -55,7 +73,6 @@ impl Solver for SimplexSolver {
 /// Tracks the current basis, non-basis variables, solution vector, objective value,
 /// and the LP tableau.
 #[derive(Debug)]
-#[allow(dead_code)]
 pub struct SimplexState<'model, M: Matrix> {
     /// Reference to the LP model being solved.
     pub model: &'model Model,
@@ -83,6 +100,12 @@ pub struct SimplexState<'model, M: Matrix> {
 
     /// Whether the LP is a minimization problem.
     minimise: bool,
+
+    /// Whether to log iteration details during the simplex algorithm.
+    logging: bool,
+
+    /// Interval at which to log iteration details if logging is enabled.
+    log_interval: usize,
 }
 
 impl<'m, M: Matrix + Clone> SimplexState<'m, M> {
@@ -90,7 +113,7 @@ impl<'m, M: Matrix + Clone> SimplexState<'m, M> {
     ///
     /// Constructs the tableau, sets up artificial variables for inequalities, and
     /// computes the objective coefficients based on the problem's sense (min/max).
-    pub fn new(model: &'m Model) -> Self {
+    pub fn new(model: &'m Model, solver: &SimplexSolver) -> Self {
         let n_vars = model.vars().len();
         let n_cons = model.constraints().len();
 
@@ -150,6 +173,8 @@ impl<'m, M: Matrix + Clone> SimplexState<'m, M> {
             objective: 0.0,
             status: SolveStatus::NotSolved,
             minimise,
+            logging: solver.logging,
+            log_interval: solver.log_interval,
         }
     }
 
@@ -281,9 +306,9 @@ impl<'m, M: Matrix + Clone> SimplexState<'m, M> {
     }
 
     /// Build the current basis matrix `B` from the full tableau `A`.
-    pub fn build_bmat(&self) -> DenseMatrix {
+    pub fn build_bmat(&self) -> M {
         let m = self.a.rows();
-        let mut bmat = DenseMatrix::new(m, m);
+        let mut bmat = M::new(m, m);
         for i in 0..m {
             for j in 0..m {
                 bmat.set(i, j, self.a.get(i, self.basis[j]));
@@ -293,10 +318,7 @@ impl<'m, M: Matrix + Clone> SimplexState<'m, M> {
     }
 
     /// Compute the values of the basic variables by solving `B x_B = b`.
-    pub fn compute_basic_solution(
-        &self,
-        bmat: &mut DenseMatrix,
-    ) -> Result<Vec<f64>, String> {
+    pub fn compute_basic_solution(&self, bmat: &mut M) -> Result<Vec<f64>, String> {
         let mut xb = self.b.clone();
         bmat.gaussian_elimination(&mut xb)
             .map_err(|e| format!("gauss failed: {e}"))?;
@@ -306,7 +328,7 @@ impl<'m, M: Matrix + Clone> SimplexState<'m, M> {
     /// Run the main simplex iteration loop.
     fn run_simplex(
         &mut self,
-        bmat: &mut DenseMatrix,
+        bmat: &mut M,
         max_iter: usize,
         tol: f64,
     ) -> Result<(), SolveError> {
@@ -329,17 +351,25 @@ impl<'m, M: Matrix + Clone> SimplexState<'m, M> {
             self.update_primal(&d, leave_row, theta);
             self.pivot(bmat, nb_pos, leave_row, entering);
             self.update_objective();
+
+            if self.logging && (iter + 1) % self.log_interval == 0 {
+                println!(
+                    "Iteration {:>4}: Objective = {:>12.6}",
+                    iter + 1,
+                    if self.minimise { -self.objective } else { self.objective }
+                );
+            }
         }
 
         Err(SolveError::Other("max iterations reached".into()))
     }
 
     /// Compute dual variables for the current basis.
-    fn compute_duals(&self, bmat: &DenseMatrix) -> Result<Vec<f64>, SolveError> {
+    fn compute_duals(&self, bmat: &M) -> Result<Vec<f64>, SolveError> {
         let m = bmat.rows();
         let mut pi = (0..m).map(|i| self.c[self.basis[i]]).collect::<Vec<_>>();
 
-        let mut bt = DenseMatrix::new(m, m);
+        let mut bt = M::new(m, m);
         for i in 0..m {
             for j in 0..m {
                 bt.set(i, j, bmat.get(j, i));
@@ -369,7 +399,7 @@ impl<'m, M: Matrix + Clone> SimplexState<'m, M> {
     /// Compute the simplex direction `d = B^{-1} A_j`.
     fn compute_direction(
         &self,
-        bmat: &mut DenseMatrix,
+        bmat: &mut M,
         entering: usize,
     ) -> Result<Vec<f64>, SolveError> {
         let mut d = (0..bmat.rows()).map(|i| self.a.get(i, entering)).collect::<Vec<_>>();
@@ -402,7 +432,7 @@ impl<'m, M: Matrix + Clone> SimplexState<'m, M> {
     /// Perform pivot operations on the basis and non-basis sets.
     fn pivot(
         &mut self,
-        bmat: &mut DenseMatrix,
+        bmat: &mut M,
         enter_pos: usize,
         leave_row: usize,
         entering: usize,
@@ -427,7 +457,7 @@ impl<'m, M: Matrix + Clone> SimplexState<'m, M> {
     }
 
     /// Prepare the LP for phase 1 of two-phase simplex by adding artificial variables.
-    pub fn setup_phase1(&mut self, orig_n: usize) -> (M, Vec<f64>, DenseMatrix) {
+    pub fn setup_phase1(&mut self, orig_n: usize) -> (M, Vec<f64>, M) {
         let m = self.a.rows();
         let n = self.a.cols();
 
@@ -465,7 +495,7 @@ impl<'m, M: Matrix + Clone> SimplexState<'m, M> {
         self.non_basis = (0..orig_n).collect();
         self.x_b = b_aug;
 
-        let mut bmat = DenseMatrix::new(m, m);
+        let mut bmat = M::new(m, m);
         for i in 0..m {
             for j in 0..m {
                 bmat.set(i, j, self.a.get(i, self.basis[j]));
@@ -478,7 +508,7 @@ impl<'m, M: Matrix + Clone> SimplexState<'m, M> {
     /// Remove artificial variables from the basis once feasibility is established.
     pub fn remove_artificial_from_basis(
         &mut self,
-        bmat: &mut DenseMatrix,
+        bmat: &mut M,
         orig_n: usize,
     ) -> Result<(), String> {
         let m = bmat.rows();
