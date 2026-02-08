@@ -60,7 +60,7 @@ jobs:
         run: cargo build --workspace --all-targets
 
   lint:
-    name: Lint - Workspace
+    name: Lint, Format and Docs - Workspace
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -71,6 +71,9 @@ jobs:
 
       - name: Check Formatting
         run: cargo fmt --all -- --check
+
+      - name: Check Docs
+        run: RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps --document-private-items
 
   test:
     name: Test - Crate

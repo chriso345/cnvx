@@ -36,5 +36,4 @@ strip = true
 opt-level = 0
 debug = 2
 overflow-checks = true
-panic = "unwind"
 incremental = true
