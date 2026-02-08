@@ -124,17 +124,17 @@ impl LanguageParser for MPSLanguage {
                         .or_insert_with(|| model.add_var().finish());
                     match btype {
                         "UP" => {
-                            if parts.len() >= idx + 4 {
-                                if let Ok(v) = parts[idx + 3].parse::<f64>() {
-                                    model.vars[varid.0].ub = Some(v);
-                                }
+                            if parts.len() >= idx + 4
+                                && let Ok(v) = parts[idx + 3].parse::<f64>()
+                            {
+                                model.vars[varid.0].ub = Some(v);
                             }
                         }
                         "LO" => {
-                            if parts.len() >= idx + 4 {
-                                if let Ok(v) = parts[idx + 3].parse::<f64>() {
-                                    model.vars[varid.0].lb = Some(v);
-                                }
+                            if parts.len() >= idx + 4
+                                && let Ok(v) = parts[idx + 3].parse::<f64>()
+                            {
+                                model.vars[varid.0].lb = Some(v);
                             }
                         }
                         "FR" => {
@@ -150,11 +150,11 @@ impl LanguageParser for MPSLanguage {
                             model.vars[varid.0].ub = Some(1.0);
                         }
                         "FX" => {
-                            if parts.len() >= idx + 4 {
-                                if let Ok(v) = parts[idx + 3].parse::<f64>() {
-                                    model.vars[varid.0].lb = Some(v);
-                                    model.vars[varid.0].ub = Some(v);
-                                }
+                            if parts.len() >= idx + 4
+                                && let Ok(v) = parts[idx + 3].parse::<f64>()
+                            {
+                                model.vars[varid.0].lb = Some(v);
+                                model.vars[varid.0].ub = Some(v);
                             }
                         }
                         _ => {}

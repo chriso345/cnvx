@@ -6,7 +6,7 @@ use std::fs;
 
 pub fn solve_file(file: &str) -> Result<(), Box<dyn std::error::Error>> {
     let contents = fs::read_to_string(file)?;
-    let ext = file.split('.').last().unwrap_or("");
+    let ext = file.split('.').next_back().unwrap_or("");
 
     let model = match ext {
         "gmpl" => GMPLLanguage::new().parse(&contents)?,
