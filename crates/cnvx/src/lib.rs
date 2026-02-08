@@ -54,14 +54,19 @@
 //! ```
 
 pub use cnvx_core as core;
+
+#[cfg(feature = "lp")]
 pub use cnvx_lp as lp;
 
 pub mod prelude {
     pub use crate::core::*;
+
+    #[cfg(feature = "lp")]
     pub use crate::lp::*;
 }
 
 pub mod solvers {
+    #[cfg(feature = "lp")]
     pub use crate::lp::SimplexSolver;
 }
 

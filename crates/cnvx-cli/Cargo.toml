@@ -16,3 +16,7 @@ clap = { workspace = true, features = ["derive"] }
 
 [lints]
 workspace = true
+
+[[bin]]
+name = "cnvx"
+path = "src/main.rs"

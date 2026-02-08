@@ -1,4 +1,4 @@
-use crate::command::run::command_run;
+use crate::command::solve::command_run;
 use clap::{Parser, Subcommand};
 
 /// CNVX CLI
@@ -15,8 +15,8 @@ pub enum Commands {
     /// Show version
     Version,
 
-    /// Run a model file
-    Run {
+    /// Solve a model file
+    Solve {
         /// Path to the model file (GMPL or AMPL)
         file: String,
     },
@@ -32,7 +32,7 @@ pub fn cli() -> Result<(), Box<dyn std::error::Error>> {
         Commands::Version => {
             println!("CNVX version {}", env!("CARGO_PKG_VERSION"));
         }
-        Commands::Run { file } => {
+        Commands::Solve { file } => {
             command_run(file)?;
         }
         Commands::Repl => {
