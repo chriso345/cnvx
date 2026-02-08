@@ -68,7 +68,7 @@ jobs:
         run: cargo clippy --workspace --all-targets -- -D warnings
 
       - name: Check formatting
-        run: cargo fmt --workspace --all -- --check
+        run: cargo fmt --all -- --check
 
   test:
     runs-on: ubuntu-latest
