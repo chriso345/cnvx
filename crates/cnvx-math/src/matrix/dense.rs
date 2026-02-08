@@ -43,21 +43,21 @@ impl Matrix for DenseMatrix {
         }
         // build augmented matrix
         let mut aug = vec![vec![0.0; n + 1]; n];
-        for i in 0..n {
-            for j in 0..n {
-                aug[i][j] = self.get(i, j);
+        for (i, row) in aug.iter_mut().enumerate().take(n) {
+            for (j, cell) in row.iter_mut().take(n).enumerate() {
+                *cell = self.get(i, j);
             }
-            aug[i][n] = rhs[i];
+            row[n] = rhs[i];
         }
         // gaussian elimination with partial pivot
         for col in 0..n {
             // pivot
             let mut pivot = col;
             let mut maxv = aug[pivot][col].abs();
-            for r in (col + 1)..n {
-                if aug[r][col].abs() > maxv {
+            for (r, row) in aug.iter().enumerate().skip(col + 1) {
+                if row[col].abs() > maxv {
                     pivot = r;
-                    maxv = aug[r][col].abs();
+                    maxv = row[col].abs();
                 }
             }
             if maxv < 1e-12 {
@@ -68,26 +68,26 @@ impl Matrix for DenseMatrix {
             }
             // normalize
             let diag = aug[col][col];
-            for k in col..=n {
-                aug[col][k] /= diag;
-            }
+            aug[col].iter_mut().skip(col).for_each(|v| *v /= diag);
+            // capture pivot row to avoid borrowing issues
+            let pivot_row = aug[col].clone();
             // eliminate
-            for r in 0..n {
+            for (r, row) in aug.iter_mut().enumerate().take(n) {
                 if r == col {
                     continue;
                 }
-                let fac = aug[r][col];
+                let fac = row[col];
                 if fac.abs() < 1e-15 {
                     continue;
                 }
-                for k in col..=n {
-                    aug[r][k] -= fac * aug[col][k];
+                for (k, val) in row.iter_mut().enumerate().skip(col) {
+                    *val -= fac * pivot_row[k];
                 }
             }
         }
         // write back solution
-        for i in 0..n {
-            rhs[i] = aug[i][n];
+        for (i, row) in aug.iter().enumerate().take(n) {
+            rhs[i] = row[n];
         }
         Ok(())
     }

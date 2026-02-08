@@ -268,7 +268,7 @@ impl<'m, M: Matrix + Clone> SimplexState<'m, M> {
         let mut basis = vec![None; m];
         let mut used = vec![false; n];
 
-        for j in 0..n {
+        for (j, used_j) in used.iter_mut().enumerate().take(n) {
             let mut one_row = None;
             let mut ok = true;
             for i in 0..m {
@@ -286,13 +286,10 @@ impl<'m, M: Matrix + Clone> SimplexState<'m, M> {
                     }
                 }
             }
-            if ok {
-                if let Some(r) = one_row {
-                    if basis[r].is_none() {
-                        basis[r] = Some(j);
-                        used[j] = true;
-                    }
-                }
+            if ok && one_row.is_some_and(|r| basis[r].is_none()) {
+                let r = one_row.unwrap();
+                basis[r] = Some(j);
+                *used_j = true;
             }
         }
 
@@ -420,10 +417,10 @@ impl<'m, M: Matrix + Clone> SimplexState<'m, M> {
 
     /// Update the primal solution vector `x_B` after a pivot.
     fn update_primal(&mut self, d: &[f64], leave: usize, theta: f64) {
-        for i in 0..self.x_b.len() {
-            self.x_b[i] -= theta * d[i];
-            if self.x_b[i].abs() < 1e-12 {
-                self.x_b[i] = 0.0;
+        for (xi, di) in self.x_b.iter_mut().zip(d.iter()) {
+            *xi -= theta * di;
+            if (*xi).abs() < 1e-12 {
+                *xi = 0.0;
             }
         }
         self.x_b[leave] = theta;
@@ -464,9 +461,9 @@ impl<'m, M: Matrix + Clone> SimplexState<'m, M> {
         let mut a_aug = M::new(m, n + m);
         let mut b_aug = self.b.clone();
 
-        for i in 0..m {
-            if b_aug[i] < 0.0 {
-                b_aug[i] = -b_aug[i];
+        for (i, bval) in b_aug.iter_mut().enumerate().take(m) {
+            if *bval < 0.0 {
+                *bval = -*bval;
                 for j in 0..n {
                     a_aug.set(i, j, -self.a.get(i, j));
                 }

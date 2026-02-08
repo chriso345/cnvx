@@ -62,8 +62,8 @@ fn parse_expression(expr: &str, vars: &[VarId]) -> Result<LinExpr, String> {
                 .parse::<f64>()
                 .map_err(|_| format!("invalid coefficient '{}'", parts[0]))?;
             (coef, parts[1])
-        } else if tok.starts_with('-') {
-            (-1.0, &tok[1..])
+        } else if let Some(rest) = tok.strip_prefix('-') {
+            (-1.0, rest)
         } else {
             (1.0, tok)
         };
