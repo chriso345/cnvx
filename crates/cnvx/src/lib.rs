@@ -17,7 +17,7 @@
 //! # Modules
 //!
 //! - [`prelude`]: Re-exports the main types and functions from [`cnvx_core`] and [`cnvx_lp`] for convenient usage.
-//! - [`solvers`]: Contains LP solvers, currently [`SimplexSolver`].
+//! - [`solvers`]: Contains LP solvers enabled by features, such as the [`SimplexSolver`](::cnvx_lp::SimplexSolver).
 //!
 //! # Examples
 //!

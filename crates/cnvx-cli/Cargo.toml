@@ -20,3 +20,4 @@ workspace = true
 [[bin]]
 name = "cnvx"
 path = "src/main.rs"
+doc = false

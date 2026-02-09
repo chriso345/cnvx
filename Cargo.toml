@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/*"]
+members = ["crates/*", "tests"]
 default-members = ["crates/cnvx-cli"]
 resolver = "2"
 
@@ -36,5 +36,4 @@ strip = true
 opt-level = 0
 debug = 2
 overflow-checks = true
-panic = "unwind"
 incremental = true
