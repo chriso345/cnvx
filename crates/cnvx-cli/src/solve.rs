@@ -15,7 +15,7 @@ pub fn solve_file(file: &str) -> Result<(), Box<dyn std::error::Error>> {
         _ => return Err(format!("unsupported file type: {}", ext).into()),
     };
 
-    let solver = SimplexSolver { logging: true, ..Default::default() };
+    let solver = SimplexSolver::default();
     let sol = solver.solve(&model)?;
 
     println!("{}", sol);

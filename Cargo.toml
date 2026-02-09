@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/*"]
+members = ["crates/*", "tests"]
 default-members = ["crates/cnvx-cli"]
 resolver = "2"
 
