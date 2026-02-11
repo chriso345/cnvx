@@ -25,7 +25,7 @@ pub(crate) const CLI_STYLING: Styles = Styles::styled()
     .valid(VALID)
     .invalid(INVALID);
 
-pub(crate) fn after_help() -> String {
+pub fn after_help() -> String {
     format!(
         "See '{}{} help {}{}<command>{}' for more information on a specific command.",
         HEADER,

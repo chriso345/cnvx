@@ -18,6 +18,7 @@ cnvx-cli = { path = "crates/cnvx-cli", version = "0.0.0" }
 cnvx-core = { path = "crates/cnvx-core", version = "0.0.0" }
 cnvx-lp = { path = "crates/cnvx-lp", version = "0.0.0" }
 cnvx-math = { path = "crates/cnvx-math", version = "0.0.0" }
+cnvx-parse = { path = "crates/cnvx-parse", version = "0.0.0" }
 clap = { version = "4.5.57", features = ["derive"] }
 
 [workspace.lints]
