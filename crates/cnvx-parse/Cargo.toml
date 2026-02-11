@@ -1,5 +1,5 @@
 [package]
-name = "cnvx-cli"
+name = "cnvx-parse"
 description = ""
 version = { workspace = true }
 authors = { workspace = true }
@@ -10,16 +10,7 @@ keywords = { workspace = true }
 readme = { workspace = true }
 
 [dependencies]
-cnvx = { workspace = true }
 cnvx-core = { workspace = true }
-cnvx-parse = { workspace = true }
-clap = { workspace = true, features = ["derive"] }
-sigpipe = "0.1.3"
 
 [lints]
 workspace = true
-
-[[bin]]
-name = "cnvx"
-path = "src/main.rs"
-doc = false
