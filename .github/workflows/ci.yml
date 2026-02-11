@@ -97,9 +97,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build
-        run: cargo build --workspace --all-targets --release
-
         # FIXME: This timeout should be replaced with either something in the test itself
         #  or something within the solver.
       - name: Run integration tests
