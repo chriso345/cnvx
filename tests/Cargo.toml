@@ -12,7 +12,6 @@ path = "src/tests.rs"
 
 [dependencies]
 cnvx = { workspace = true }
-cnvx-cli = { workspace = true }
 cnvx-core = { workspace = true }
 cnvx-lp = { workspace = true }
 cnvx-math = { workspace = true }
