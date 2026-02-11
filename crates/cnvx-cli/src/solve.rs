@@ -1,8 +1,6 @@
 use cnvx::lp::SimplexSolver;
 use cnvx_core::Solver;
 
-use crate::lang::LanguageParser;
-
 pub fn solve(
     command: &crate::args::SolveCommand,
 ) -> Result<(), Box<dyn std::error::Error>> {
@@ -30,18 +28,16 @@ pub fn solve(
         }
     };
 
-    let model = match ext.as_str() {
-        "gmpl" => crate::lang::GMPLLanguage::new().parse(&contents)?,
-        "ampl" => crate::lang::AMPLLanguage::new().parse(&contents)?,
-        "mps" => crate::lang::MPSLanguage::new().parse(&contents)?,
-        _ => return Err(format!("unsupported file type: {}", ext).into()),
-    };
+    if let Ok(model) = cnvx_parse::parse(&contents, &ext) {
+        let solver = SimplexSolver::default();
+        let sol = solver.solve(&model)?;
 
-    let solver = SimplexSolver::default();
-    let sol = solver.solve(&model)?;
-
-    // TODO: Also support writing to a file, and saving to a file
-    println!("{}", sol);
+        // TODO: Also support writing to a file, and saving to a file
+        println!("{}", sol);
+    } else {
+        println!("Failed to parse model");
+        return Err("Failed to parse model".into());
+    }
 
     Ok(())
 }

@@ -107,7 +107,7 @@ fn input_value_parser() -> impl TypedValueParser<Value = Input> {
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, ValueEnum)]
-#[allow(non_camel_case_types)]
+#[allow(clippy::upper_case_acronyms)]
 pub enum LanguageType {
     /// GNU Math Programming Language (.gmpl)
     #[value(name = "gmpl")]

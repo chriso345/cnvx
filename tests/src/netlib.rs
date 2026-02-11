@@ -6,6 +6,9 @@ use std::{
     sync::LazyLock,
 };
 
+use cnvx_core::{Model, Solution, SolveStatus, Solver};
+use cnvx_lp::SimplexSolver;
+use cnvx_parse::parse;
 use test_case::test_case;
 
 // URLs for Netlib data
@@ -140,61 +143,21 @@ fn run_emps(lp: &Path) {
 }
 
 // Run cnvx solver on the produced MPS
-fn run_cnvx(mps: &Path) -> String {
-    let cnvx = Path::new(env!("CARGO_MANIFEST_DIR"))
-        .parent()
-        .unwrap()
-        .join("target/release/cnvx");
-    if !cnvx.exists() {
-        panic!("cnvx binary not found at {}. Build the workspace first.", cnvx.display());
+fn run_cnvx(mps: &Path) -> Result<Solution, String> {
+    let contents = fs::read_to_string(mps).expect("Failed to read MPS file");
+
+    let ext = "mps"; // or infer from file extension
+    let model: Model = match parse(&contents, ext) {
+        Ok(m) => m,
+        Err(e) => return Err(format!("Failed to parse MPS file: {}", e)),
+    };
+
+    let solver = SimplexSolver::default();
+
+    match solver.solve(&model) {
+        Ok(sol) => Ok(sol),
+        Err(e) => Err(format!("Solver failed: {}", e)),
     }
-
-    let output = Command::new(cnvx)
-        .arg("solve")
-        .arg(mps)
-        .output()
-        .expect("Failed to run cnvx solve");
-
-    if !output.status.success() {
-        panic!(
-            "cnvx solve failed\nstdout:\n{}\nstderr:\n{}",
-            String::from_utf8_lossy(&output.stdout),
-            String::from_utf8_lossy(&output.stderr)
-        );
-    }
-
-    format!(
-        "{}{}",
-        String::from_utf8_lossy(&output.stdout),
-        String::from_utf8_lossy(&output.stderr)
-    )
-}
-
-// Validate the output
-fn assert_output(output: &str, expected: Option<f64>) {
-    let lower = output.to_lowercase();
-
-    match expected {
-        Some(val) => {
-            if !lower.contains("optimal") {
-                panic!("Expected optimal solution, got:\n{}", output);
-            }
-            let found =
-                extract_objective(output).expect("Failed to parse objective value");
-            if (found - val).abs() > TOL {
-                panic!("Objective mismatch: expected {}, got {}\n{}", val, found, output);
-            }
-        }
-        None => {
-            if !lower.contains("infeasible") && !lower.contains("unbounded") {
-                panic!("Expected infeasible or unbounded, got:\n{}", output);
-            }
-        }
-    }
-}
-
-fn extract_objective(output: &str) -> Option<f64> {
-    output.split_whitespace().find_map(|tok| tok.parse().ok())
 }
 
 #[test_case("afiro", Some(-4.6475314286E+02))]
@@ -209,6 +172,30 @@ fn netlib_test(name: &str, expected: Option<f64>) {
         panic!("emps did not produce expected file {}", mps.display());
     }
 
-    let output = run_cnvx(&mps);
-    assert_output(&output, expected);
+    let output: Solution = match run_cnvx(&mps) {
+        Ok(sol) => sol,
+        Err(e) => panic!("cnvx failed on {}: {}", mps.display(), e),
+    };
+
+    if output.status != SolveStatus::Optimal {
+        panic!("cnvx did not find optimal solution for {}", mps.display());
+    }
+
+    let obj = match output.objective_value {
+        Some(obj) => obj,
+        None => panic!("cnvx did not return objective value for {}", mps.display()),
+    };
+
+    if let Some(expected) = expected {
+        if (obj - expected).abs() > TOL {
+            panic!(
+                "Objective value mismatch for {}: expected {}, got {}",
+                mps.display(),
+                expected,
+                obj
+            );
+        }
+    } else {
+        println!("No expected objective provided for {}, got {}", mps.display(), obj);
+    }
 }

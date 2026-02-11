@@ -10,6 +10,7 @@ keywords = { workspace = true }
 readme = { workspace = true }
 
 [dependencies]
+cnvx-core = { workspace = true }
 
 [lints]
 workspace = true

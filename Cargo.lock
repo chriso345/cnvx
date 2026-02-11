@@ -221,6 +221,9 @@ version = "0.0.0"
 [[package]]
 name = "cnvx-parse"
 version = "0.0.0"
+dependencies = [
+ "cnvx-core",
+]
 
 [[package]]
 name = "cnvx-tests"
@@ -232,6 +235,7 @@ dependencies = [
  "cnvx-core",
  "cnvx-lp",
  "cnvx-math",
+ "cnvx-parse",
  "reqwest",
  "tempfile",
  "test-case",

@@ -5,13 +5,11 @@ use clap::Parser;
 use crate::args::{CliArguments, Command};
 
 mod args;
-mod lang;
 mod solve;
 mod style;
 mod version;
 
 thread_local! {
-    /// The CLI's exit code.
     static EXIT: Cell<ExitCode> = const { Cell::new(ExitCode::SUCCESS) };
 }
 
