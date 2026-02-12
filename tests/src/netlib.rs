@@ -63,7 +63,7 @@ fn ensure_emps_binary(suite_dir: &Path, src: &Path) -> PathBuf {
 static EMPS: LazyLock<PathBuf> = LazyLock::new(|| {
     let suite_dir = setup_suite_dir();
     let vendor_src = Path::new(VENDOR_SOURCE);
-    ensure_emps_binary(&suite_dir, &vendor_src)
+    ensure_emps_binary(&suite_dir, vendor_src)
 });
 
 // Helper to download LP files
