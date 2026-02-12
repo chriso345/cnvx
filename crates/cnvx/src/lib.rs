@@ -67,7 +67,7 @@ pub mod prelude {
 
 pub mod solvers {
     #[cfg(feature = "lp")]
-    pub use crate::lp::SimplexSolver;
+    pub use crate::lp::PrimalSimplexSolver;
 }
 
 /// Returns the version of the `cnvx` crate.

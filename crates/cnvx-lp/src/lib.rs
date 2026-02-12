@@ -6,13 +6,13 @@
 //!
 //! # Features
 //!
-//! - [`SimplexSolver`]: Solver implementing the simplex algorithm for LP problems.
+//! - [`PrimalSimplexSolver`]: Solver implementing the 2-phase primal simplex algorithm for LP problems.
 //!
 //! # Modules
 //!
-//! - [`simplex`]: Contains the [`SimplexSolver`] struct and simplex-specific solver logic.
+//! - [`primal_simplex`]: Contains the [`PrimalSimplexSolver`] struct and primal simplex-specific solver logic.
 
-pub mod simplex;
+pub mod primal_simplex;
 pub mod validate;
 
-pub use simplex::*;
+pub use primal_simplex::*;
