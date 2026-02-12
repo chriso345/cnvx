@@ -14,10 +14,9 @@ use test_case::test_case;
 // URLs for Netlib data
 const NETLIB_DATA_URL: &str = "https://www.netlib.org/lp/data/";
 const NETLIB_INFEAS_URL: &str = "https://www.netlib.org/lp/infeas/";
-const EMPS_URL: &str = "https://www.netlib.org/lp/data/emps.c";
 
 // Local filenames
-const DECOMP_FILE: &str = "emps.c";
+const VENDOR_SOURCE: &str = "vendor/emps.c";
 const DECOMP_EXECUTABLE: &str = "emps";
 
 // Tolerance for objective comparison
@@ -30,20 +29,6 @@ fn setup_suite_dir() -> PathBuf {
     let dir = Path::new(NETLIB_SUITE);
     fs::create_dir_all(dir).expect("Failed to create netlib_suite directory");
     dir.to_path_buf()
-}
-
-// Ensure emps.c is downloaded
-fn ensure_emps_source(suite_dir: &Path) -> PathBuf {
-    let path = suite_dir.join(DECOMP_FILE);
-    if !path.exists() {
-        println!("Downloading emps.c...");
-        let bytes = reqwest::blocking::get(EMPS_URL)
-            .expect("Failed to download emps.c")
-            .bytes()
-            .expect("Failed to read emps.c content");
-        fs::write(&path, &bytes).expect("Failed to write emps.c");
-    }
-    path
 }
 
 // Ensure emps is compiled
@@ -77,8 +62,8 @@ fn ensure_emps_binary(suite_dir: &Path, src: &Path) -> PathBuf {
 // Lazy static to ensure emps is ready before any test
 static EMPS: LazyLock<PathBuf> = LazyLock::new(|| {
     let suite_dir = setup_suite_dir();
-    let src = ensure_emps_source(&suite_dir);
-    ensure_emps_binary(&suite_dir, &src)
+    let vendor_src = Path::new(VENDOR_SOURCE);
+    ensure_emps_binary(&suite_dir, &vendor_src)
 });
 
 // Helper to download LP files
@@ -102,7 +87,6 @@ fn ensure_lp_file(name: &str, expected: Option<f64>) -> PathBuf {
 }
 
 // Run emps on the LP file
-
 fn run_emps(lp: &Path) {
     let emps_abs = EMPS.canonicalize().expect("Failed to canonicalize emps binary");
     let workdir = lp.parent().unwrap().canonicalize().unwrap();
