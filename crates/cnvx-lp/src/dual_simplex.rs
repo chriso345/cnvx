@@ -1,13 +1,13 @@
 use cnvx_core::Solver;
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct DualSimplexSolver {}
 
-impl Default for DualSimplexSolver {
-    fn default() -> Self {
-        Self {}
-    }
-}
+// impl Default for DualSimplexSolver {
+//     fn default() -> Self {
+//         Self {}
+//     }
+// }
 
 impl Solver for DualSimplexSolver {
     fn solve(

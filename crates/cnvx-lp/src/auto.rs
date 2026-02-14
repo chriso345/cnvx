@@ -1,13 +1,13 @@
 use cnvx_core::Solver;
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct LpAutoSolver {}
 
-impl Default for LpAutoSolver {
-    fn default() -> Self {
-        Self {}
-    }
-}
+// impl Default for LpAutoSolver {
+//     fn default() -> Self {
+//         Self {}
+//     }
+// }
 
 impl Solver for LpAutoSolver {
     fn solve(
