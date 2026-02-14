@@ -189,6 +189,7 @@ version = "0.0.0"
 dependencies = [
  "cnvx-core",
  "cnvx-lp",
+ "cnvx-math",
 ]
 
 [[package]]
@@ -198,6 +199,7 @@ dependencies = [
  "clap",
  "cnvx",
  "cnvx-core",
+ "cnvx-math",
  "cnvx-parse",
  "sigpipe",
 ]

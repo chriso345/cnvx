@@ -18,6 +18,7 @@ lp = ["cnvx-lp"]
 [dependencies]
 cnvx-core = { workspace = true }
 cnvx-lp = { workspace = true, optional = true }
+cnvx-math = { workspace = true }
 
 [lints]
 workspace = true

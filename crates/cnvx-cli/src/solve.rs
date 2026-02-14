@@ -1,5 +1,5 @@
-use cnvx::lp::PrimalSimplexSolver;
-use cnvx_core::Solver;
+use cnvx::AutoSolver;
+use cnvx_math::DenseMatrix;
 
 pub fn solve(
     command: &crate::args::SolveCommand,
@@ -29,8 +29,15 @@ pub fn solve(
     };
 
     if let Ok(model) = cnvx_parse::parse(&contents, &ext) {
-        let solver = PrimalSimplexSolver::default();
-        let sol = solver.solve(&model)?;
+        let mut solver = AutoSolver::<DenseMatrix>::new(&model);
+        // Match on the solution (Ok or Err) and print the appropriate messagej
+        let sol = match solver.solve() {
+            Ok(solution) => solution,
+            Err(e) => {
+                println!("Solver error: {}", e);
+                return Err("Solver error".into());
+            }
+        };
 
         // TODO: Also support writing to a file, and saving to a file
         println!("{}", sol);

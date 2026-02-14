@@ -1,23 +1,30 @@
-use cnvx_core::Solver;
+use cnvx_core::{Model, Solution, SolveError, Solver};
+use cnvx_math::Matrix;
 
-#[derive(Debug, Default)]
-pub struct LpAutoSolver {}
+use crate::{DualSimplexSolver, PrimalSimplexSolver};
 
-// impl Default for LpAutoSolver {
-//     fn default() -> Self {
-//         Self {}
-//     }
-// }
+pub enum LpAutoSolver<'model, A: Matrix> {
+    Primal(PrimalSimplexSolver<'model, A>),
+    Dual(DualSimplexSolver<'model, A>),
+}
 
-impl Solver for LpAutoSolver {
-    fn solve(
-        &self,
-        model: &cnvx_core::Model,
-    ) -> Result<cnvx_core::Solution, cnvx_core::SolveError> {
-        _ = model;
-        // For now always use the primal simplex solver. In the future logic will need to
-        //  be added to choose which solver to use based on the problem shape and characteristics.
-        let primal_simplex_solver = crate::PrimalSimplexSolver::default();
-        primal_simplex_solver.solve(model)
+impl<'model, A: Matrix> LpAutoSolver<'model, A> {
+    pub fn new(model: &'model Model) -> Self {
+        // let (m, n) = model.shape();
+        // if m > n {
+        //     LpAutoSolver::Dual(DualSimplexSolver::new(model))
+        // } else {
+        //     LpAutoSolver::Primal(PrimalSimplexSolver::new(model))
+        // }
+
+        // For now, just use the primal simplex solver. We can add more heuristics later.
+        LpAutoSolver::Primal(PrimalSimplexSolver::new(model))
+    }
+
+    pub fn solve(&mut self) -> Result<Solution, SolveError> {
+        match self {
+            LpAutoSolver::Primal(s) => s.solve(),
+            LpAutoSolver::Dual(s) => s.solve(),
+        }
     }
 }

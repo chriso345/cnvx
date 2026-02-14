@@ -29,9 +29,27 @@ use crate::{Model, Solution, SolveError};
 ///     Err(e) => println!("Solver error: {}", e),
 /// }
 /// ```
-pub trait Solver: Default {
-    /// Solves the given model and returns a solution or an error.
-    /// - [`Ok(Solution)`](Solution) if the model is solved successfully, containing variable assignments and objective value.
-    /// - [`Err(SolveError)`](SolveError) if the solver encounters an error, such as invalid model, numerical issues, or unsupported features.
-    fn solve(&self, model: &Model) -> Result<Solution, SolveError>;
+///
+/// Generic over:
+/// - `S`: solver state type
+pub trait Solver<'model, S> {
+    /// Algorithm name for display/logging.
+    const ALGORITHM_NAME: &'static str;
+
+    /// Create a new solver for the given model.
+    fn new(model: &'model Model) -> Self
+    where
+        Self: Sized;
+
+    /// Solve the model.
+    fn solve(&mut self) -> Result<Solution, SolveError>;
+
+    /// Get a reference to the solver's internal state.
+    fn get_state(&self) -> &S;
+
+    /// Get the current objective value (if available).
+    fn get_objective_value(&self) -> f64;
+
+    /// Return the current solution vector.
+    fn get_solution(&self) -> Vec<f64>;
 }

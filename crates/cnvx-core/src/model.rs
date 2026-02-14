@@ -44,6 +44,10 @@ impl Model {
         Self { ..Default::default() }
     }
 
+    pub fn shape(&self) -> (usize, usize) {
+        (self.constraints.len(), self.vars.len())
+    }
+
     /// Adds a new variable to the model and returns a [`VarBuilder`] for ergonomic configuration.
     ///
     /// # Example

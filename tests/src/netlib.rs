@@ -6,8 +6,9 @@ use std::{
     sync::LazyLock,
 };
 
-use cnvx_core::{Model, Solution, SolveStatus, Solver};
+use cnvx_core::{Model, Solution, SolveStatus};
 use cnvx_lp::LpAutoSolver;
+use cnvx_math::DenseMatrix;
 use cnvx_parse::parse;
 use test_case::test_case;
 
@@ -136,10 +137,10 @@ fn run_cnvx(mps: &Path) -> Result<Solution, String> {
         Err(e) => return Err(format!("Failed to parse MPS file: {}", e)),
     };
 
-    let solver = LpAutoSolver::default();
-    match solver.solve(&model) {
+    let mut solver = LpAutoSolver::<DenseMatrix>::new(&model);
+    match solver.solve() {
         Ok(sol) => Ok(sol),
-        Err(e) => Err(format!("Solver failed: {}", e)),
+        Err(e) => return Err(format!("Solver failed: {}", e)),
     }
 }
 
