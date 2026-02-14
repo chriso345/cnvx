@@ -17,13 +17,13 @@
 //! # Modules
 //!
 //! - [`prelude`]: Re-exports the main types and functions from [`cnvx_core`] and [`cnvx_lp`] for convenient usage.
-//! - [`solvers`]: Contains LP solvers enabled by features, such as the [`SimplexSolver`](::cnvx_lp::SimplexSolver).
+//! - [`solvers`]: Contains LP solvers enabled by features, such as the [`PrimalSimplexSolver`](::cnvx_lp::PrimalSimplexSolver) and [`DualSimplexSolver`](::cnvx_lp::DualSimplexSolver).
 //!
 //! # Examples
 //!
 //! ```rust
 //! use cnvx::prelude::*;
-//! use cnvx::solvers::SimplexSolver;
+//! use cnvx::solvers::PrimalSimplexSolver;
 //!
 //! // Create a model
 //! let mut model = Model::new();
@@ -39,7 +39,7 @@
 //! model.add_objective(Objective::maximize(x + 2.0 * y).name("Z"));
 //!
 //! // Solve using the simplex solver
-//! let solver = SimplexSolver::default();
+//! let solver = PrimalSimplexSolver::default();
 //! let solution = solver.solve(&model).unwrap();
 //!
 //! println!("Optimal solution: x = {}, y = {}", solution.value(x), solution.value(y));
@@ -67,7 +67,9 @@ pub mod prelude {
 
 pub mod solvers {
     #[cfg(feature = "lp")]
-    pub use crate::lp::PrimalSimplexSolver;
+    pub use crate::lp::{
+        DualSimplexSolver, LpAutoSolver as LpSolver, PrimalSimplexSolver,
+    };
 }
 
 /// Returns the version of the `cnvx` crate.

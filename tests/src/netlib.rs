@@ -7,7 +7,7 @@ use std::{
 };
 
 use cnvx_core::{Model, Solution, SolveStatus, Solver};
-use cnvx_lp::PrimalSimplexSolver;
+use cnvx_lp::LpAutoSolver;
 use cnvx_parse::parse;
 use test_case::test_case;
 
@@ -136,8 +136,7 @@ fn run_cnvx(mps: &Path) -> Result<Solution, String> {
         Err(e) => return Err(format!("Failed to parse MPS file: {}", e)),
     };
 
-    let solver = PrimalSimplexSolver::default();
-
+    let solver = LpAutoSolver::default();
     match solver.solve(&model) {
         Ok(sol) => Ok(sol),
         Err(e) => Err(format!("Solver failed: {}", e)),
