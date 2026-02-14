@@ -139,7 +139,7 @@ fn run_cnvx(mps: &Path) -> Result<Solution, String> {
     let mut solver = LpAutoSolver::new(&model);
     match solver.solve() {
         Ok(sol) => Ok(sol),
-        Err(e) => return Err(format!("Solver failed: {}", e)),
+        Err(e) => Err(format!("Solver failed: {}", e)),
     }
 }
 
