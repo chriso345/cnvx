@@ -1,24 +1,27 @@
-use cnvx_core::{Model, Solution, SolveError};
+use cnvx_core::{Model, Solution, SolveError, Solver};
 use cnvx_lp::LpAutoSolver;
-use cnvx_math::Matrix;
 
-// === Top-level auto solver ===
-pub enum AutoSolver<'model, A: Matrix> {
-    LP(LpAutoSolver<'model, A>),
-    // IP(IpAutoSolver<'model>),
-    // QP(QpAutoSolver<'model>), etc.
+pub struct AutoSolver<'model> {
+    solver: Box<dyn Solver<'model> + 'model>,
 }
 
-impl<'model, A: Matrix> AutoSolver<'model, A> {
-    pub fn new(model: &'model Model) -> Self {
-        // For now, just assume it's an LP. We can add more heuristics later.
-        AutoSolver::LP(LpAutoSolver::new(model))
+impl<'model> Solver<'model> for AutoSolver<'model> {
+    fn new(model: &'model Model) -> Self {
+        // For now, assume LP
+        let solver = Box::new(LpAutoSolver::new(model));
+
+        Self { solver }
     }
 
-    pub fn solve(&mut self) -> Result<Solution, SolveError> {
-        match self {
-            AutoSolver::LP(s) => s.solve(),
-            // AutoSolver::IP(s) => s.solve(),
-        }
+    fn solve(&mut self) -> Result<Solution, SolveError> {
+        self.solver.solve()
+    }
+
+    fn get_objective_value(&self) -> f64 {
+        todo!()
+    }
+
+    fn get_solution(&self) -> Vec<f64> {
+        todo!()
     }
 }

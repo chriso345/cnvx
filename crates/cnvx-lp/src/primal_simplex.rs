@@ -2,7 +2,7 @@ use std::ops::Neg;
 
 // FIXME: Replace with better solving techniques.
 use cnvx_core::*;
-use cnvx_math::Matrix;
+use cnvx_math::{DenseMatrix, Matrix};
 
 /// A simplex solver for linear programs (LPs).
 ///
@@ -21,9 +21,9 @@ use cnvx_math::Matrix;
 /// let solution = solver.solve(&model).unwrap();
 /// println!("Solution value: {}", solution.value(x));
 /// ```
-pub struct PrimalSimplexSolver<'model, A: Matrix> {
+pub struct PrimalSimplexSolver<'model> {
     // Internal state of the simplex algorithm, including the tableau and current solution.
-    pub state: PrimalSimplexState<'model, A>,
+    state: State<'model>,
     /// The numerical tolerance used for feasibility and optimality checks.
     pub tolerance: f64,
     /// The maximum number of simplex iterations before terminating with an error.
@@ -32,14 +32,10 @@ pub struct PrimalSimplexSolver<'model, A: Matrix> {
     pub logging: bool,
 }
 
-impl<'model, A: Matrix> Solver<'model, PrimalSimplexState<'model, A>>
-    for PrimalSimplexSolver<'model, A>
-{
-    const ALGORITHM_NAME: &'static str = "Primal Simplex";
-
+impl<'model> Solver<'model> for PrimalSimplexSolver<'model> {
     fn new(model: &'model Model) -> Self {
         Self {
-            state: PrimalSimplexState::new(model),
+            state: State::Dense(PrimalSimplexState::new(model)),
             tolerance: 1e-8,
             max_iter: 1000,
             logging: false,
@@ -47,36 +43,55 @@ impl<'model, A: Matrix> Solver<'model, PrimalSimplexState<'model, A>>
     }
 
     fn solve(&mut self) -> Result<Solution, SolveError> {
-        crate::validate::check_lp(self.state.model)?;
-
-        let (values, obj) = self.state.solve_lp(self.max_iter, self.tolerance)?;
-
-        if self.logging {
-            println!(
-                "Simplex finished with status {:?} in {} iterations. Objective value: {}",
-                self.state.status, self.state.iteration, obj
-            );
+        // crate::validate::check_lp(self.state.model)?;
+        match &self.state {
+            State::Dense(s) => crate::validate::check_lp(s.model)?,
+            // State::Sparse(s) => s.solve_lp(self.max_iter, self.tolerance),
         }
 
-        Ok(Solution {
-            values,
-            objective_value: Some(obj),
-            status: self.state.status.clone(),
-        })
-    }
+        // let (values, obj) = self.state.solve_lp(self.max_iter, self.tolerance)?;
+        let (values, obj) = match &mut self.state {
+            State::Dense(s) => s.solve_lp(self.max_iter, self.tolerance)?,
+            // State::Sparse(s) => s.solve_lp(self.max_iter, self.tolerance)?,
+        };
 
-    fn get_state(&self) -> &PrimalSimplexState<'model, A> {
-        &self.state
+        if self.logging {
+            match &self.state {
+                State::Dense(s) => println!(
+                    "Simplex finished with status {:?} in {} iterations. Objective value: {}",
+                    s.status, s.iteration, obj
+                ),
+                // State::Sparse(s) => println!(
+                //     "Simplex finished with status {:?} in {} iterations. Objective value: {}",
+                //     s.status, s.iteration, obj
+                // ),
+            }
+        }
+
+        let status = match &self.state {
+            State::Dense(s) => s.status.clone(),
+            // State::Sparse(s) => s.status.clone(),
+        };
+
+        Ok(Solution { values, objective_value: Some(obj), status })
     }
 
     fn get_objective_value(&self) -> f64 {
-        self.state.objective
+        match &self.state {
+            State::Dense(s) => s.objective,
+            // State::Sparse(s) => s.objective,
+        }
     }
 
     fn get_solution(&self) -> Vec<f64> {
         // TODO: reconstruct full solution vector from x_b and non-basic vars
         vec![]
     }
+}
+
+enum State<'model> {
+    Dense(PrimalSimplexState<'model, DenseMatrix>),
+    // Sparse(PrimalSimplexState<'model, SparseMatrix>),
 }
 
 /// Internal state for the simplex algorithm.

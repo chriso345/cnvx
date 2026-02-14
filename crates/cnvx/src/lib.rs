@@ -55,12 +55,12 @@
 
 pub use cnvx_core as core;
 pub mod auto_solver;
-pub use auto_solver::AutoSolver;
 
 #[cfg(feature = "lp")]
 pub use cnvx_lp as lp;
 
 pub mod prelude {
+    pub use crate::auto_solver::AutoSolver;
     pub use crate::core::*;
 
     #[cfg(feature = "lp")]

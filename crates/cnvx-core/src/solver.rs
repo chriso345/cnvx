@@ -32,10 +32,7 @@ use crate::{Model, Solution, SolveError};
 ///
 /// Generic over:
 /// - `S`: solver state type
-pub trait Solver<'model, S> {
-    /// Algorithm name for display/logging.
-    const ALGORITHM_NAME: &'static str;
-
+pub trait Solver<'model> {
     /// Create a new solver for the given model.
     fn new(model: &'model Model) -> Self
     where
@@ -43,9 +40,6 @@ pub trait Solver<'model, S> {
 
     /// Solve the model.
     fn solve(&mut self) -> Result<Solution, SolveError>;
-
-    /// Get a reference to the solver's internal state.
-    fn get_state(&self) -> &S;
 
     /// Get the current objective value (if available).
     fn get_objective_value(&self) -> f64;

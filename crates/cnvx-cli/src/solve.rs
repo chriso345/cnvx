@@ -1,5 +1,4 @@
-use cnvx::AutoSolver;
-use cnvx_math::DenseMatrix;
+use cnvx::prelude::*;
 
 pub fn solve(
     command: &crate::args::SolveCommand,
@@ -29,7 +28,7 @@ pub fn solve(
     };
 
     if let Ok(model) = cnvx_parse::parse(&contents, &ext) {
-        let mut solver = AutoSolver::<DenseMatrix>::new(&model);
+        let mut solver = AutoSolver::new(&model);
         // Match on the solution (Ok or Err) and print the appropriate messagej
         let sol = match solver.solve() {
             Ok(solution) => solution,
