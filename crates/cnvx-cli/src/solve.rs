@@ -1,4 +1,4 @@
-use cnvx::lp::SimplexSolver;
+use cnvx::lp::PrimalSimplexSolver;
 use cnvx_core::Solver;
 
 pub fn solve(
@@ -29,7 +29,7 @@ pub fn solve(
     };
 
     if let Ok(model) = cnvx_parse::parse(&contents, &ext) {
-        let solver = SimplexSolver::default();
+        let solver = PrimalSimplexSolver::default();
         let sol = solver.solve(&model)?;
 
         // TODO: Also support writing to a file, and saving to a file

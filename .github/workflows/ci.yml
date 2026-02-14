@@ -100,7 +100,7 @@ jobs:
         # FIXME: This timeout should be replaced with either something in the test itself
         #  or something within the solver.
       - name: Run integration tests
-        run: timeout 240s cargo test --workspace --test tests -- --nocapture
+        run: timeout 240s cargo netlib -- --nocapture
 
   find-crates:
     name: Discover Crates

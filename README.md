@@ -63,8 +63,8 @@ fn main() -> Result<(), SolveError> {
   model += (x + y).eq(4.0);
   model += (2.0 * x + 3.0 * y).eq(9.0);
 
-  // Solve the model using the Simplex solver
-  let solver = SimplexSolver::default();
+  // Solve the model using the a linear programming solver
+  let solver = LpSolver::new();
   let sol = solver.solve(&model)?;
 
   println!(

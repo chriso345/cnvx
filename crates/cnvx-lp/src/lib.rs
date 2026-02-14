@@ -6,13 +6,21 @@
 //!
 //! # Features
 //!
-//! - [`SimplexSolver`]: Solver implementing the simplex algorithm for LP problems.
+//! - [`LpAutoSolver`]: Automatically selects the appropriate solver based on the problem characteristics. (TODO)
+//! - [`DualSimplexSolver`]: Solver implementing the dual simplex algorithm for LP problems. (TODO)
+//! - [`PrimalSimplexSolver`]: Solver implementing the 2-phase primal simplex algorithm for LP problems.
 //!
 //! # Modules
 //!
-//! - [`simplex`]: Contains the [`SimplexSolver`] struct and simplex-specific solver logic.
+//! - [`auto`]: Contains the [`LpAutoSolver`] struct, which automatically selects the appropriate solver based on the problem characteristics.
+//! - [`dual_simplex`]: Contains the [`DualSimplexSolver`] struct and dual
+//! - [`primal_simplex`]: Contains the [`PrimalSimplexSolver`] struct and primal simplex-specific solver logic.
 
-pub mod simplex;
+pub mod auto;
+pub mod dual_simplex;
+pub mod primal_simplex;
 pub mod validate;
 
-pub use simplex::*;
+pub use auto::*;
+pub use dual_simplex::*;
+pub use primal_simplex::*;

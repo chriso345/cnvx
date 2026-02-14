@@ -9,19 +9,19 @@ use cnvx_math::{DenseMatrix, Matrix};
 ///
 /// ```rust
 /// # use cnvx_core::*;
-/// # use cnvx_lp::SimplexSolver;
+/// # use cnvx_lp::PrimalSimplexSolver;
 /// let mut model = Model::new();
 /// let x = model.add_var().finish();
 /// model += x.geq(0.0);
 /// model += x.leq(10.0);
 /// model.add_objective(Objective::maximize(x * 2.0).name("maximize_x"));
 ///
-/// let solver = SimplexSolver::default();
+/// let solver = PrimalSimplexSolver::default();
 /// let solution = solver.solve(&model).unwrap();
 /// println!("Solution value: {}", solution.value(x));
 /// ```
 #[derive(Debug)]
-pub struct SimplexSolver {
+pub struct PrimalSimplexSolver {
     /// The numerical tolerance used for feasibility and optimality checks.
     pub tolerance: f64,
 
@@ -35,7 +35,7 @@ pub struct SimplexSolver {
     pub log_interval: usize,
 }
 
-impl Default for SimplexSolver {
+impl Default for PrimalSimplexSolver {
     fn default() -> Self {
         Self {
             tolerance: 1e-8,
@@ -46,11 +46,11 @@ impl Default for SimplexSolver {
     }
 }
 
-impl Solver for SimplexSolver {
+impl Solver for PrimalSimplexSolver {
     fn solve(&self, model: &Model) -> Result<Solution, SolveError> {
         crate::validate::check_lp(model)?;
 
-        let mut state = SimplexState::<DenseMatrix>::new(model, self);
+        let mut state = PrimalSimplexState::<DenseMatrix>::new(model, self);
         let (values, obj) = state.solve_lp(self.max_iterations, self.tolerance)?;
 
         if self.logging {
@@ -73,7 +73,7 @@ impl Solver for SimplexSolver {
 /// Tracks the current basis, non-basis variables, solution vector, objective value,
 /// and the LP tableau.
 #[derive(Debug)]
-pub struct SimplexState<'model, M: Matrix> {
+pub struct PrimalSimplexState<'model, M: Matrix> {
     /// Reference to the LP model being solved.
     pub model: &'model Model,
     /// Current iteration count of the simplex algorithm.
@@ -108,12 +108,12 @@ pub struct SimplexState<'model, M: Matrix> {
     log_interval: usize,
 }
 
-impl<'m, M: Matrix + Clone> SimplexState<'m, M> {
+impl<'m, M: Matrix + Clone> PrimalSimplexState<'m, M> {
     /// Initialize a new simplex state from a given `Model`.
     ///
     /// Constructs the tableau, sets up artificial variables for inequalities, and
     /// computes the objective coefficients based on the problem's sense (min/max).
-    pub fn new(model: &'m Model, solver: &SimplexSolver) -> Self {
+    pub fn new(model: &'m Model, solver: &PrimalSimplexSolver) -> Self {
         let n_vars = model.vars().len();
         let n_cons = model.constraints().len();
 

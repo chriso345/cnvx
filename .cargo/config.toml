@@ -1,0 +1,2 @@
+[alias]
+netlib = "test --workspace --test tests"

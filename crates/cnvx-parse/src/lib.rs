@@ -1,3 +1,15 @@
+//! # CNVX Parse
+//!
+//! This crate provides simple parsers for various LP file formats, including AMPL, GMPL, and MPS,
+//! built on top of [`cnvx_core`]. It defines a common [`LanguageParser`] trait and specific parsers for
+//! each format.
+//!
+//! # Modules
+//!
+//! - [`ampl`]: Parser for AMPL format.
+//! - [`gmpl`]: Parser for GMPL format.
+//! - [`mps`]: Parser for MPS format.
+
 pub mod ampl;
 pub mod gmpl;
 pub mod mps;
