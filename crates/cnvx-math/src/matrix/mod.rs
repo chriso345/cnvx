@@ -10,7 +10,9 @@ pub use dense::DenseMatrix;
 ///
 /// Implementors must provide row/column indexing, element access, and
 /// Gaussian elimination for square systems.
-pub trait Matrix: Index<usize, Output = [f64]> + IndexMut<usize, Output = [f64]> {
+pub trait Matrix:
+    Index<usize, Output = [f64]> + IndexMut<usize, Output = [f64]> + Clone
+{
     /// Create a new matrix with the given number of rows and columns,
     /// initialized with zeros.
     ///

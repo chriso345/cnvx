@@ -8,7 +8,6 @@
 //! # Modules
 //!
 //! - [`constraint`]: Defines linear constraints and comparison operators ([`Eq`](Cmp::Eq), [`Leq`](Cmp::Leq), [`Geq`](Cmp::Geq)).
-//! - [`error`]: Error types used by solvers and models.
 //! - [`expr`]: Linear expressions ([`LinExpr`]) and terms ([`LinTerm`]) for building objectives and constraints.
 //! - [`model`]: The [`Model`] struct, containing variables, constraints, and objectives.
 //! - [`objective`]: Objective functions ([`Objective`]) and builder API.
@@ -21,7 +20,6 @@
 // to allow non-LP models (e.g., SAT or other problem types) to remain separate.
 
 pub mod constraint;
-pub mod error;
 pub mod expr;
 pub mod model;
 pub mod objective;
@@ -32,7 +30,6 @@ pub mod var;
 
 // Re-export all submodules for easy access via `cnvx_core::*`
 pub use constraint::*;
-pub use error::*;
 pub use expr::*;
 pub use model::*;
 pub use objective::*;

@@ -1,14 +1,14 @@
 use cnvx_core::{Model, Solution, SolveError, Solver};
+use cnvx_lp::LpAutoSolver;
 
-use crate::PrimalSimplexSolver;
-
-pub struct LpAutoSolver<'model> {
+pub struct AutoSolver<'model> {
     solver: Box<dyn Solver<'model> + 'model>,
 }
 
-impl<'model> Solver<'model> for LpAutoSolver<'model> {
+impl<'model> Solver<'model> for AutoSolver<'model> {
     fn new(model: &'model Model) -> Self {
-        let solver = Box::new(PrimalSimplexSolver::new(model));
+        // For now, assume LP
+        let solver = Box::new(LpAutoSolver::new(model));
 
         Self { solver }
     }
