@@ -10,20 +10,19 @@ use crate::{Model, Solution, SolveError};
 /// # use cnvx_core::{Model, Solver, SolveError, Solution};
 /// # struct DummySolver {}
 /// #
-/// # impl Default for DummySolver {
-/// #   fn default() -> Self { Self {} }
-/// # }
-/// #
-/// # impl Solver for DummySolver {
-/// #   fn solve(&self, _model: &Model) -> Result<Solution, SolveError> {
+/// # impl Solver<'_> for DummySolver {
+/// #   fn new(model: &Model) -> Self { DummySolver {} }
+/// #   fn solve(&mut self) -> Result<Solution, SolveError> {
 /// #       Err(SolveError::Unsupported("DummySolver does not implement solving".to_string()))
 /// #   }
+/// #   fn get_objective_value(&self) -> f64 { 0.0 }
+/// #   fn get_solution(&self) -> Vec<f64> { vec![] }
 /// # }
 /// let mut model = Model::new();
 /// // ... build model variables, constraints, objective ...
 ///
-/// let solver = DummySolver::default();
-/// let result: Result<_, SolveError> = solver.solve(&model);
+/// let mut solver = DummySolver::new(&model);
+/// let result: Result<_, SolveError> = solver.solve();
 /// match result {
 ///     Ok(solution) => println!("Optimal solution: {}", solution.objective_value.unwrap_or(0.0)),
 ///     Err(e) => println!("Solver error: {}", e),

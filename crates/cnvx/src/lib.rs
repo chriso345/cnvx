@@ -39,8 +39,8 @@
 //! model.add_objective(Objective::maximize(x + 2.0 * y).name("Z"));
 //!
 //! // Solve using the simplex solver
-//! let solver = PrimalSimplexSolver::default();
-//! let solution = solver.solve(&model).unwrap();
+//! let mut solver = PrimalSimplexSolver::new(&model);;
+//! let solution = solver.solve().unwrap();
 //!
 //! println!("Optimal solution: x = {}, y = {}", solution.value(x), solution.value(y));
 //! ```
@@ -69,7 +69,7 @@ pub mod prelude {
 
 pub mod solvers {
     #[cfg(feature = "lp")]
-    pub use crate::lp::{DualSimplexSolver, LpAutoSolver};
+    pub use crate::lp::{DualSimplexSolver, LpAutoSolver, PrimalSimplexSolver};
 }
 
 /// Returns the version of the `cnvx` crate.

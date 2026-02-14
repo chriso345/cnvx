@@ -17,8 +17,8 @@ use cnvx_math::{DenseMatrix, Matrix};
 /// model += x.leq(10.0);
 /// model.add_objective(Objective::maximize(x * 2.0).name("maximize_x"));
 ///
-/// let solver = PrimalSimplexSolver::default();
-/// let solution = solver.solve(&model).unwrap();
+/// let mut solver = PrimalSimplexSolver::new(&model);
+/// let solution = solver.solve().unwrap();
 /// println!("Solution value: {}", solution.value(x));
 /// ```
 pub struct PrimalSimplexSolver<'model> {
