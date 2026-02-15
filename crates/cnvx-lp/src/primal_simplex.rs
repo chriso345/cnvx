@@ -2,7 +2,7 @@ use std::ops::Neg;
 
 // FIXME: Replace with better solving techniques.
 use cnvx_core::*;
-use cnvx_math::{DenseMatrix, Matrix};
+use cnvx_math::{DenseMatrix, Matrix, matrix::SparseMatrix};
 
 /// A simplex solver for linear programs (LPs).
 ///
@@ -46,13 +46,13 @@ impl<'model> Solver<'model> for PrimalSimplexSolver<'model> {
         // crate::validate::check_lp(self.state.model)?;
         match &self.state {
             State::Dense(s) => crate::validate::check_lp(s.model)?,
-            // State::Sparse(s) => s.solve_lp(self.max_iter, self.tolerance),
+            State::Sparse(s) => crate::validate::check_lp(s.model)?,
         }
 
         // let (values, obj) = self.state.solve_lp(self.max_iter, self.tolerance)?;
         let (values, obj) = match &mut self.state {
             State::Dense(s) => s.solve_lp(self.max_iter, self.tolerance)?,
-            // State::Sparse(s) => s.solve_lp(self.max_iter, self.tolerance)?,
+            State::Sparse(s) => s.solve_lp(self.max_iter, self.tolerance)?,
         };
 
         if self.logging {
@@ -61,16 +61,16 @@ impl<'model> Solver<'model> for PrimalSimplexSolver<'model> {
                     "Simplex finished with status {:?} in {} iterations. Objective value: {}",
                     s.status, s.iteration, obj
                 ),
-                // State::Sparse(s) => println!(
-                //     "Simplex finished with status {:?} in {} iterations. Objective value: {}",
-                //     s.status, s.iteration, obj
-                // ),
+                State::Sparse(s) => println!(
+                    "Simplex finished with status {:?} in {} iterations. Objective value: {}",
+                    s.status, s.iteration, obj
+                ),
             }
         }
 
         let status = match &self.state {
             State::Dense(s) => s.status.clone(),
-            // State::Sparse(s) => s.status.clone(),
+            State::Sparse(s) => s.status.clone(),
         };
 
         Ok(Solution { values, objective_value: Some(obj), status })
@@ -79,7 +79,7 @@ impl<'model> Solver<'model> for PrimalSimplexSolver<'model> {
     fn get_objective_value(&self) -> f64 {
         match &self.state {
             State::Dense(s) => s.objective,
-            // State::Sparse(s) => s.objective,
+            State::Sparse(s) => s.objective,
         }
     }
 
@@ -89,9 +89,10 @@ impl<'model> Solver<'model> for PrimalSimplexSolver<'model> {
     }
 }
 
+#[allow(dead_code)]
 enum State<'model> {
     Dense(PrimalSimplexState<'model, DenseMatrix>),
-    // Sparse(PrimalSimplexState<'model, SparseMatrix>),
+    Sparse(PrimalSimplexState<'model, SparseMatrix>),
 }
 
 /// Internal state for the simplex algorithm.
@@ -344,8 +345,7 @@ impl<'model, A: Matrix> PrimalSimplexState<'model, A> {
     /// Compute the values of the basic variables by solving `B x_B = b`.
     pub fn compute_basic_solution(&self, bmat: &mut A) -> Result<Vec<f64>, String> {
         let mut xb = self.b.clone();
-        bmat.gaussian_elimination(&mut xb)
-            .map_err(|e| format!("gauss failed: {e}"))?;
+        bmat.mldivide(&mut xb).map_err(|e| format!("gauss failed: {e}"))?;
         Ok(xb)
     }
 
@@ -400,7 +400,7 @@ impl<'model, A: Matrix> PrimalSimplexState<'model, A> {
             }
         }
 
-        bt.gaussian_elimination(&mut pi)
+        bt.mldivide(&mut pi)
             .map_err(|e| SolveError::Other(format!("dual solve failed: {e}")))?;
 
         Ok(pi)
@@ -428,7 +428,7 @@ impl<'model, A: Matrix> PrimalSimplexState<'model, A> {
     ) -> Result<Vec<f64>, SolveError> {
         let mut d = (0..bmat.rows()).map(|i| self.a.get(i, entering)).collect::<Vec<_>>();
 
-        bmat.gaussian_elimination(&mut d)
+        bmat.mldivide(&mut d)
             .map_err(|e| SolveError::Other(format!("direction solve failed: {e}")))?;
 
         Ok(d)

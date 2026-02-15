@@ -1,7 +1,10 @@
 use std::ops::{Index, IndexMut};
 
 mod dense;
+mod sparse;
+
 pub use dense::DenseMatrix;
+pub use sparse::SparseMatrix;
 
 /// A generic matrix trait for linear algebra operations.
 ///
@@ -9,7 +12,7 @@ pub use dense::DenseMatrix;
 /// including creation, element access, and solving linear systems.
 ///
 /// Implementors must provide row/column indexing, element access, and
-/// Gaussian elimination for square systems.
+///  a method for solving linear systems.
 pub trait Matrix:
     Index<usize, Output = [f64]> + IndexMut<usize, Output = [f64]> + Clone
 {
@@ -45,39 +48,10 @@ pub trait Matrix:
     /// Panics if `row` or `col` are out of bounds.
     fn set(&mut self, row: usize, col: usize, value: f64);
 
-    /// Create an identity matrix of the given size.
     ///
-    /// # Example
-    /// ```
-    /// # use cnvx_math::{DenseMatrix, Matrix};
-    /// let eye = DenseMatrix::eye(3);
-    /// assert_eq!(eye.get(0, 0), 1.0);
-    /// assert_eq!(eye.get(0, 1), 0.0);
-    /// ```
-    fn eye(rows: usize) -> Self
-    where
-        Self: Sized,
-    {
-        let mut m = Self::new(rows, rows);
-        for i in 0..rows {
-            m.set(i, i, 1.0);
-        }
-        m
-    }
+    fn matvec(&self, x: &[f64]) -> Vec<f64>;
 
-    /// Return the matrix as a 2D `Vec` for debugging or conversion purposes.
-    ///
-    /// # Example
-    /// ```
-    /// # use cnvx_math::{DenseMatrix, Matrix};
-    /// let m = DenseMatrix::new(2, 2);
-    /// let v = m.as_vec2();
-    /// assert_eq!(v.len(), 2);
-    /// assert_eq!(v[0].len(), 2);
-    /// ```
-    fn as_vec2(&self) -> Vec<Vec<f64>>;
-
-    /// Solve a square linear system `Ax = rhs` using Gaussian elimination.
+    /// Solve a square linear system `Ax = rhs`
     ///
     /// On success, `rhs` is overwritten with the solution vector `x`.
     ///
@@ -95,11 +69,57 @@ pub trait Matrix:
     /// a.set(1, 1, 3.0);
     ///
     /// let mut rhs = vec![3.0, 7.0];
-    /// a.gaussian_elimination(&mut rhs).unwrap();
+    /// a.mldivide(&mut rhs).unwrap();
     /// assert!((rhs[0] - 0.4).abs() < 1e-6);
     /// assert!((rhs[1] - 2.2).abs() < 1e-6);
     /// ```
-    fn gaussian_elimination(&self, rhs: &mut [f64]) -> Result<(), String>
+    fn mldivide(&self, rhs: &mut [f64]) -> Result<(), String>
     where
         Self: Sized;
+
+    /// Create a matrix of the given size, initialized with zeros.
+    ///
+    /// # Example
+    /// ```
+    /// # use cnvx_math::{DenseMatrix, Matrix};
+    /// let m = DenseMatrix::zeros(2, 3);
+    /// assert_eq!(m.rows(), 2);
+    /// assert_eq!(m.cols(), 3);
+    /// assert_eq!(m.get(0, 0), 0.0);
+    /// ```
+    fn zeros(rows: usize, cols: usize) -> Self
+    where
+        Self: Sized;
+
+    /// Create an identity matrix of the given size.
+    ///
+    /// # Example
+    /// ```
+    /// # use cnvx_math::{DenseMatrix, Matrix};
+    /// let eye = DenseMatrix::eye(3);
+    /// assert_eq!(eye.get(0, 0), 1.0);
+    /// assert_eq!(eye.get(0, 1), 0.0);
+    /// ```
+    fn eye(size: usize) -> Self
+    where
+        Self: Sized,
+    {
+        let mut m = Self::new(size, size);
+        for i in 0..size {
+            m.set(i, i, 1.0);
+        }
+        m
+    }
+
+    /// Return the matrix as a 2D `Vec` for debugging or conversion purposes.
+    ///
+    /// # Example
+    /// ```
+    /// # use cnvx_math::{DenseMatrix, Matrix};
+    /// let m = DenseMatrix::new(2, 2);
+    /// let v = m.as_vec2();
+    /// assert_eq!(v.len(), 2);
+    /// assert_eq!(v[0].len(), 2);
+    /// ```
+    fn as_vec2(&self) -> Vec<Vec<f64>>;
 }

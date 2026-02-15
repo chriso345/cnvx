@@ -29,12 +29,38 @@ impl Matrix for DenseMatrix {
         self.data[r * self.cols + c] = v;
     }
 
+    fn matvec(&self, x: &[f64]) -> Vec<f64> {
+        if x.len() != self.cols {
+            panic!("input vector length mismatch");
+        }
+        let mut result = vec![0.0; self.rows];
+        for r in 0..self.rows {
+            let mut sum = 0.0;
+            for c in 0..self.cols {
+                sum += self.get(r, c) * x[c];
+            }
+            result[r] = sum;
+        }
+        result
+    }
+
+    fn mldivide(&self, rhs: &mut [f64]) -> Result<(), String> {
+        // https://mathworks.com/help/matlab/ref/mldivide_full.png
+        self.gaussian_elimination(rhs)
+    }
+
     fn as_vec2(&self) -> Vec<Vec<f64>> {
         (0..self.rows)
             .map(|r| (0..self.cols).map(|c| self.get(r, c)).collect())
             .collect()
     }
 
+    fn zeros(rows: usize, cols: usize) -> Self {
+        Self::new(rows, cols)
+    }
+}
+
+impl DenseMatrix {
     // FIXME: Replace with a more efficient solver
     fn gaussian_elimination(&self, rhs: &mut [f64]) -> Result<(), String> {
         let n = self.rows();
