@@ -55,9 +55,9 @@ impl<'matrix> MatrixSolveMethod<'matrix, SparseMatrix> for SparseCholesky<'matri
         let mut y = vec![0.0; n];
         for i in 0..n {
             let mut sum = rhs[i];
-            for j in 0..i {
+            for (j, yj) in y.iter().enumerate().take(i) {
                 if let Some(&lij) = l.get(&(i, j)) {
-                    sum -= lij * y[j];
+                    sum -= lij * yj;
                 }
             }
             let lii = *l.get(&(i, i)).unwrap();
@@ -67,9 +67,9 @@ impl<'matrix> MatrixSolveMethod<'matrix, SparseMatrix> for SparseCholesky<'matri
         // Back substitution
         for i in (0..n).rev() {
             let mut sum = y[i];
-            for j in (i + 1)..n {
+            for (j, rj) in rhs.iter().enumerate().take(n).skip(i + 1) {
                 if let Some(&lji) = l.get(&(j, i)) {
-                    sum -= lji * rhs[j];
+                    sum -= lji * rj;
                 }
             }
             let lii = *l.get(&(i, i)).unwrap();

@@ -40,12 +40,12 @@ impl Matrix for DenseMatrix {
             panic!("input vector length mismatch");
         }
         let mut result = vec![0.0; self.rows];
-        for r in 0..self.rows {
+        for (r, row) in result.iter_mut().enumerate().take(self.rows) {
             let mut sum = 0.0;
-            for c in 0..self.cols {
-                sum += self.get(r, c) * x[c];
+            for (c, xc) in x.iter().enumerate().take(self.cols) {
+                sum += self.get(r, c) * xc;
             }
-            result[r] = sum;
+            *row = sum;
         }
         result
     }

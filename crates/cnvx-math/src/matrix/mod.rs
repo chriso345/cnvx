@@ -48,7 +48,10 @@ pub trait Matrix:
     /// Panics if `row` or `col` are out of bounds.
     fn set(&mut self, row: usize, col: usize, value: f64);
 
+    /// Compute the matrix-vector product `Ax` where `A` is this matrix and `x` is the input vector.
     ///
+    /// # Panics
+    /// Panics if the length of `x` does not match the number of columns in the matrix.
     fn matvec(&self, x: &[f64]) -> Vec<f64>;
 
     /// Solve a square linear system `Ax = rhs`

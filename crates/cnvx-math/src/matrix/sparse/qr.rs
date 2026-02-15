@@ -105,9 +105,9 @@ impl<'matrix> MatrixSolveMethod<'matrix, SparseMatrix> for SparseQR<'matrix> {
         let mut x = vec![0.0; n];
         for i in (0..n).rev() {
             let mut sum = b[i];
-            for j in (i + 1)..n {
+            for (j, xj) in x.iter().enumerate().take(n).skip(i + 1) {
                 if let Some(&rij) = r.get(&(i, j)) {
-                    sum -= rij * x[j];
+                    sum -= rij * xj;
                 }
             }
             let rii = *r.get(&(i, i)).unwrap();
