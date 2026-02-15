@@ -123,3 +123,28 @@ pub trait Matrix:
     /// ```
     fn as_vec2(&self) -> Vec<Vec<f64>>;
 }
+
+/// MatrixSolveMethod defines a trait for defining different methods to solve linear
+/// systems for a given Matrix type M.
+///
+/// This systems are used to solve the $A * x = b$ systems that arise in the Simplex
+/// method.
+///
+/// This allows us to implement multiple solving strategies, and select the appropriate
+/// strategy at runtime based on the properties of the matrix.
+///
+/// Implementors of this trait must provide a constructor to take a reference the the
+/// matrix and a solve method, that takes a mutable reference to the right-hand side
+/// vector.
+pub(crate) trait MatrixSolveMethod<'matrix, M: Matrix> {
+    /// Create a new solver for the given matrix.
+    fn new(matrix: &'matrix M) -> Self
+    where
+        Self: Sized;
+
+    /// Solve the linear system `Ax = rhs` where `A` is the matrix associated with this
+    /// solver.
+    ///
+    /// On success, `rhs` is overwritten with the solution vector `x`.
+    fn solve(&self, rhs: &mut [f64]) -> Result<(), String>;
+}

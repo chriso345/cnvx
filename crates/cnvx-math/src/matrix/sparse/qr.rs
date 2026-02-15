@@ -1,11 +1,21 @@
 use std::collections::HashMap;
 
-use crate::matrix::SparseMatrix;
+use crate::matrix::{MatrixSolveMethod, SparseMatrix};
 
-impl SparseMatrix {
-    pub fn qr(&self, rhs: &mut [f64]) -> Result<(), String> {
-        let m = self.rows;
-        let n = self.cols;
+pub(crate) struct SparseQR<'matrix> {
+    matrix: &'matrix SparseMatrix, // borrow reference to the matrix for QR factorization
+}
+
+impl<'matrix> MatrixSolveMethod<'matrix, SparseMatrix> for SparseQR<'matrix> {
+    // Do we want the new() method??
+    fn new(matrix: &'matrix SparseMatrix) -> Self {
+        Self { matrix }
+    }
+
+    // FIXME: This is a very naive implementation of QR factorization.
+    fn solve(&self, rhs: &mut [f64]) -> Result<(), String> {
+        let m = self.matrix.rows;
+        let n = self.matrix.cols;
 
         if rhs.len() != m {
             return Err("rhs length mismatch".into());
@@ -17,11 +27,11 @@ impl SparseMatrix {
         // R stored sparsely (upper triangular)
         let mut r: HashMap<(usize, usize), f64> = HashMap::new();
 
-        // Working copy of rhs for Qᵀb
+        // Working copy of rhs for Q'b
         let mut b = rhs.to_vec();
 
         // Copy A into R initially
-        for (&(i, j), &v) in &self.data {
+        for (&(i, j), &v) in &self.matrix.data {
             r.insert((i, j), v);
         }
 
@@ -52,7 +62,6 @@ impl SparseMatrix {
                 }
             }
 
-            // β = 2 / (vᵀv)
             let mut vtv = 0.0;
             for &val in v.values() {
                 vtv += val * val;

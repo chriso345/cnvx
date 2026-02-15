@@ -1,11 +1,24 @@
 use std::collections::HashMap;
 
-use crate::{Matrix, matrix::SparseMatrix};
+use crate::{
+    Matrix,
+    matrix::{MatrixSolveMethod, SparseMatrix},
+};
 
-impl SparseMatrix {
-    pub fn cholesky(&self, rhs: &mut [f64]) -> Result<(), String> {
-        let n = self.rows;
-        if self.rows != self.cols {
+pub(crate) struct SparseCholesky<'matrix> {
+    matrix: &'matrix SparseMatrix, // borrow reference to the matrix for QR factorization
+}
+
+impl<'matrix> MatrixSolveMethod<'matrix, SparseMatrix> for SparseCholesky<'matrix> {
+    // Do we want the new() method??
+    fn new(matrix: &'matrix SparseMatrix) -> Self {
+        Self { matrix }
+    }
+
+    // FIXME: This is a very naive implementation of Cholesky factorization. It does not attempt to preserve sparsity and will be very slow for large matrices. A real implementation would use a more sophisticated data structure and algorithm to maintain sparsity.
+    fn solve(&self, rhs: &mut [f64]) -> Result<(), String> {
+        let n = self.matrix.rows;
+        if self.matrix.rows != self.matrix.cols {
             return Err("Cholesky requires a square matrix".into());
         }
         if rhs.len() != n {
@@ -18,9 +31,8 @@ impl SparseMatrix {
         // Compute L
         for i in 0..n {
             for j in 0..=i {
-                let mut sum = self.get(i, j);
+                let mut sum = self.matrix.get(i, j);
 
-                // sum -= Σ_k L[i,k] * L[j,k]
                 for k in 0..j {
                     if let (Some(&lik), Some(&ljk)) = (l.get(&(i, k)), l.get(&(j, k))) {
                         sum -= lik * ljk;
@@ -39,7 +51,7 @@ impl SparseMatrix {
             }
         }
 
-        // Forward substitution: L y = rhs
+        // Forward substitution
         let mut y = vec![0.0; n];
         for i in 0..n {
             let mut sum = rhs[i];
@@ -52,7 +64,7 @@ impl SparseMatrix {
             y[i] = sum / lii;
         }
 
-        // Back substitution: Lᵀ x = y
+        // Back substitution
         for i in (0..n).rev() {
             let mut sum = y[i];
             for j in (i + 1)..n {

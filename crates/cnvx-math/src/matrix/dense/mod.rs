@@ -1,5 +1,11 @@
-use crate::Matrix;
 use std::ops::{Index, IndexMut};
+
+use crate::{
+    Matrix,
+    matrix::{MatrixSolveMethod, dense::gauss_elim::DenseGaussElim},
+};
+
+mod gauss_elim;
 
 #[derive(Debug, Clone)]
 pub struct DenseMatrix {
@@ -46,7 +52,9 @@ impl Matrix for DenseMatrix {
 
     fn mldivide(&self, rhs: &mut [f64]) -> Result<(), String> {
         // https://mathworks.com/help/matlab/ref/mldivide_full.png
-        self.gaussian_elimination(rhs)
+        let solver: Box<dyn MatrixSolveMethod<DenseMatrix>> =
+            Box::new(DenseGaussElim::new(self));
+        solver.solve(rhs)
     }
 
     fn as_vec2(&self) -> Vec<Vec<f64>> {
@@ -57,65 +65,6 @@ impl Matrix for DenseMatrix {
 
     fn zeros(rows: usize, cols: usize) -> Self {
         Self::new(rows, cols)
-    }
-}
-
-impl DenseMatrix {
-    // FIXME: Replace with a more efficient solver
-    fn gaussian_elimination(&self, rhs: &mut [f64]) -> Result<(), String> {
-        let n = self.rows();
-        if rhs.len() != n {
-            return Err("rhs length mismatch".into());
-        }
-        // build augmented matrix
-        let mut aug = vec![vec![0.0; n + 1]; n];
-        for (i, row) in aug.iter_mut().enumerate().take(n) {
-            for (j, cell) in row.iter_mut().take(n).enumerate() {
-                *cell = self.get(i, j);
-            }
-            row[n] = rhs[i];
-        }
-        // gaussian elimination with partial pivot
-        for col in 0..n {
-            // pivot
-            let mut pivot = col;
-            let mut maxv = aug[pivot][col].abs();
-            for (r, row) in aug.iter().enumerate().skip(col + 1) {
-                if row[col].abs() > maxv {
-                    pivot = r;
-                    maxv = row[col].abs();
-                }
-            }
-            if maxv < 1e-12 {
-                return Err("singular matrix".into());
-            }
-            if pivot != col {
-                aug.swap(pivot, col);
-            }
-            // normalize
-            let diag = aug[col][col];
-            aug[col].iter_mut().skip(col).for_each(|v| *v /= diag);
-            // capture pivot row to avoid borrowing issues
-            let pivot_row = aug[col].clone();
-            // eliminate
-            for (r, row) in aug.iter_mut().enumerate().take(n) {
-                if r == col {
-                    continue;
-                }
-                let fac = row[col];
-                if fac.abs() < 1e-15 {
-                    continue;
-                }
-                for (k, val) in row.iter_mut().enumerate().skip(col) {
-                    *val -= fac * pivot_row[k];
-                }
-            }
-        }
-        // write back solution
-        for (i, row) in aug.iter().enumerate().take(n) {
-            rhs[i] = row[n];
-        }
-        Ok(())
     }
 }
 

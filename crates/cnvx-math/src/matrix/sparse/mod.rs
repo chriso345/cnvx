@@ -1,13 +1,18 @@
-use crate::Matrix;
-
-mod cholesky;
-mod qr;
-// use crate::qr::SparseQR;
-
 use std::{
     collections::HashMap,
     ops::{Index, IndexMut},
 };
+
+use crate::{
+    Matrix,
+    matrix::{
+        MatrixSolveMethod,
+        sparse::{cholesky::SparseCholesky, qr::SparseQR},
+    },
+};
+
+mod cholesky;
+mod qr;
 
 /// Sparse matrix storing only non-zero entries.
 /// Keys are (row, col) pairs.
@@ -56,9 +61,14 @@ impl Matrix for SparseMatrix {
     }
 
     fn mldivide(&self, rhs: &mut [f64]) -> Result<(), String> {
-        // https://au.mathworks.com/help/matlab/ref/mldivide_sparse.png
+        // TODO: https://au.mathworks.com/help/matlab/ref/mldivide_sparse.png
 
-        if self.rows != self.cols { self.qr(rhs) } else { self.cholesky(rhs) }
+        let solver: Box<dyn MatrixSolveMethod<SparseMatrix>> = if self.rows != self.cols {
+            Box::new(SparseQR::new(self))
+        } else {
+            Box::new(SparseCholesky::new(self))
+        };
+        solver.solve(rhs)
     }
 
     fn as_vec2(&self) -> Vec<Vec<f64>> {
