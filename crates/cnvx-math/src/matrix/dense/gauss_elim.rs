@@ -1,43 +1,18 @@
-use crate::Matrix;
-use std::ops::{Index, IndexMut};
+use crate::{DenseMatrix, Matrix, matrix::MatrixSolveMethod};
 
-#[derive(Debug, Clone)]
-pub struct DenseMatrix {
-    pub rows: usize,
-    pub cols: usize,
-    pub data: Vec<f64>,
+pub(crate) struct DenseGaussElim<'matrix> {
+    matrix: &'matrix DenseMatrix, // borrow reference to the matrix for QR factorization
 }
 
-impl Matrix for DenseMatrix {
-    fn new(rows: usize, cols: usize) -> Self {
-        Self { rows, cols, data: vec![0.0; rows * cols] }
+impl<'matrix> MatrixSolveMethod<'matrix, DenseMatrix> for DenseGaussElim<'matrix> {
+    // Do we want the new() method??
+    fn new(matrix: &'matrix DenseMatrix) -> Self {
+        Self { matrix }
     }
 
-    fn rows(&self) -> usize {
-        self.rows
-    }
-
-    fn cols(&self) -> usize {
-        self.cols
-    }
-
-    fn get(&self, r: usize, c: usize) -> f64 {
-        self.data[r * self.cols + c]
-    }
-
-    fn set(&mut self, r: usize, c: usize, v: f64) {
-        self.data[r * self.cols + c] = v;
-    }
-
-    fn as_vec2(&self) -> Vec<Vec<f64>> {
-        (0..self.rows)
-            .map(|r| (0..self.cols).map(|c| self.get(r, c)).collect())
-            .collect()
-    }
-
-    // FIXME: Replace with a more efficient solver
-    fn gaussian_elimination(&self, rhs: &mut [f64]) -> Result<(), String> {
-        let n = self.rows();
+    // FIXME: This is a very naive implementation of QR factorization.
+    fn solve(&self, rhs: &mut [f64]) -> Result<(), String> {
+        let n = self.matrix.rows;
         if rhs.len() != n {
             return Err("rhs length mismatch".into());
         }
@@ -45,7 +20,7 @@ impl Matrix for DenseMatrix {
         let mut aug = vec![vec![0.0; n + 1]; n];
         for (i, row) in aug.iter_mut().enumerate().take(n) {
             for (j, cell) in row.iter_mut().take(n).enumerate() {
-                *cell = self.get(i, j);
+                *cell = self.matrix.get(i, j);
             }
             row[n] = rhs[i];
         }
@@ -90,23 +65,5 @@ impl Matrix for DenseMatrix {
             rhs[i] = row[n];
         }
         Ok(())
-    }
-}
-
-impl Index<usize> for DenseMatrix {
-    type Output = [f64];
-
-    fn index(&self, row: usize) -> &Self::Output {
-        let start = row * self.cols;
-        let end = start + self.cols;
-        &self.data[start..end] // &slice is fine
-    }
-}
-
-impl IndexMut<usize> for DenseMatrix {
-    fn index_mut(&mut self, row: usize) -> &mut Self::Output {
-        let start = row * self.cols;
-        let end = start + self.cols;
-        &mut self.data[start..end]
     }
 }
