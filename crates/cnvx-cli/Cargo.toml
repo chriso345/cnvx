@@ -1,6 +1,6 @@
 [package]
 name = "cnvx-cli"
-description = ""
+description = "cli for cnvx optimization library"
 version = { workspace = true }
 authors = { workspace = true }
 edition = { workspace = true }

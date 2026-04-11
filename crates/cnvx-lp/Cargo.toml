@@ -1,6 +1,6 @@
 [package]
 name = "cnvx-lp"
-description = ""
+description = "linear programming solver for cnvx optimization library"
 version = { workspace = true }
 authors = { workspace = true }
 edition = { workspace = true }
