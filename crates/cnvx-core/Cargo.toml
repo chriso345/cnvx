@@ -1,6 +1,6 @@
 [package]
 name = "cnvx-core"
-description = ""
+description = "core traits for cnvx optimization library"
 version = { workspace = true }
 authors = { workspace = true }
 edition = { workspace = true }

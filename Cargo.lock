@@ -206,7 +206,7 @@ dependencies = [
 
 [[package]]
 name = "cnvx"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "cnvx-core",
  "cnvx-lp",
@@ -215,7 +215,7 @@ dependencies = [
 
 [[package]]
 name = "cnvx-cli"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "clap",
  "cnvx",
@@ -227,11 +227,11 @@ dependencies = [
 
 [[package]]
 name = "cnvx-core"
-version = "0.0.0"
+version = "0.0.1"
 
 [[package]]
 name = "cnvx-lp"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "cnvx-core",
  "cnvx-math",
@@ -239,21 +239,21 @@ dependencies = [
 
 [[package]]
 name = "cnvx-math"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "nalgebra",
 ]
 
 [[package]]
 name = "cnvx-parse"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "cnvx-core",
 ]
 
 [[package]]
 name = "cnvx-tests"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "clap",
  "cnvx",
