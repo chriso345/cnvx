@@ -20,13 +20,13 @@ jobs:
         include:
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
-            bin_name: cnvx-cli
-            archive_name: cnvx-cli-linux-x86_64.tar.gz
+            bin_name: cnvx
+            archive_name: cnvx-linux-x86_64.tar.gz
 
           - os: windows-latest
             target: x86_64-pc-windows-msvc
-            bin_name: cnvx-cli.exe
-            archive_name: cnvx-cli-windows-x86_64.zip
+            bin_name: cnvx.exe
+            archive_name: cnvx-windows-x86_64.zip
 
     steps:
       - name: Checkout
@@ -53,7 +53,7 @@ jobs:
 
           mkdir -p dist
 
-          cp "target/${{ matrix.target }}/release/cnvx-cli" "dist/${{ matrix.bin_name }}"
+          cp "target/${{ matrix.target }}/release/cnvx" "dist/${{ matrix.bin_name }}"
 
           tar -czf "dist/${{ matrix.archive_name }}" \
             -C dist "${{ matrix.bin_name }}"
@@ -67,7 +67,7 @@ jobs:
           New-Item -ItemType Directory -Force -Path dist | Out-Null
 
           Copy-Item `
-            "target\${{ matrix.target }}\release\cnvx-cli.exe" `
+            "target\${{ matrix.target }}\release\cnvx.exe" `
             "dist\${{ matrix.bin_name }}"
 
           Compress-Archive `
