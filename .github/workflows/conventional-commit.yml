@@ -41,3 +41,4 @@ jobs:
             echo "  fix(auth)!: fix critical bug"
             exit 1
           fi
+
