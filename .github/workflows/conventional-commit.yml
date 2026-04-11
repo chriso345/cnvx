@@ -20,7 +20,7 @@ jobs:
           set -euo pipefail
 
           # Allowed prefixes
-          PREFIXES=("feat" "fix" "docs" "style" "refactor" "test" "chore")
+          PREFIXES=("feat" "fix" "docs" "style" "refactor" "test" "chore" "ci" "perf")
 
           # Get PR title
           PR_TITLE=$(jq -r .pull_request.title "$GITHUB_EVENT_PATH")
@@ -41,3 +41,4 @@ jobs:
             echo "  fix(auth)!: fix critical bug"
             exit 1
           fi
+

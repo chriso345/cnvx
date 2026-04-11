@@ -4,7 +4,7 @@ default-members = ["crates/cnvx-cli"]
 resolver = "2"
 
 [workspace.package]
-version = "0.0.0"
+version = "0.0.1"
 authors = ["chriso345"]
 edition = "2024"
 repository = "https://github.com/chriso345/cnvx"
@@ -13,12 +13,12 @@ keywords = ["optimization", "linear-programming", "convex"]
 readme = "README.md"
 
 [workspace.dependencies]
-cnvx = { path = "crates/cnvx", version = "0.0.0" }
-cnvx-cli = { path = "crates/cnvx-cli", version = "0.0.0" }
-cnvx-core = { path = "crates/cnvx-core", version = "0.0.0" }
-cnvx-lp = { path = "crates/cnvx-lp", version = "0.0.0" }
-cnvx-math = { path = "crates/cnvx-math", version = "0.0.0" }
-cnvx-parse = { path = "crates/cnvx-parse", version = "0.0.0" }
+cnvx = { path = "crates/cnvx", version = "0.0.1" }
+cnvx-cli = { path = "crates/cnvx-cli", version = "0.0.1" }
+cnvx-core = { path = "crates/cnvx-core", version = "0.0.1" }
+cnvx-lp = { path = "crates/cnvx-lp", version = "0.0.1" }
+cnvx-math = { path = "crates/cnvx-math", version = "0.0.1" }
+cnvx-parse = { path = "crates/cnvx-parse", version = "0.0.1" }
 clap = { version = "4.5.57", features = ["derive"] }
 nalgebra = "0.34.2"
 
