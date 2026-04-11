@@ -10,4 +10,4 @@
 
 pub mod matrix;
 
-pub use matrix::{DenseMatrix, Matrix};
+pub use matrix::{DenseMatrix, MatrixWrapper as Matrix, SparseMatrix};

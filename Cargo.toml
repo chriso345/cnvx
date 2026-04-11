@@ -20,6 +20,7 @@ cnvx-lp = { path = "crates/cnvx-lp", version = "0.0.0" }
 cnvx-math = { path = "crates/cnvx-math", version = "0.0.0" }
 cnvx-parse = { path = "crates/cnvx-parse", version = "0.0.0" }
 clap = { version = "4.5.57", features = ["derive"] }
+nalgebra = "0.34.2"
 
 [workspace.lints]
 
