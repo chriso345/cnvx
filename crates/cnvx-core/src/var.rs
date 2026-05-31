@@ -33,6 +33,9 @@ pub struct Var {
     /// Unique identifier for the variable.
     pub id: VarId,
 
+    /// Optional name for the variable. Currently unused.
+    pub name: Option<String>,
+
     /// Optional lower bound.
     pub lb: Option<f64>,
 
@@ -71,6 +74,18 @@ pub struct VarBuilder<'a> {
 /// Returned by [`Model::add_var()`](crate::model::Model::add_var). Use these methods to set bounds,
 /// integrality, or mark a variable as binary before calling [`finish()`](VarBuilder::finish).
 impl<'a> VarBuilder<'a> {
+    /// Sets a name for the variable.
+    ///
+    /// ```rust, no_run
+    /// # use cnvx_core::{Model};
+    /// let mut model = Model::new();
+    /// let x = model.add_var().name("x").finish();
+    /// ```
+    pub fn name(self, name: &str) -> Self {
+        self.model.vars[self.var.0].name = Some(name.to_string());
+        self
+    }
+
     /// Sets a lower bound for the variable.
     ///
     /// This method currently panics because lower bounds are not yet implemented.
@@ -83,10 +98,10 @@ impl<'a> VarBuilder<'a> {
     /// let x = model.add_var().lower_bound(0.0).finish();
     /// ```
     pub fn lower_bound(self, lb: f64) -> Self {
-        _ = lb;
-        panic!("Lower bound not implemented yet");
-        // self.model.vars[self.var.0].lb = Some(lb);
-        // self
+        // _ = lb;
+        // panic!("Lower bound not implemented yet");
+        self.model.vars[self.var.0].lb = Some(lb);
+        self
     }
 
     /// Sets an upper bound for the variable.

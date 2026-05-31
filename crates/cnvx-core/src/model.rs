@@ -58,9 +58,10 @@ impl Model {
     /// let x = model.add_var().integer().finish();
     /// ```
     pub fn add_var(&mut self) -> VarBuilder<'_> {
-        let id = VarId(self.vars.len());
+        let id = VarId(self.vars.len()); // FIXME: This should be a global counter.
         self.vars.push(Var {
             id,
+            name: None,
             lb: Some(0.0),
             ub: None,
             is_integer: false,
