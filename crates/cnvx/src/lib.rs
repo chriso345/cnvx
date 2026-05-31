@@ -54,13 +54,11 @@
 //! ```
 
 pub use cnvx_core as core;
-pub mod auto_solver;
 
 #[cfg(feature = "lp")]
 pub use cnvx_lp as lp;
 
 pub mod prelude {
-    pub use crate::auto_solver::AutoSolver;
     pub use crate::core::*;
 
     #[cfg(feature = "lp")]
@@ -69,7 +67,7 @@ pub mod prelude {
 
 pub mod solvers {
     #[cfg(feature = "lp")]
-    pub use crate::lp::{DualSimplexSolver, LpAutoSolver, PrimalSimplexSolver};
+    pub use crate::lp::{DualSimplexSolver, LpSolver, PrimalSimplexSolver};
 }
 
 /// Returns the version of the `cnvx` crate.

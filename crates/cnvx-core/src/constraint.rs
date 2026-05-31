@@ -1,17 +1,20 @@
-use crate::LinExpr;
+//! Linear constraints for optimization models.
+
 use std::fmt::Display;
+
+use crate::LinExpr;
 
 /// Comparison operators used in constraints.
 #[derive(Copy, Clone, Debug)]
 pub enum Cmp {
     /// Equality: `==`
-    Eq,
+    EQ,
 
     /// Less than or equal: `<=`
-    Leq,
+    LEQ,
 
     /// Greater than or equal: `>=`
-    Geq,
+    GEQ,
 }
 
 /// A linear constraint of the form `expr cmp rhs`.
@@ -27,42 +30,79 @@ pub enum Cmp {
 /// let c2 = Constraint::geq(expr.clone(), 1.0);  // 2*x0 + 3 >= 1
 /// let c3 = Constraint::eq(expr, 4.0);           // 2*x0 + 3 == 4
 /// ```
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct Constraint {
     /// The left-hand side linear expression of the constraint.
-    pub expr: LinExpr,
+    pub expr: LinExpr, // TODO: Allow for this to be a more general expression type
 
     /// The right-hand side value of the constraint.
     pub rhs: f64,
 
     /// The comparison operator (==, <=, >=).
     pub cmp: Cmp,
+
+    /// Optional human-readable name for the constraint, used in diagnostics and
+    /// dual-variable reporting.
+    pub name: Option<String>,
+}
+
+impl Clone for Constraint {
+    fn clone(&self) -> Self {
+        // ExtensionMap does not implement Clone (its values are `dyn Any`);
+        // cloning a constraint preserves all fields but drops extensions.
+        // Sub-crates that rely on extensions should clone them explicitly.
+        Self {
+            expr: self.expr.clone(),
+            rhs: self.rhs,
+            cmp: self.cmp,
+            name: self.name.clone(),
+        }
+    }
 }
 
 impl Constraint {
     /// Creates a `<=` constraint: `lhs <= rhs`.
     pub fn leq(lhs: LinExpr, rhs: f64) -> Self {
-        Self { expr: lhs, rhs, cmp: Cmp::Leq }
+        Self { expr: lhs, rhs, cmp: Cmp::LEQ, name: None }
     }
 
     /// Creates a `>=` constraint: `lhs >= rhs`.
     pub fn geq(lhs: LinExpr, rhs: f64) -> Self {
-        Self { expr: lhs, rhs, cmp: Cmp::Geq }
+        Self { expr: lhs, rhs, cmp: Cmp::GEQ, name: None }
     }
 
     /// Creates a `==` constraint: `lhs == rhs`.
     pub fn eq(lhs: LinExpr, rhs: f64) -> Self {
-        Self { expr: lhs, rhs, cmp: Cmp::Eq }
+        Self { expr: lhs, rhs, cmp: Cmp::EQ, name: None }
+    }
+
+    /// Attaches a human-readable name to this constraint (builder-style).
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use cnvx_core::{LinExpr, VarId, Constraint};
+    /// let c = Constraint::leq(LinExpr::from(VarId(0)), 10.0)
+    ///     .named("capacity");
+    /// assert_eq!(c.name.as_deref(), Some("capacity"));
+    /// ```
+    pub fn named(mut self, name: &str) -> Self {
+        self.name = Some(name.to_string());
+        self
     }
 }
 
 impl Display for Constraint {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let cmp_str = match self.cmp {
-            Cmp::Eq => "==",
-            Cmp::Leq => "<=",
-            Cmp::Geq => ">=",
+            Cmp::EQ => "==",
+            Cmp::LEQ => "<=",
+            Cmp::GEQ => ">=",
         };
-        write!(f, "{} {} {}", self.expr, cmp_str, self.rhs)
+        if let Some(name) = &self.name {
+            write!(f, "[{}] {} {} {}", name, self.expr, cmp_str, self.rhs)
+        } else {
+            write!(f, "{} {} {}", self.expr, cmp_str, self.rhs)
+        }
     }
 }

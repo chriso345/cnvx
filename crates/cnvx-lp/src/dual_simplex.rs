@@ -1,72 +1,136 @@
-use cnvx_core::{Model, Solution, SolveError, Solver};
+use cnvx_core::{Model, Solution, SolveError, problem::Problem, solver::Solver};
 use cnvx_math::{DenseMatrix, Matrix};
 
-/// Generic Simplex solver.
-pub struct DualSimplexSolver<'model> {
-    state: State<'model>,
+/// Dual simplex solver for linear programs.
+///
+/// The dual simplex method maintains dual feasibility throughout the iteration
+/// and is particularly well-suited for warm-started re-optimisation (e.g. after
+/// adding a constraint or a cut in branch-and-bound), where the primal simplex
+/// would require an expensive Phase 1.
+///
+/// ## Status
+///
+/// The `solve` implementation is **not yet complete** - it returns
+/// [`SolveError::Unsupported`]. The state scaffolding ([`DualSimplexState`]) is
+/// in place so that the algorithm can be filled in incrementally without
+/// interface changes.
+///
+/// ## Compatibility
+///
+/// Accepts the same problems as [`PrimalSimplexSolver`](crate::PrimalSimplexSolver):
+/// `kind() == "lp"` with a defined objective and a successful downcast to [`Model`].
+///
+/// ## Configuration
+///
+/// ```rust,ignore
+/// let mut solver = DualSimplexSolver::new();
+/// solver.tolerance = 1e-9;
+/// solver.max_iter  = 2000;
+/// ```
+pub struct DualSimplexSolver {
+    /// Internal state retained between solve() calls for warm-starting.
+    ///
+    /// `None` until the first successful solve.
+    state: Option<DualSimplexState<DenseMatrix>>,
+    /// The numerical tolerance used for feasibility and optimality checks.
     pub tolerance: f64,
+    /// The maximum number of dual simplex iterations before terminating.
     pub max_iter: usize,
+    /// Whether to log iteration details during solving.
     pub logging: bool,
+
+    /// Cached objective value from the most recent solve.
+    last_objective: Option<f64>,
+    /// Cached solution vector from the most recent solve.
+    last_solution: Vec<f64>,
 }
 
-impl<'model> Default for DualSimplexSolver<'model> {
-    fn default() -> Self {
-        panic!("Use SimplexSolver::new(model) to construct");
-    }
-}
-
-impl<'model> Solver<'model> for DualSimplexSolver<'model> {
-    fn new(model: &'model Model) -> Self {
+impl DualSimplexSolver {
+    /// Creates a new, unconfigured dual simplex solver.
+    pub fn new() -> Self {
         Self {
-            state: State::Dense(DualSimplexState::new(model)),
+            state: None,
             tolerance: 1e-8,
             max_iter: 1000,
             logging: false,
+            last_objective: None,
+            last_solution: Vec::new(),
         }
     }
+}
 
-    fn solve(&mut self) -> Result<Solution, SolveError> {
-        // TODO: implement primal simplex iterations
+impl Default for DualSimplexSolver {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
+impl Solver for DualSimplexSolver {
+    fn name(&self) -> &str {
+        "dual-simplex"
+    }
+
+    /// Returns `true` for LP problems with a defined objective that downcast to [`Model`].
+    fn supports(&self, problem: &dyn Problem) -> bool {
+        problem.kind() == "lp"
+            && problem.has_objective()
+            && problem.as_any().downcast_ref::<Model>().is_some()
+    }
+
+    fn solve(&mut self, problem: &dyn Problem) -> Result<Solution, SolveError> {
+        if !self.supports(problem) {
+            return Err(SolveError::Unsupported(format!(
+                "dual-simplex does not support {} problems",
+                problem.kind()
+            )));
+        }
+
+        _ = self.state; // Silence unused field warning until solve() is implemented
+
+        // TODO: implement dual simplex iterations
         Err(SolveError::Unsupported(
-            "DualSimplexSolver.solve() not implemented yet".to_string(),
+            "DualSimplexSolver.solve() is not yet implemented".to_string(),
         ))
     }
 
-    fn get_objective_value(&self) -> f64 {
-        match &self.state {
-            State::Dense(s) => s.objective,
-        }
+    fn objective_value(&self) -> Option<f64> {
+        self.last_objective
     }
 
-    fn get_solution(&self) -> Vec<f64> {
-        // TODO: reconstruct full solution vector from x_b and non-basic vars
-        vec![]
+    fn solution_vector(&self) -> Vec<f64> {
+        self.last_solution.clone()
     }
 }
 
-enum State<'model> {
-    Dense(DualSimplexState<'model, DenseMatrix>),
-}
-
-/// State used internally by the simplex solver.
+/// State used internally by the dual simplex solver.
+///
+/// Mirrors the fields in [`PrimalSimplexState`](crate::primal_simplex::PrimalSimplexState)
+/// so that the two implementations share a common structure and can eventually
+/// share helper utilities (e.g. pivot, basis update, dual computation).
 #[derive(Clone)]
-pub struct DualSimplexState<'model, A: Matrix> {
-    pub model: &'model Model,
+pub struct DualSimplexState<A: Matrix> {
+    /// Current iteration count of the dual simplex algorithm.
     pub iteration: usize,
+    /// Indices of basis variables in the tableau.
     pub basis: Vec<usize>,
+    /// Indices of non-basis variables in the tableau.
     pub non_basis: Vec<usize>,
+    /// Values of the basic variables.
     pub x_b: Vec<f64>,
+    /// Constraint matrix `A`.
     pub a: A,
+    /// Right-hand side vector `b`.
     pub b: Vec<f64>,
+    /// Objective coefficients vector `c`.
     pub c: Vec<f64>,
+    /// Current objective value.
     pub objective: f64,
 }
 
-impl<'model, A: Matrix> DualSimplexState<'model, A> {
-    pub fn new(model: &'model Model) -> Self {
+impl<A: Matrix> DualSimplexState<A> {
+    /// Initialises an empty dual simplex state.
+    pub fn new() -> Self {
         Self {
-            model,
             iteration: 0,
             basis: vec![],
             non_basis: vec![],
@@ -76,5 +140,11 @@ impl<'model, A: Matrix> DualSimplexState<'model, A> {
             c: vec![],
             objective: 0.0,
         }
+    }
+}
+
+impl<A: Matrix> Default for DualSimplexState<A> {
+    fn default() -> Self {
+        Self::new()
     }
 }

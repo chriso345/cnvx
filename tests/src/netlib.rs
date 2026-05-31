@@ -7,7 +7,6 @@ use std::{
 };
 
 use cnvx::prelude::*;
-use cnvx::solvers::LpAutoSolver;
 use cnvx_parse::parse;
 use test_case::test_case;
 
@@ -136,8 +135,8 @@ fn run_cnvx(mps: &Path) -> Result<Solution, String> {
         Err(e) => return Err(format!("Failed to parse MPS file: {}", e)),
     };
 
-    let mut solver = LpAutoSolver::new(&model);
-    match solver.solve() {
+    let mut solver = LpSolver::new();
+    match solver.solve(&model) {
         Ok(sol) => Ok(sol),
         Err(e) => Err(format!("Solver failed: {}", e)),
     }

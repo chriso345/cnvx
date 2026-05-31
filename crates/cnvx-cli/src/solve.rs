@@ -1,5 +1,16 @@
-use cnvx::prelude::*;
+use cnvx::lp::LpSolver; // TODO: Behind a feature flag?
+use cnvx_core::solver::Solver;
 
+/// Entry point for the `cnvx solve` command.
+///
+/// Reads a model from a file (or stdin), parses it using the appropriate
+/// [`LanguageParser`](cnvx_parse::LanguageParser), and solves it.
+///
+/// Solver selection is performed without a global registry: the parsed model's
+/// [`Problem::kind()`](cnvx_core::problem::Problem::kind) is matched against the
+/// available domain solvers by calling [`Solver::supports`].  Currently only LP
+/// problems are supported; additional domain solvers can be added to the
+/// `candidates` list below as new sub-crates are introduced.
 pub fn solve(
     command: &crate::args::SolveCommand,
 ) -> Result<(), Box<dyn std::error::Error>> {
@@ -27,23 +38,35 @@ pub fn solve(
         }
     };
 
-    if let Ok(model) = cnvx_parse::parse(&contents, &ext) {
-        let mut solver = AutoSolver::new(&model);
-        // Match on the solution (Ok or Err) and print the appropriate messagej
-        let sol = match solver.solve() {
-            Ok(solution) => solution,
-            Err(e) => {
-                println!("Solver error: {}", e);
-                return Err("Solver error".into());
-            }
-        };
+    let model = cnvx_parse::parse(&contents, &ext)
+        .map_err(|e| format!("Failed to parse model: {e}"))?;
 
-        // TODO: Also support writing to a file, and saving to a file
-        println!("{}", sol);
-    } else {
-        println!("Failed to parse model");
-        return Err("Failed to parse model".into());
-    }
+    // Build a ranked list of candidate solvers.
+    //
+    // Each entry is tried in order; the first solver for which `supports`
+    // returns `true` is used. Adding a new domain (e.g. `cnvx-nlp`) means
+    // appending one line here and one `Cargo.toml` dependency — nothing else
+    // needs to change.
+    let mut candidates: Vec<Box<dyn Solver>> = vec![
+        Box::new(LpSolver::new()),
+        // ...
+        // ...
+    ];
+
+    let solver = candidates.iter_mut().find(|s| s.supports(&model)).ok_or_else(|| {
+        format!(
+            "No solver supports '{}' problems. \
+                 Is the required sub-crate linked?",
+            cnvx_core::problem::Problem::kind(&model)
+        )
+    })?;
+
+    println!("Using solver: {}", solver.name());
+
+    let solution = solver.solve(&model).map_err(|e| format!("Solver error: {e}"))?;
+
+    // TODO: Also support writing to a file.
+    println!("{}", solution);
 
     Ok(())
 }

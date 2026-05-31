@@ -21,78 +21,104 @@ use cnvx_math::{DenseMatrix, Matrix, matrix::SparseMatrix};
 /// let solution = solver.solve().unwrap();
 /// println!("Solution value: {}", solution.value(x));
 /// ```
-pub struct PrimalSimplexSolver<'model> {
+pub struct PrimalSimplexSolver {
     // Internal state of the simplex algorithm, including the tableau and current solution.
-    state: State<'model>,
+    state: Option<State>,
     /// The numerical tolerance used for feasibility and optimality checks.
     pub tolerance: f64,
     /// The maximum number of simplex iterations before terminating with an error.
     pub max_iter: usize,
     /// Whether to log iteration details during the simplex algorithm.
     pub logging: bool,
+
+    /// Cached objective value from the most recent solve.
+    last_objective: Option<f64>,
+    /// Cached solution vector from the most recent solve.
+    last_solution: Vec<f64>,
 }
 
-impl<'model> Solver<'model> for PrimalSimplexSolver<'model> {
-    fn new(model: &'model Model) -> Self {
+impl PrimalSimplexSolver {
+    pub fn new() -> Self {
         Self {
-            state: State::Dense(PrimalSimplexState::new(model)),
+            state: None,
             tolerance: 1e-8,
             max_iter: 1000,
             logging: false,
+            last_objective: None,
+            last_solution: Vec::new(),
         }
     }
+}
 
-    fn solve(&mut self) -> Result<Solution, SolveError> {
-        // crate::validate::check_lp(self.state.model)?;
-        match &self.state {
-            State::Dense(s) => crate::validate::check_lp(s.model)?,
-            State::Sparse(s) => crate::validate::check_lp(s.model)?,
+impl Default for PrimalSimplexSolver {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Solver for PrimalSimplexSolver {
+    fn name(&self) -> &str {
+        "primal-simplex"
+    }
+
+    fn supports(&self, problem: &dyn Problem) -> bool {
+        problem.kind() == "lp"
+            && problem.has_objective()
+            && problem.as_any().downcast_ref::<Model>().is_some()
+    }
+
+    fn solve(&mut self, problem: &dyn Problem) -> Result<Solution, SolveError> {
+        if !self.supports(problem) {
+            return Err(SolveError::Unsupported(format!(
+                "primal-simplex does not support {} problems",
+                problem.kind()
+            )));
         }
 
-        // let (values, obj) = self.state.solve_lp(self.max_iter, self.tolerance)?;
-        let (values, obj) = match &mut self.state {
-            State::Dense(s) => s.solve_lp(self.max_iter, self.tolerance)?,
-            State::Sparse(s) => s.solve_lp(self.max_iter, self.tolerance)?,
-        };
+        let model = problem
+            .as_any()
+            .downcast_ref::<Model>()
+            .expect("supports() guarantees Model downcast succeeds");
+
+        crate::validate::check_lp(model)?;
+
+        let mut state: PrimalSimplexState<DenseMatrix> = PrimalSimplexState::new(model);
+
+        let (values, obj) = state.solve_lp(self.max_iter, self.tolerance)?;
 
         if self.logging {
-            match &self.state {
-                State::Dense(s) => println!(
-                    "Simplex finished with status {:?} in {} iterations. Objective value: {}",
-                    s.status, s.iteration, obj
-                ),
-                State::Sparse(s) => println!(
-                    "Simplex finished with status {:?} in {} iterations. Objective value: {}",
-                    s.status, s.iteration, obj
-                ),
-            }
+            println!(
+                "Simplex finished with status {:?} in {} iterations. Objective value: {}",
+                state.status, state.iteration, obj
+            );
         }
 
+        self.last_objective = Some(obj);
+        self.last_solution = values.clone();
+        self.state = Some(State::Dense(state));
+
         let status = match &self.state {
-            State::Dense(s) => s.status.clone(),
-            State::Sparse(s) => s.status.clone(),
+            Some(State::Dense(s)) => s.status.clone(),
+            Some(State::Sparse(s)) => s.status.clone(),
+            None => unreachable!(),
         };
 
         Ok(Solution { values, objective_value: Some(obj), status })
     }
 
-    fn get_objective_value(&self) -> f64 {
-        match &self.state {
-            State::Dense(s) => s.objective,
-            State::Sparse(s) => s.objective,
-        }
+    fn objective_value(&self) -> Option<f64> {
+        self.last_objective
     }
 
-    fn get_solution(&self) -> Vec<f64> {
-        // TODO: reconstruct full solution vector from x_b and non-basic vars
-        vec![]
+    fn solution_vector(&self) -> Vec<f64> {
+        self.last_solution.clone()
     }
 }
 
 #[allow(dead_code)]
-enum State<'model> {
-    Dense(PrimalSimplexState<'model, DenseMatrix>),
-    Sparse(PrimalSimplexState<'model, SparseMatrix>),
+enum State {
+    Dense(PrimalSimplexState<DenseMatrix>),
+    Sparse(PrimalSimplexState<SparseMatrix>),
 }
 
 /// Internal state for the simplex algorithm.
@@ -100,9 +126,7 @@ enum State<'model> {
 /// Tracks the current basis, non-basis variables, solution vector, objective value,
 /// and the LP tableau.
 #[derive(Clone)]
-pub struct PrimalSimplexState<'model, A: Matrix> {
-    /// Reference to the LP model being solved.
-    pub model: &'model Model,
+pub struct PrimalSimplexState<A: Matrix> {
     /// Current iteration count of the simplex algorithm.
     pub iteration: usize,
 
@@ -135,12 +159,12 @@ pub struct PrimalSimplexState<'model, A: Matrix> {
     log_interval: usize,
 }
 
-impl<'model, A: Matrix> PrimalSimplexState<'model, A> {
+impl<A: Matrix> PrimalSimplexState<A> {
     /// Initialize a new simplex state from a given `Model`.
     ///
     /// Constructs the tableau, sets up artificial variables for inequalities, and
     /// computes the objective coefficients based on the problem's sense (min/max).
-    pub fn new(model: &'model Model) -> Self {
+    pub fn new(model: &Model) -> Self {
         let n_vars = model.vars().len();
         let n_cons = model.constraints().len();
 
@@ -149,8 +173,8 @@ impl<'model, A: Matrix> PrimalSimplexState<'model, A> {
         let mut n_total = n_vars;
         for cons in model.constraints().iter() {
             match cons.cmp {
-                Cmp::Leq | Cmp::Geq => n_total += 1,
-                Cmp::Eq => {}
+                Cmp::LEQ | Cmp::GEQ => n_total += 1,
+                Cmp::EQ => {}
             }
         }
 
@@ -176,20 +200,19 @@ impl<'model, A: Matrix> PrimalSimplexState<'model, A> {
                 a.set(i, term.var.0, term.coeff);
             }
             match cons.cmp {
-                Cmp::Leq => {
+                Cmp::LEQ => {
                     a.set(i, extra_idx, 1.0);
                     extra_idx += 1;
                 }
-                Cmp::Geq => {
+                Cmp::GEQ => {
                     a.set(i, extra_idx, -1.0);
                     extra_idx += 1;
                 }
-                Cmp::Eq => {}
+                Cmp::EQ => {}
             }
         }
 
         Self {
-            model,
             iteration: 0,
             basis: Vec::new(),
             non_basis: (0..n_vars).collect(),
@@ -200,7 +223,6 @@ impl<'model, A: Matrix> PrimalSimplexState<'model, A> {
             objective: 0.0,
             status: SolveStatus::NotSolved,
             minimise,
-            // FIXME: For now always enable logging
             logging: true,
             log_interval: 100,
         }
