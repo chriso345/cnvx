@@ -41,8 +41,8 @@ fn main() {
     // Total electricity generation must exactly match demand (300 MW)
     model += (gas + coal + wind).eq(300.0);
 
-    // Coal produces 2 units of emissions per MW, capped at 200
-    model += (coal * 2.0).leq(200.0);
+    // Gas Emissions must be less that half of coal emissions
+    model += gas.leq(0.5 * coal);
 
     // At least 150 MW must come from thermal generation (gas + coal)
     model += (gas + coal).geq(150.0);
@@ -52,9 +52,6 @@ fn main() {
         Objective::minimize(gas * 50.0 + coal * 80.0 + wind * 0.0).name("TotalCost"),
     );
 
-    // -------------------------
-    // Solve LP
-    // -------------------------
     let mut solver = LpSolver::new();
 
     if let Some(name) = solver.selected_for(&model) {
@@ -68,9 +65,11 @@ fn main() {
     println!("Coal generation: {}", solution.value(coal));
     println!("Wind generation: {}", solution.value(wind));
 
-    // Expected behavior:
+    // Expected output:
     //
-    // - Wind is used as much as possible (free resource)
-    // - Gas and coal satisfy minimum thermal constraint
-    // - Coal is limited by emissions cap
+    // Selected solver: primal-simplex
+    // Optimal profit: 12600
+    // Gas generation: 60
+    // Coal generation: 120
+    // Wind generation: 120
 }

@@ -165,6 +165,33 @@ impl<A: Matrix> PrimalSimplexState<A> {
     /// Constructs the tableau, sets up artificial variables for inequalities, and
     /// computes the objective coefficients based on the problem's sense (min/max).
     pub fn new(model: &Model) -> Self {
+        // Clone the model so we can inject bound constraints without mutating the original
+        let mut model = model.clone();
+
+        // Inject variable bounds as constraints
+        // Collect bound constraints separately to avoid borrow checker issues
+        let vars: Vec<_> = model.vars().iter().cloned().collect();
+        let mut bound_constraints = Vec::new();
+        for var in vars.iter() {
+            if let Some(lb) = var.lb {
+                bound_constraints.push(Constraint::geq(LinExpr::from(var.id), lb).named(
+                    &format!(
+                        "{}_lower_bound",
+                        var.name.as_deref().unwrap_or(&format!("var{}", var.id.0))
+                    ),
+                ));
+            }
+            if let Some(ub) = var.ub {
+                bound_constraints.push(Constraint::leq(LinExpr::from(var.id), ub).named(
+                    &format!(
+                        "{}_upper_bound",
+                        var.name.as_deref().unwrap_or(&format!("var{}", var.id.0))
+                    ),
+                ));
+            }
+        }
+        model.constraints.extend(bound_constraints);
+
         let n_vars = model.vars().len();
         let n_cons = model.constraints().len();
 

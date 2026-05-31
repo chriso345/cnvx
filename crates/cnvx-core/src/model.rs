@@ -34,7 +34,7 @@ use crate::*;
 /// assert_eq!(model.num_constraints(), 3);
 /// assert!(model.has_objective());
 /// ```
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct Model {
     /// List of variables in the model.
     pub vars: Vec<Var>,
