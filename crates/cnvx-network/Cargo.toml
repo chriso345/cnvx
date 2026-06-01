@@ -1,0 +1,16 @@
+[package]
+name = "cnvx-network"
+description = "network optimization solvers for cnvx optimization library"
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
+repository = { workspace = true }
+license = { workspace = true }
+keywords = { workspace = true }
+readme = { workspace = true }
+
+[dependencies]
+cnvx-core = { workspace = true }
+
+[lints]
+workspace = true

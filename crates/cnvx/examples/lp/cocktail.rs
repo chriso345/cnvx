@@ -1,10 +1,12 @@
-//! Simple cocktail blending LP.
+//! Cocktail Blending LP
 //!
 //! Maximize profit from producing two cocktails:
 //! - Mojito
 //! - Margarita
 //!
 //! Subject to limited supplies of rum and tequila.
+//!
+//! Category: Linear Programming
 
 use cnvx::prelude::*;
 use cnvx_core::solver::Solver;

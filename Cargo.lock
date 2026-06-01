@@ -211,6 +211,7 @@ dependencies = [
  "cnvx-core",
  "cnvx-lp",
  "cnvx-math",
+ "cnvx-network",
 ]
 
 [[package]]
@@ -242,6 +243,13 @@ name = "cnvx-math"
 version = "0.0.1"
 dependencies = [
  "nalgebra",
+]
+
+[[package]]
+name = "cnvx-network"
+version = "0.0.1"
+dependencies = [
+ "cnvx-core",
 ]
 
 [[package]]

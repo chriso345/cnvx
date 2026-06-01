@@ -1,4 +1,4 @@
-//! Power grid dispatch optimization (PURE LINEAR PROGRAM).
+//! Power Grid Dispatch Optimization
 //!
 //! Minimize cost of producing electricity while meeting demand:
 //! - Gas plant (flexible, medium cost)
@@ -9,6 +9,8 @@
 //! - Exact demand satisfaction
 //! - Emissions cap
 //! - Minimum thermal generation requirement
+//!
+//! Category: Linear Programming
 
 use cnvx::prelude::*;
 use cnvx_core::solver::Solver;

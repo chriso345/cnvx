@@ -10,15 +10,32 @@ keywords = { workspace = true }
 readme = { workspace = true }
 
 [features]
-default = ["lp"]
+# default = ["lp"]
+default = ["all"]          # enable all features for development
+all = ["lp", "network"]
 lp = ["cnvx-lp"]
-# mop = ["lp", "cnvx-mop"]
-# sat = ["cnvx-sat"]
+network = ["cnvx-network"]
 
 [dependencies]
 cnvx-core = { workspace = true }
 cnvx-lp = { workspace = true, optional = true }
 cnvx-math = { workspace = true }
+cnvx-network = { workspace = true, optional = true }
 
 [lints]
 workspace = true
+
+[[example]]
+name = "cocktail"
+path = "examples/lp/cocktail.rs"
+required-features = ["lp"]
+
+[[example]]
+name = "power"
+path = "examples/lp/power.rs"
+required-features = ["lp"]
+
+[[example]]
+name = "shortest_path"
+path = "examples/network/shortest_path.rs"
+required-features = ["network"]

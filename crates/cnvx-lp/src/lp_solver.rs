@@ -1,12 +1,5 @@
 //! # LP Solver
 //!
-//! [`LpSolver`] is `cnvx-lp`'s convenience entry point.  It does not delegate
-//! to a global registry; instead it owns a ranked list of concrete LP solvers
-//! and tries them in priority order, falling back if one declines to handle the
-//! problem.
-//!
-//! ## Examples
-//!
 //! ```rust
 //! use cnvx_core::{Model, Objective, solver::Solver};
 //! use cnvx_lp::LpSolver;
@@ -27,8 +20,7 @@ use crate::{DualSimplexSolver, PrimalSimplexSolver};
 ///
 /// Internally holds a ranked list of LP solvers and delegates to the first one
 /// that [`supports`](Solver::supports) the given problem.  The list is
-/// constructed once at [`LpSolver::new()`] and is entirely within safe Rust —
-/// no global state, no startup hooks, no unsafe lifetime casts.
+/// constructed once at [`LpSolver::new()`].
 ///
 /// See the [module-level documentation](self) for the current solver ranking.
 pub struct LpSolver {
