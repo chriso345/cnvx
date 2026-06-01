@@ -1,5 +1,8 @@
-use crate::LinExpr;
+// TODO: Move to `cnvx-lp` and call linear objective.
+
 use std::fmt::Display;
+
+use crate::LinExpr;
 
 /// The optimization direction of an objective function.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -25,7 +28,7 @@ pub enum Sense {
 /// let x = model.add_var().finish(); // VarId
 /// let objective = Objective::maximize(3.0 * x).name("Profit");
 /// ```
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct Objective {
     /// Whether to minimize or maximize the objective.
     pub sense: Sense,
@@ -38,6 +41,17 @@ pub struct Objective {
 
     /// Optional priority for multi-objective optimization (not used)
     pub priority: Option<u32>,
+}
+
+impl Clone for Objective {
+    fn clone(&self) -> Self {
+        Self {
+            sense: self.sense,
+            expr: self.expr.clone(),
+            name: self.name.clone(),
+            priority: self.priority,
+        }
+    }
 }
 
 /// Builder for ergonomic creation of objectives.

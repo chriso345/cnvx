@@ -1,3 +1,5 @@
+//! Variable types and builder API for optimization models.
+
 use crate::{Constraint, expr::LinExpr};
 use std::ops::Mul;
 
@@ -9,18 +11,18 @@ pub struct VarId(pub usize);
 
 impl VarId {
     /// Creates a `<=` constraint: `self <= rhs`.
-    pub fn leq(self, rhs: f64) -> Constraint {
-        LinExpr::from(self).leq(rhs)
+    pub fn leq<T: Into<LinExpr>>(self, rhs: T) -> Constraint {
+        (LinExpr::from(self) - rhs.into()).leq(0.0)
     }
 
     /// Creates a `>=` constraint: `self >= rhs`.
-    pub fn geq(self, rhs: f64) -> Constraint {
-        LinExpr::from(self).geq(rhs)
+    pub fn geq<T: Into<LinExpr>>(self, rhs: T) -> Constraint {
+        (LinExpr::from(self) - rhs.into()).geq(0.0)
     }
 
     /// Creates a `==` constraint: `self == rhs`.
-    pub fn eq(self, rhs: f64) -> Constraint {
-        LinExpr::from(self).eq(rhs)
+    pub fn eq<T: Into<LinExpr>>(self, rhs: T) -> Constraint {
+        (LinExpr::from(self) - rhs.into()).eq(0.0)
     }
 }
 
@@ -32,6 +34,9 @@ impl VarId {
 pub struct Var {
     /// Unique identifier for the variable.
     pub id: VarId,
+
+    /// Optional name for the variable. Currently unused.
+    pub name: Option<String>,
 
     /// Optional lower bound.
     pub lb: Option<f64>,
@@ -71,9 +76,19 @@ pub struct VarBuilder<'a> {
 /// Returned by [`Model::add_var()`](crate::model::Model::add_var). Use these methods to set bounds,
 /// integrality, or mark a variable as binary before calling [`finish()`](VarBuilder::finish).
 impl<'a> VarBuilder<'a> {
-    /// Sets a lower bound for the variable.
+    /// Sets a name for the variable.
     ///
-    /// This method currently panics because lower bounds are not yet implemented.
+    /// ```rust, no_run
+    /// # use cnvx_core::{Model};
+    /// let mut model = Model::new();
+    /// let x = model.add_var().name("x").finish();
+    /// ```
+    pub fn name(self, name: &str) -> Self {
+        self.model.vars[self.var.0].name = Some(name.to_string());
+        self
+    }
+
+    /// Sets a lower bound for the variable.
     ///
     /// # Examples
     ///
@@ -83,15 +98,11 @@ impl<'a> VarBuilder<'a> {
     /// let x = model.add_var().lower_bound(0.0).finish();
     /// ```
     pub fn lower_bound(self, lb: f64) -> Self {
-        _ = lb;
-        panic!("Lower bound not implemented yet");
-        // self.model.vars[self.var.0].lb = Some(lb);
-        // self
+        self.model.vars[self.var.0].lb = Some(lb);
+        self
     }
 
     /// Sets an upper bound for the variable.
-    ///
-    /// This method currently panics because upper bounds are not yet implemented.
     ///
     /// # Examples
     ///
@@ -101,10 +112,8 @@ impl<'a> VarBuilder<'a> {
     /// let x = model.add_var().upper_bound(10.0).finish();
     /// ```
     pub fn upper_bound(self, ub: f64) -> Self {
-        _ = ub;
-        panic!("Upper bound not implemented yet");
-        // self.model.vars[self.var.0].ub = Some(ub);
-        // self
+        self.model.vars[self.var.0].ub = Some(ub);
+        self
     }
 
     /// Mark the variable as an integer.

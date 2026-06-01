@@ -30,7 +30,7 @@ pub struct Solution {
 
     /// The value of the objective function at the solution.
     ///
-    /// [`None`] if the solver did not produce an objective value (e.g., infeasible or unbounded problem).
+    /// [`None`] if the solver did not produce an objective value (e.g. infeasible or unbounded problem).
     pub objective_value: Option<f64>,
 
     /// The solver status indicating whether the solution is optimal, feasible, infeasible, or unbounded.

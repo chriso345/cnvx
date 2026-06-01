@@ -22,8 +22,7 @@ pub struct LinExpr {
     pub constant: f64,
 }
 
-// TODO: Currently LinExpr only implements addition, but we want support for subtraction and negation.
-// This will later likely pivot to a more general `Expr` type for non-linear support.
+// TODO: This will later likely pivot to a more general `Expr` type for non-linear support.
 
 impl LinExpr {
     /// Creates a new linear expression from a single variable and coefficient.
@@ -167,9 +166,28 @@ impl Add<f64> for LinExpr {
     }
 }
 
+/// LinExpr - LinExpr
+impl std::ops::Sub for LinExpr {
+    type Output = LinExpr;
+
+    fn sub(self, rhs: LinExpr) -> LinExpr {
+        let mut terms = self.terms;
+        for term in rhs.terms {
+            terms.push(LinTerm { var: term.var, coeff: -term.coeff });
+        }
+        LinExpr { terms, constant: self.constant - rhs.constant }
+    }
+}
+
 /// Allows converting a single variable into a linear expression with coefficient 1.0.
 impl From<VarId> for LinExpr {
     fn from(var: VarId) -> Self {
         LinExpr::new(var, 1.0)
+    }
+}
+
+impl From<f64> for LinExpr {
+    fn from(c: f64) -> Self {
+        LinExpr::constant(c)
     }
 }
