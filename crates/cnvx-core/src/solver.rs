@@ -2,7 +2,7 @@ use crate::{Solution, SolveError, problem::Problem};
 
 /// Trait for optimization solvers.
 ///
-/// Any struct implementing this trait can solve a [`Model`] and produce a [`Solution`].
+/// Any struct implementing this trait can solve a [`Model`](crate::model::Model) and produce a [`Solution`].
 /// This trait provides a consistent interface across different solver implementations,
 /// such as simplex, interior point, branch-and-bound, or lexicographic solvers.
 ///

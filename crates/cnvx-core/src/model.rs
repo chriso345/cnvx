@@ -11,7 +11,7 @@ use crate::*;
 /// `Model` is the concrete problem type for LP and MIP problems (both report
 /// `kind() == "lp"` until a dedicated MIP problem type is introduced in
 /// `cnvx-lp`).  It implements [`Problem`] so it can be passed directly to any
-/// [`Solver`](crate::solver::Solver) without wrapping.
+/// [`Solver`] without wrapping.
 ///
 ///
 /// # Examples

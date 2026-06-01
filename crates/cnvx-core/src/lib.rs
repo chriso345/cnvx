@@ -7,7 +7,7 @@
 //!
 //! # Modules
 //!
-//! - [`constraint`]: Defines linear constraints and comparison operators ([`Eq`](Cmp::Eq), [`Leq`](Cmp::Leq), [`Geq`](Cmp::Geq)).
+//! - [`constraint`]: Defines linear constraints and comparison operators ([`EQ`](Cmp::EQ), [`LEQ`](Cmp::LEQ), [`GEQ`](Cmp::GEQ)).
 //! - [`expr`]: Linear expressions ([`LinExpr`]) and terms ([`LinTerm`]) for building objectives and constraints.
 //! - [`model`]: The [`Model`] struct, containing variables, constraints, and objectives.
 //! - [`objective`]: Objective functions ([`Objective`]) and builder API.
