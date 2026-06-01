@@ -1,5 +1,7 @@
-use cnvx_core::{Model, Solution, SolveError, problem::Problem, solver::Solver};
+use cnvx_core::{SolveError, problem::Problem};
 use cnvx_math::{DenseMatrix, Matrix};
+
+use crate::{LpModel, LpSolution, Solver};
 
 /// Dual simplex solver for linear programs.
 ///
@@ -74,10 +76,10 @@ impl Solver for DualSimplexSolver {
     fn supports(&self, problem: &dyn Problem) -> bool {
         problem.kind() == "lp"
             && problem.has_objective()
-            && problem.as_any().downcast_ref::<Model>().is_some()
+            && problem.as_any().downcast_ref::<LpModel>().is_some()
     }
 
-    fn solve(&mut self, problem: &dyn Problem) -> Result<Solution, SolveError> {
+    fn solve(&mut self, problem: &dyn Problem) -> Result<LpSolution, SolveError> {
         if !self.supports(problem) {
             return Err(SolveError::Unsupported(format!(
                 "dual-simplex does not support {} problems",

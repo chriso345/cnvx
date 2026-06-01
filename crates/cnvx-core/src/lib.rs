@@ -19,23 +19,11 @@
 // TODO: Consider moving LP-specific logic into `cnvx-core/lp`
 // to allow non-LP models (e.g., SAT or other problem types) to remain separate.
 
-pub mod constraint;
-pub mod expr;
-pub mod model;
-pub mod objective;
 pub mod problem;
-pub mod solution;
-pub mod solver;
+pub mod sense;
 pub mod status;
-pub mod var;
 
 // Re-export all submodules for easy access via `cnvx_core::*`
-pub use constraint::*;
-pub use expr::*;
-pub use model::*;
-pub use objective::*;
 pub use problem::*;
-pub use solution::*;
-pub use solver::*;
+pub use sense::*;
 pub use status::*;
-pub use var::*;

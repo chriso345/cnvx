@@ -31,7 +31,7 @@ pub enum Cmp {
 /// let c3 = Constraint::eq(expr, 4.0);           // 2*x0 + 3 == 4
 /// ```
 #[derive(Debug)]
-pub struct Constraint {
+pub struct LinearConstraint {
     /// The left-hand side linear expression of the constraint.
     pub expr: LinExpr, // TODO: Allow for this to be a more general expression type
 
@@ -46,7 +46,7 @@ pub struct Constraint {
     pub name: Option<String>,
 }
 
-impl Clone for Constraint {
+impl Clone for LinearConstraint {
     fn clone(&self) -> Self {
         // ExtensionMap does not implement Clone (its values are `dyn Any`);
         // cloning a constraint preserves all fields but drops extensions.
@@ -60,7 +60,7 @@ impl Clone for Constraint {
     }
 }
 
-impl Constraint {
+impl LinearConstraint {
     /// Creates a `<=` constraint: `lhs <= rhs`.
     pub fn leq(lhs: LinExpr, rhs: f64) -> Self {
         Self { expr: lhs, rhs, cmp: Cmp::LEQ, name: None }
@@ -92,7 +92,7 @@ impl Constraint {
     }
 }
 
-impl Display for Constraint {
+impl Display for LinearConstraint {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let cmp_str = match self.cmp {
             Cmp::EQ => "==",

@@ -1,6 +1,6 @@
 //! Variable types and builder API for optimization models.
 
-use crate::{Constraint, expr::LinExpr};
+use crate::{LinearConstraint, expr::LinExpr};
 use std::ops::Mul;
 
 /// A unique identifier for a variable in a model.
@@ -11,17 +11,17 @@ pub struct VarId(pub usize);
 
 impl VarId {
     /// Creates a `<=` constraint: `self <= rhs`.
-    pub fn leq<T: Into<LinExpr>>(self, rhs: T) -> Constraint {
+    pub fn leq<T: Into<LinExpr>>(self, rhs: T) -> LinearConstraint {
         (LinExpr::from(self) - rhs.into()).leq(0.0)
     }
 
     /// Creates a `>=` constraint: `self >= rhs`.
-    pub fn geq<T: Into<LinExpr>>(self, rhs: T) -> Constraint {
+    pub fn geq<T: Into<LinExpr>>(self, rhs: T) -> LinearConstraint {
         (LinExpr::from(self) - rhs.into()).geq(0.0)
     }
 
     /// Creates a `==` constraint: `self == rhs`.
-    pub fn eq<T: Into<LinExpr>>(self, rhs: T) -> Constraint {
+    pub fn eq<T: Into<LinExpr>>(self, rhs: T) -> LinearConstraint {
         (LinExpr::from(self) - rhs.into()).eq(0.0)
     }
 }
@@ -67,7 +67,7 @@ pub struct Var {
 ///     .finish();
 /// ```
 pub struct VarBuilder<'a> {
-    pub model: &'a mut crate::Model,
+    pub model: &'a mut crate::LpModel,
     pub var: VarId,
 }
 

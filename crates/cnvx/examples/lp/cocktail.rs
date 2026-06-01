@@ -9,11 +9,9 @@
 //! Category: Linear Programming
 
 use cnvx::prelude::*;
-use cnvx_core::solver::Solver;
-use cnvx_lp::LpSolver;
 
 fn main() {
-    let mut model = Model::new();
+    let mut model = LpModel::new();
 
     let mojito = model.add_var().name("Mojito").lower_bound(0.0).integer().finish();
     let margarita = model.add_var().name("Margarita").lower_bound(0.0).integer().finish();

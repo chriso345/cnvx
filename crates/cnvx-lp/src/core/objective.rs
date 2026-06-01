@@ -2,17 +2,9 @@
 
 use std::fmt::Display;
 
+use cnvx_core::Sense;
+
 use crate::LinExpr;
-
-/// The optimization direction of an objective function.
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub enum Sense {
-    /// Minimize the objective function.
-    Minimize,
-
-    /// Maximize the objective function.
-    Maximize,
-}
 
 /// Represents an objective function in a model.
 ///

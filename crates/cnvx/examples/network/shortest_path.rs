@@ -51,9 +51,8 @@ fn main() {
     println!("Edges: {}", g.edges.len());
 
     let mut solver = LabelSet::new(&g);
-    solver.set_sp_type(SPType::OneToAll(0));
-    solver.set_cost_function(|e: &EdgeData| e.costs.to_vec());
-    let result = solver.solve();
+    solver.sp_type = SPType::OneToAll(0);
+    let result = solver.solve(|e: &EdgeData| e.costs.to_vec());
 
     for n in 0..g.num_nodes() {
         println!("Node {n}:");

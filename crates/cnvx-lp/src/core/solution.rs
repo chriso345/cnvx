@@ -1,4 +1,6 @@
-use crate::{SolveStatus, VarId};
+use cnvx_core::SolveStatus;
+
+use crate::VarId;
 use std::fmt::Display;
 
 /// Represents the result of solving an optimization problem.
@@ -22,7 +24,7 @@ use std::fmt::Display;
 /// assert_eq!(solution.value(VarId(2)), 3.0);
 /// ```
 #[derive(Debug)]
-pub struct Solution {
+pub struct LpSolution {
     /// Variable assignments, indexed by variable ID.
     ///
     /// The value at index `i` corresponds to the variable with ID [`VarId(i)`](VarId).
@@ -37,7 +39,7 @@ pub struct Solution {
     pub status: SolveStatus,
 }
 
-impl Solution {
+impl LpSolution {
     /// Returns the value assigned to the variable with the given [`VarId`].
     ///
     /// # Example
@@ -58,7 +60,7 @@ impl Solution {
     }
 }
 
-impl Display for Solution {
+impl Display for LpSolution {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         if let Some(obj_val) = self.objective_value {
             write!(f, "{}: {}", self.status, obj_val)?;

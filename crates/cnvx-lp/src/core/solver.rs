@@ -1,4 +1,6 @@
-use crate::{Solution, SolveError, problem::Problem};
+use cnvx_core::{Problem, SolveError};
+
+use crate::LpSolution;
 
 /// Trait for optimization solvers.
 ///
@@ -76,7 +78,7 @@ pub trait Solver: Send {
     ///
     /// Does not panic under normal circumstances.  Implementations may panic
     /// on internal assertion failures that indicate a programming error.
-    fn solve(&mut self, problem: &dyn Problem) -> Result<Solution, SolveError>;
+    fn solve(&mut self, problem: &dyn Problem) -> Result<LpSolution, SolveError>;
 
     /// Returns the objective value from the most recent call to [`solve`](Self::solve).
     ///

@@ -14,18 +14,17 @@ pub mod ampl;
 pub mod gmpl;
 pub mod mps;
 
-use cnvx_core::Model;
-
 pub use ampl::AMPLLanguage;
+use cnvx_lp::LpModel;
 pub use gmpl::GMPLLanguage;
 pub use mps::MPSLanguage;
 
 /// Trait for parsers
 pub trait LanguageParser {
-    fn parse(&self, src: &str) -> Result<Model, String>;
+    fn parse(&self, src: &str) -> Result<LpModel, String>;
 }
 
-pub fn parse(contents: &str, file_type: &str) -> Result<Model, String> {
+pub fn parse(contents: &str, file_type: &str) -> Result<LpModel, String> {
     let model = match file_type {
         "ampl" => AMPLLanguage::new().parse(contents)?,
         "gmpl" => GMPLLanguage::new().parse(contents)?,

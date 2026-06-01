@@ -12,9 +12,9 @@
 //! let solution = solver.solve(&model).unwrap();
 //! ```
 
-use cnvx_core::{Solution, SolveError, problem::Problem, solver::Solver};
+use cnvx_core::{SolveError, problem::Problem};
 
-use crate::{DualSimplexSolver, PrimalSimplexSolver};
+use crate::{DualSimplexSolver, LpSolution, PrimalSimplexSolver, Solver};
 
 /// The recommended entry point for solving LP problems with `cnvx-lp`.
 ///
@@ -106,7 +106,7 @@ impl Solver for LpSolver {
     ///
     /// Returns [`SolveError::Unsupported`] if no registered solver supports
     /// the problem.  All other errors are propagated from the chosen solver.
-    fn solve(&mut self, problem: &dyn Problem) -> Result<Solution, SolveError> {
+    fn solve(&mut self, problem: &dyn Problem) -> Result<LpSolution, SolveError> {
         let solver =
             self.solvers.iter_mut().find(|s| s.supports(problem)).ok_or_else(|| {
                 SolveError::Unsupported(format!(

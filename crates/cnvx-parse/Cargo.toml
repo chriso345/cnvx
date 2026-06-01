@@ -11,6 +11,7 @@ readme = { workspace = true }
 
 [dependencies]
 cnvx-core = { workspace = true }
+cnvx-lp = { workspace = true }
 
 [lints]
 workspace = true

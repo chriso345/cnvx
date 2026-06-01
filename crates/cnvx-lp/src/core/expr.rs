@@ -1,4 +1,4 @@
-use crate::{Constraint, VarId};
+use crate::{LinearConstraint, VarId};
 use std::{
     fmt::Display,
     ops::{Add, AddAssign},
@@ -51,18 +51,18 @@ impl LinExpr {
     }
 
     /// Creates a `<=` constraint from this linear expression.
-    pub fn leq(self, rhs: f64) -> Constraint {
-        Constraint::leq(self, rhs)
+    pub fn leq(self, rhs: f64) -> LinearConstraint {
+        LinearConstraint::leq(self, rhs)
     }
 
     /// Creates a `>=` constraint from this linear expression.
-    pub fn geq(self, rhs: f64) -> Constraint {
-        Constraint::geq(self, rhs)
+    pub fn geq(self, rhs: f64) -> LinearConstraint {
+        LinearConstraint::geq(self, rhs)
     }
 
     /// Creates a `==` constraint from this linear expression.
-    pub fn eq(self, rhs: f64) -> Constraint {
-        Constraint::eq(self, rhs)
+    pub fn eq(self, rhs: f64) -> LinearConstraint {
+        LinearConstraint::eq(self, rhs)
     }
 }
 

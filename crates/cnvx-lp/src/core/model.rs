@@ -3,6 +3,8 @@
 use std::any::Any;
 use std::ops::AddAssign;
 
+use cnvx_core::{Problem, ProblemKind};
+
 use crate::*;
 
 /// Represents an extensible optimization model containing variables, constraints,
@@ -35,12 +37,12 @@ use crate::*;
 /// assert!(model.has_objective());
 /// ```
 #[derive(Debug, Default, Clone)]
-pub struct Model {
+pub struct LpModel {
     /// List of variables in the model.
     pub vars: Vec<Var>,
 
     /// List of constraints in the model.
-    pub constraints: Vec<Constraint>,
+    pub constraints: Vec<LinearConstraint>,
 
     /// Optional objective function.
     ///
@@ -49,7 +51,7 @@ pub struct Model {
     pub objective: Option<Objective>,
 }
 
-impl Model {
+impl LpModel {
     /// Creates a new, empty model.
     pub fn new() -> Self {
         Self { ..Default::default() }
@@ -104,7 +106,7 @@ impl Model {
     }
 
     /// Returns a read-only slice of all constraints.
-    pub fn constraints(&self) -> &[Constraint] {
+    pub fn constraints(&self) -> &[LinearConstraint] {
         &self.constraints
     }
 
@@ -114,12 +116,12 @@ impl Model {
     }
 }
 
-impl Problem for Model {
+impl Problem for LpModel {
     /// Returns `"lp"` - the canonical kind tag for linear programs.
     ///
     /// Once a dedicated `MipModel` type is introduced in `cnvx-lp`, integer
     /// problems should be wrapped in that type and return `"mip"` instead.
-    fn kind(&self) -> crate::problem::ProblemKind {
+    fn kind(&self) -> ProblemKind {
         "lp"
     }
 
@@ -164,8 +166,8 @@ impl Problem for Model {
 /// let x = model.add_var().finish();
 /// model += x.geq(0.0);
 /// ```
-impl AddAssign<Constraint> for Model {
-    fn add_assign(&mut self, rhs: Constraint) {
+impl AddAssign<LinearConstraint> for LpModel {
+    fn add_assign(&mut self, rhs: LinearConstraint) {
         self.constraints.push(rhs);
     }
 }

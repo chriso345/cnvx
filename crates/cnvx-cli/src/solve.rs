@@ -1,5 +1,4 @@
-use cnvx::lp::LpSolver; // TODO: Behind a feature flag?
-use cnvx_core::solver::Solver;
+use cnvx::lp::{LpSolver, Solver}; // TODO: Behind a feature flag?
 
 /// Entry point for the `cnvx solve` command.
 ///

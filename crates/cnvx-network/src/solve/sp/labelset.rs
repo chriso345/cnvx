@@ -13,10 +13,7 @@ where
     graph: &'g G,
 
     /// The type of shortest path problem to solve.
-    sp_type: SPType,
-
-    /// The cost function is provided at solve time, as a closure mapping edge data to cost vectors.
-    cost_fn: Option<Box<dyn Fn(&G::EdgeData) -> Vec<f64> + 'g>>,
+    pub sp_type: SPType,
 }
 
 impl<'g, G> LabelSet<'g, G>
@@ -24,18 +21,7 @@ where
     G: Graph<Vertex = usize, Edge = usize>,
 {
     pub fn new(graph: &'g G) -> Self {
-        Self { graph, sp_type: SPType::None, cost_fn: None }
-    }
-
-    pub fn set_sp_type(&mut self, sp_type: SPType) {
-        self.sp_type = sp_type;
-    }
-
-    pub fn set_cost_function<F>(&mut self, cost_fn: F)
-    where
-        F: Fn(&G::EdgeData) -> Vec<f64> + 'g,
-    {
-        self.cost_fn = Some(Box::new(cost_fn));
+        Self { graph, sp_type: SPType::None }
     }
 }
 
@@ -54,15 +40,12 @@ where
     ///
     /// `cost_fn` must return a `Vec<f64>` of the same length for every edge,
     /// with all components non-negative.
-    pub fn solve(&self) -> ParetoResult
-where {
+    pub fn solve<F>(&self, cost_fn: F) -> ParetoResult
+    where
+        F: Fn(&G::EdgeData) -> Vec<f64>,
+    {
         let source = self.source();
         let n = self.graph.num_nodes();
-
-        let cost_fn = self
-            .cost_fn
-            .as_ref()
-            .expect("cost function must be provided for non-empty graph");
 
         let num_criteria = if self.graph.num_edges() > 0 {
             let c = cost_fn(self.graph.edge_data(0));

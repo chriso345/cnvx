@@ -257,6 +257,7 @@ name = "cnvx-parse"
 version = "0.0.1"
 dependencies = [
  "cnvx-core",
+ "cnvx-lp",
 ]
 
 [[package]]

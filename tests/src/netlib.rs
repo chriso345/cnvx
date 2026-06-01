@@ -126,11 +126,11 @@ fn run_emps(lp: &Path) {
 }
 
 // Run cnvx solver on the produced MPS
-fn run_cnvx(mps: &Path) -> Result<Solution, String> {
+fn run_cnvx(mps: &Path) -> Result<LpSolution, String> {
     let contents = fs::read_to_string(mps).expect("Failed to read MPS file");
 
     let ext = "mps"; // or infer from file extension
-    let model: Model = match parse(&contents, ext) {
+    let model: LpModel = match parse(&contents, ext) {
         Ok(m) => m,
         Err(e) => return Err(format!("Failed to parse MPS file: {}", e)),
     };
@@ -158,7 +158,7 @@ fn netlib_test(name: &str, expected: Option<f64>) {
         panic!("emps did not produce expected file {}", mps.display());
     }
 
-    let output: Solution = match run_cnvx(&mps) {
+    let output: LpSolution = match run_cnvx(&mps) {
         Ok(sol) => sol,
         Err(e) => panic!("cnvx failed on {}: {}", mps.display(), e),
     };

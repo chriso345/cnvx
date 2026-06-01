@@ -13,11 +13,9 @@
 //! Category: Linear Programming
 
 use cnvx::prelude::*;
-use cnvx_core::solver::Solver;
-use cnvx_lp::LpSolver;
 
 fn main() {
-    let mut model = Model::new();
+    let mut model = LpModel::new();
 
     let gas = model
         .add_var()

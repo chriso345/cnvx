@@ -4,6 +4,8 @@ use std::ops::Neg;
 use cnvx_core::*;
 use cnvx_math::{DenseMatrix, Matrix, matrix::SparseMatrix};
 
+use crate::{Cmp, LinExpr, LinearConstraint, LpModel, LpSolution, Solver};
+
 /// A simplex solver for linear programs (LPs).
 ///
 /// # Examples
@@ -64,10 +66,10 @@ impl Solver for PrimalSimplexSolver {
     fn supports(&self, problem: &dyn Problem) -> bool {
         problem.kind() == "lp"
             && problem.has_objective()
-            && problem.as_any().downcast_ref::<Model>().is_some()
+            && problem.as_any().downcast_ref::<LpModel>().is_some()
     }
 
-    fn solve(&mut self, problem: &dyn Problem) -> Result<Solution, SolveError> {
+    fn solve(&mut self, problem: &dyn Problem) -> Result<LpSolution, SolveError> {
         if !self.supports(problem) {
             return Err(SolveError::Unsupported(format!(
                 "primal-simplex does not support {} problems",
@@ -77,7 +79,7 @@ impl Solver for PrimalSimplexSolver {
 
         let model = problem
             .as_any()
-            .downcast_ref::<Model>()
+            .downcast_ref::<LpModel>()
             .expect("supports() guarantees Model downcast succeeds");
 
         crate::validate::check_lp(model)?;
@@ -103,7 +105,7 @@ impl Solver for PrimalSimplexSolver {
             None => unreachable!(),
         };
 
-        Ok(Solution { values, objective_value: Some(obj), status })
+        Ok(LpSolution { values, objective_value: Some(obj), status })
     }
 
     fn objective_value(&self) -> Option<f64> {
@@ -164,7 +166,7 @@ impl<A: Matrix> PrimalSimplexState<A> {
     ///
     /// Constructs the tableau, sets up artificial variables for inequalities, and
     /// computes the objective coefficients based on the problem's sense (min/max).
-    pub fn new(model: &Model) -> Self {
+    pub fn new(model: &LpModel) -> Self {
         // Clone the model so we can inject bound constraints without mutating the original
         let mut model = model.clone();
 
@@ -174,20 +176,20 @@ impl<A: Matrix> PrimalSimplexState<A> {
         let mut bound_constraints = Vec::new();
         for var in vars.iter() {
             if let Some(lb) = var.lb {
-                bound_constraints.push(Constraint::geq(LinExpr::from(var.id), lb).named(
-                    &format!(
+                bound_constraints.push(
+                    LinearConstraint::geq(LinExpr::from(var.id), lb).named(&format!(
                         "{}_lower_bound",
                         var.name.as_deref().unwrap_or(&format!("var{}", var.id.0))
-                    ),
-                ));
+                    )),
+                );
             }
             if let Some(ub) = var.ub {
-                bound_constraints.push(Constraint::leq(LinExpr::from(var.id), ub).named(
-                    &format!(
+                bound_constraints.push(
+                    LinearConstraint::leq(LinExpr::from(var.id), ub).named(&format!(
                         "{}_upper_bound",
                         var.name.as_deref().unwrap_or(&format!("var{}", var.id.0))
-                    ),
-                ));
+                    )),
+                );
             }
         }
         model.constraints.extend(bound_constraints);
