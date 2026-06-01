@@ -7,7 +7,7 @@
 //!
 //! ## Examples
 //!
-//! ```rust,ignore
+//! ```rust
 //! use cnvx_core::{Model, Objective, solver::Solver};
 //! use cnvx_lp::LpSolver;
 //!
@@ -16,7 +16,7 @@
 //! model.add_objective(Objective::maximize(x * 2.0).name("Z"));
 //!
 //! let mut solver = LpSolver::new();
-//! let solution = solver.solve(&model)?;
+//! let solution = solver.solve(&model).unwrap();
 //! ```
 
 use cnvx_core::{Solution, SolveError, problem::Problem, solver::Solver};
@@ -64,7 +64,7 @@ impl LpSolver {
     ///
     /// # Examples
     ///
-    /// ```rust,ignore
+    /// ```rust
     /// use cnvx_lp::{LpSolver, PrimalSimplexSolver};
     ///
     /// let solver = LpSolver::from_solvers(vec![

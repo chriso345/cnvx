@@ -39,8 +39,8 @@
 //! model.add_objective(Objective::maximize(x + 2.0 * y).name("Z"));
 //!
 //! // Solve using the simplex solver
-//! let mut solver = PrimalSimplexSolver::new(&model);;
-//! let solution = solver.solve().unwrap();
+//! let mut solver = PrimalSimplexSolver::new();;
+//! let solution = solver.solve(&model).unwrap();
 //!
 //! println!("Optimal solution: x = {}, y = {}", solution.value(x), solution.value(y));
 //! ```

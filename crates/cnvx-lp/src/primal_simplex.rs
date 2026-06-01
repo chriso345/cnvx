@@ -17,8 +17,8 @@ use cnvx_math::{DenseMatrix, Matrix, matrix::SparseMatrix};
 /// model += x.leq(10.0);
 /// model.add_objective(Objective::maximize(x * 2.0).name("maximize_x"));
 ///
-/// let mut solver = PrimalSimplexSolver::new(&model);
-/// let solution = solver.solve().unwrap();
+/// let mut solver = PrimalSimplexSolver::new();
+/// let solution = solver.solve(&model).unwrap();
 /// println!("Solution value: {}", solution.value(x));
 /// ```
 pub struct PrimalSimplexSolver {
@@ -170,7 +170,7 @@ impl<A: Matrix> PrimalSimplexState<A> {
 
         // Inject variable bounds as constraints
         // Collect bound constraints separately to avoid borrow checker issues
-        let vars: Vec<_> = model.vars().iter().cloned().collect();
+        let vars: Vec<_> = model.vars().to_vec();
         let mut bound_constraints = Vec::new();
         for var in vars.iter() {
             if let Some(lb) = var.lb {
