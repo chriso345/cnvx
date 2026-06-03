@@ -12,9 +12,9 @@
 //! let solution = solver.solve(&model).unwrap();
 //! ```
 
-use cnvx_core::{SolveError, problem::Problem};
+use cnvx_core::SolveError;
 
-use crate::{DualSimplexSolver, LpSolution, PrimalSimplexSolver, Solver};
+use crate::{DualSimplexSolver, LpModel, LpSolution, PrimalSimplexSolver, Solver};
 
 /// The recommended entry point for solving LP problems with `cnvx-lp`.
 ///
@@ -79,8 +79,18 @@ impl LpSolver {
     /// or `None` if no registered solver supports it.
     ///
     /// Useful for diagnostic output ("Using solver: primal-simplex").
-    pub fn selected_for(&self, problem: &dyn Problem) -> Option<&str> {
-        self.solvers.iter().find(|s| s.supports(problem)).map(|s| s.name())
+    pub fn selected_for(&mut self, model: &LpModel) -> Option<&str> {
+        self.get_selected_solver(model).map(|s| s.name())
+    }
+
+    pub fn get_selected_solver(
+        &mut self,
+        model: &LpModel,
+    ) -> Option<&mut Box<dyn Solver>> {
+        // TODO: implement this method properly once multiple solvers are implemented.
+        // Returns the Primal Simplex as this is all that is implemented for now
+        _ = model; // Silence unused parameter warning until this method is implemented
+        self.solvers.iter_mut().find(|s| s.name() == "primal-simplex")
     }
 }
 
@@ -95,27 +105,19 @@ impl Solver for LpSolver {
         "lp-solver"
     }
 
-    /// Returns `true` if at least one candidate solver supports `problem`.
-    fn supports(&self, problem: &dyn Problem) -> bool {
-        self.solvers.iter().any(|s| s.supports(problem))
-    }
-
     /// Delegates to the first candidate solver that supports `problem`.
     ///
     /// # Errors
     ///
     /// Returns [`SolveError::Unsupported`] if no registered solver supports
     /// the problem.  All other errors are propagated from the chosen solver.
-    fn solve(&mut self, problem: &dyn Problem) -> Result<LpSolution, SolveError> {
-        let solver =
-            self.solvers.iter_mut().find(|s| s.supports(problem)).ok_or_else(|| {
-                SolveError::Unsupported(format!(
-                    "LpSolver: no solver supports a '{}' problem",
-                    problem.kind()
-                ))
-            })?;
-
-        solver.solve(problem)
+    fn solve(&mut self, model: &LpModel) -> Result<LpSolution, SolveError> {
+        let solver = self.get_selected_solver(model).ok_or_else(|| {
+            SolveError::Unsupported(
+                "No registered solver supports this problem".to_string(),
+            )
+        })?;
+        solver.solve(model)
     }
 
     fn objective_value(&self) -> Option<f64> {

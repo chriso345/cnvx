@@ -53,11 +53,6 @@ fn main() {
     );
 
     let mut solver = LpSolver::new();
-
-    if let Some(name) = solver.selected_for(&model) {
-        println!("Selected solver: {name}");
-    }
-
     let solution = solver.solve(&model).unwrap();
 
     println!("Optimal cost: {}", solution.objective_value.unwrap_or(0.0));

@@ -1,2 +1,3 @@
 [alias]
 netlib = "test --workspace --test tests"
+example = "run -p cnvx --example"

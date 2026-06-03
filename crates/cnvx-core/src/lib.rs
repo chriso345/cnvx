@@ -16,14 +16,9 @@
 //! - [`status`]: Solver statuses ([`SolveStatus`]) such as [`Optimal`](SolveStatus::Optimal) or [`Infeasible`](SolveStatus::Infeasible).
 //! - [`var`]: Variable types ([`Var`], [`VarId`]) and builder API ([`VarBuilder`]).
 
-// TODO: Consider moving LP-specific logic into `cnvx-core/lp`
-// to allow non-LP models (e.g., SAT or other problem types) to remain separate.
-
-pub mod problem;
 pub mod sense;
 pub mod status;
 
 // Re-export all submodules for easy access via `cnvx_core::*`
-pub use problem::*;
 pub use sense::*;
 pub use status::*;

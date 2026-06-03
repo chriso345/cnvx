@@ -63,25 +63,7 @@ impl Solver for PrimalSimplexSolver {
         "primal-simplex"
     }
 
-    fn supports(&self, problem: &dyn Problem) -> bool {
-        problem.kind() == "lp"
-            && problem.has_objective()
-            && problem.as_any().downcast_ref::<LpModel>().is_some()
-    }
-
-    fn solve(&mut self, problem: &dyn Problem) -> Result<LpSolution, SolveError> {
-        if !self.supports(problem) {
-            return Err(SolveError::Unsupported(format!(
-                "primal-simplex does not support {} problems",
-                problem.kind()
-            )));
-        }
-
-        let model = problem
-            .as_any()
-            .downcast_ref::<LpModel>()
-            .expect("supports() guarantees Model downcast succeeds");
-
+    fn solve(&mut self, model: &LpModel) -> Result<LpSolution, SolveError> {
         crate::validate::check_lp(model)?;
 
         let mut state: PrimalSimplexState<DenseMatrix> = PrimalSimplexState::new(model);

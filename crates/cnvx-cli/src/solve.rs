@@ -40,26 +40,7 @@ pub fn solve(
     let model = cnvx_parse::parse(&contents, &ext)
         .map_err(|e| format!("Failed to parse model: {e}"))?;
 
-    // Build a ranked list of candidate solvers.
-    //
-    // Each entry is tried in order; the first solver for which `supports`
-    // returns `true` is used. Adding a new domain (e.g. `cnvx-nlp`) means
-    // appending one line here and one `Cargo.toml` dependency — nothing else
-    // needs to change.
-    let mut candidates: Vec<Box<dyn Solver>> = vec![
-        Box::new(LpSolver::new()),
-        // ...
-        // ...
-    ];
-
-    let solver = candidates.iter_mut().find(|s| s.supports(&model)).ok_or_else(|| {
-        format!(
-            "No solver supports '{}' problems. \
-                 Is the required sub-crate linked?",
-            cnvx_core::problem::Problem::kind(&model)
-        )
-    })?;
-
+    let mut solver = LpSolver::new();
     println!("Using solver: {}", solver.name());
 
     let solution = solver.solve(&model).map_err(|e| format!("Solver error: {e}"))?;

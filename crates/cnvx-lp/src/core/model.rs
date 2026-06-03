@@ -1,9 +1,6 @@
 // TODO: Move to `cnvx-lp`
 
-use std::any::Any;
 use std::ops::AddAssign;
-
-use cnvx_core::{Problem, ProblemKind};
 
 use crate::*;
 
@@ -113,46 +110,6 @@ impl LpModel {
     /// Returns a reference to the model's objective function, if one is set.
     pub fn objective(&self) -> Option<&Objective> {
         self.objective.as_ref()
-    }
-}
-
-impl Problem for LpModel {
-    /// Returns `"lp"` - the canonical kind tag for linear programs.
-    ///
-    /// Once a dedicated `MipModel` type is introduced in `cnvx-lp`, integer
-    /// problems should be wrapped in that type and return `"mip"` instead.
-    fn kind(&self) -> ProblemKind {
-        "lp"
-    }
-
-    fn num_vars(&self) -> usize {
-        self.vars.len()
-    }
-
-    fn num_constraints(&self) -> usize {
-        self.constraints.len()
-    }
-
-    fn has_objective(&self) -> bool {
-        self.objective.is_some()
-    }
-
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-
-    fn describe(&self) -> String {
-        let obj_name = self
-            .objective
-            .as_ref()
-            .and_then(|o| o.name.as_deref())
-            .unwrap_or("<unnamed>");
-        format!(
-            "LP model \"{}\" ({} vars, {} constraints)",
-            obj_name,
-            self.vars.len(),
-            self.constraints.len(),
-        )
     }
 }
 

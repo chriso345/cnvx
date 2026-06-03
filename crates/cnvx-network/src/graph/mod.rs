@@ -1,4 +1,5 @@
 pub mod adjacency;
+
 pub use adjacency::*;
 
 pub trait Graph {
