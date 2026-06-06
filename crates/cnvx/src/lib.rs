@@ -23,10 +23,9 @@
 //!
 //! ```rust
 //! use cnvx::prelude::*;
-//! use cnvx::solvers::PrimalSimplexSolver;
 //!
 //! // Create a model
-//! let mut model = Model::new();
+//! let mut model = LpModel::new();
 //! let x = model.add_var().finish();
 //! let y = model.add_var().finish();
 //!

@@ -4,12 +4,6 @@ use cnvx::lp::{LpSolver, Solver}; // TODO: Behind a feature flag?
 ///
 /// Reads a model from a file (or stdin), parses it using the appropriate
 /// [`LanguageParser`](cnvx_parse::LanguageParser), and solves it.
-///
-/// Solver selection is performed without a global registry: the parsed model's
-/// [`Problem::kind()`](cnvx_core::problem::Problem::kind) is matched against the
-/// available domain solvers by calling [`Solver::supports`].  Currently only LP
-/// problems are supported; additional domain solvers can be added to the
-/// `candidates` list below as new sub-crates are introduced.
 pub fn solve(
     command: &crate::args::SolveCommand,
 ) -> Result<(), Box<dyn std::error::Error>> {

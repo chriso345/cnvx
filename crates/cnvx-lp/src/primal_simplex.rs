@@ -12,8 +12,8 @@ use crate::{Cmp, LinExpr, LinearConstraint, LpModel, LpSolution, Solver};
 ///
 /// ```rust
 /// # use cnvx_core::*;
-/// # use cnvx_lp::PrimalSimplexSolver;
-/// let mut model = Model::new();
+/// # use crate::cnvx_lp::Solver;
+/// let mut model = LpModel::new();
 /// let x = model.add_var().finish();
 /// model += x.geq(0.0);
 /// model += x.leq(10.0);

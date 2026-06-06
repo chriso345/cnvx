@@ -14,7 +14,7 @@ pub struct ParetoLabel {
     pub prev_label_idx: Option<usize>,
 }
 
-/// Result from [`LabelSet`].
+/// Result from [`LabelSet`](crate::LabelSet).
 ///
 /// For single-criterion solves, each node has exactly one label.
 /// For multicriteria solves, each node has zero or more Pareto-optimal labels.

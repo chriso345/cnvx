@@ -1,10 +1,9 @@
 //! # LP Solver
 //!
 //! ```rust
-//! use cnvx_core::{Model, Objective, solver::Solver};
-//! use cnvx_lp::LpSolver;
+//! use crate::core::{LpModel, LpSolver, Objective};
 //!
-//! let mut model = Model::new();
+//! let mut model = LpModel::new();
 //! let x = model.add_var().finish();
 //! model.add_objective(Objective::maximize(x * 2.0).name("Z"));
 //!
@@ -19,8 +18,8 @@ use crate::{DualSimplexSolver, LpModel, LpSolution, PrimalSimplexSolver, Solver}
 /// The recommended entry point for solving LP problems with `cnvx-lp`.
 ///
 /// Internally holds a ranked list of LP solvers and delegates to the first one
-/// that [`supports`](Solver::supports) the given problem.  The list is
-/// constructed once at [`LpSolver::new()`].
+/// that supports the given problem. The list is constructed once at
+/// [`LpSolver::new()`].
 ///
 /// See the [module-level documentation](self) for the current solver ranking.
 pub struct LpSolver {
@@ -105,7 +104,7 @@ impl Solver for LpSolver {
         "lp-solver"
     }
 
-    /// Delegates to the first candidate solver that supports `problem`.
+    /// Delegates to the optimal solver for the given linear problem.
     ///
     /// # Errors
     ///

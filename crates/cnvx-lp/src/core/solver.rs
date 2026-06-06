@@ -4,7 +4,7 @@ use crate::{LpModel, LpSolution};
 
 /// Trait for optimization solvers.
 ///
-/// Any struct implementing this trait can solve a [`Model`](crate::model::Model) and produce a [`Solution`].
+/// Any struct implementing this trait can solve a [`LpModel`] and produce a [`LpSolution`].
 /// This trait provides a consistent interface across different solver implementations,
 /// such as simplex, interior point, branch-and-bound, or lexicographic solvers.
 ///
@@ -17,7 +17,7 @@ use crate::{LpModel, LpSolution};
 ///     fn solve(
 ///         &mut self,
 ///         model: &LpModel,
-///     ) -> Result<Solution, SolveError> {
+///     ) -> Result<LpSolution, SolveError> {
 ///         todo!()
 ///     }
 ///
@@ -26,7 +26,7 @@ use crate::{LpModel, LpSolution};
 /// }
 /// ```
 pub trait Solver: Send {
-    /// Attempt to solve `problem` and return a [`Solution`].
+    /// Attempt to solve `problem` and return a [`LpSolution`].
     ///
     /// The solver borrows `problem` only for the duration of this call.  After
     /// `solve` returns, the solver retains any internal state needed for a
@@ -36,7 +36,7 @@ pub trait Solver: Send {
     ///
     /// | Error                          | Meaning                                      |
     /// |--------------------------------|----------------------------------------------|
-    /// | [`SolveError::Unsupported`]    | [`supports`](Self::supports) would be `false`|
+    /// | [`SolveError::Unsupported`]    | There is no registered solver that supports this problem |
     /// | [`SolveError::NoObjective`]    | Problem has no objective                     |
     /// | [`SolveError::InvalidModel`]   | Problem data is inconsistent                 |
     /// | [`SolveError::NumericalFailure`]| Numerical breakdown during solving           |

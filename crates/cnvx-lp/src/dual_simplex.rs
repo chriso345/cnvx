@@ -20,7 +20,7 @@ use crate::{LpModel, LpSolution, Solver};
 /// ## Compatibility
 ///
 /// Accepts the same problems as [`PrimalSimplexSolver`](crate::PrimalSimplexSolver):
-/// `kind() == "lp"` with a defined objective and a successful downcast to [`Model`].
+/// `kind() == "lp"` with a defined objective operating on an [`LpModel`].
 ///
 /// ## Configuration
 ///
