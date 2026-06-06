@@ -219,8 +219,8 @@ name = "cnvx-cli"
 version = "0.0.1"
 dependencies = [
  "clap",
- "cnvx",
  "cnvx-core",
+ "cnvx-lp",
  "cnvx-math",
  "cnvx-parse",
  "sigpipe",
@@ -265,7 +265,6 @@ name = "cnvx-tests"
 version = "0.0.1"
 dependencies = [
  "clap",
- "cnvx",
  "cnvx-core",
  "cnvx-lp",
  "cnvx-math",

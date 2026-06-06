@@ -6,7 +6,8 @@ use std::{
     sync::LazyLock,
 };
 
-use cnvx::prelude::*;
+use cnvx_core::SolveStatus;
+use cnvx_lp::{LpModel, LpSolution, LpSolver, Solver};
 use cnvx_parse::parse;
 use test_case::test_case;
 

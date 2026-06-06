@@ -10,8 +10,9 @@ keywords = { workspace = true }
 readme = { workspace = true }
 
 [dependencies]
-cnvx = { workspace = true }
+# cnvx = { workspace = true }
 cnvx-core = { workspace = true }
+cnvx-lp = { workspace = true }
 cnvx-parse = { workspace = true }
 cnvx-math = { workspace = true }
 clap = { workspace = true, features = ["derive"] }
