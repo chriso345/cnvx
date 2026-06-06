@@ -11,15 +11,15 @@ readme = { workspace = true }
 
 [features]
 default = ["lp"]
-all = ["lp", "network"]
+all = ["lp", "graph"]
 lp = ["cnvx-lp"]
-network = ["cnvx-network"]
+graph = ["cnvx-graph"]
 
 [dependencies]
 cnvx-core = { workspace = true }
 cnvx-lp = { workspace = true, optional = true }
 cnvx-math = { workspace = true }
-cnvx-network = { workspace = true, optional = true }
+cnvx-graph = { workspace = true, optional = true }
 
 [lints]
 workspace = true
@@ -44,7 +44,7 @@ cnvx-cli = { path = "crates/cnvx-cli", version = "0.0.1" }
 cnvx-core = { path = "crates/cnvx-core", version = "0.0.1" }
 cnvx-lp = { path = "crates/cnvx-lp", version = "0.0.1" }
 cnvx-math = { path = "crates/cnvx-math", version = "0.0.1" }
-cnvx-network = { path = "crates/cnvx-network", version = "0.0.1" }
+cnvx-graph = { path = "crates/cnvx-graph", version = "0.0.1" }
 cnvx-parse = { path = "crates/cnvx-parse", version = "0.0.1" }
 clap = { version = "4.5.57", features = ["derive"] }
 nalgebra = "0.34.2"
@@ -80,4 +80,4 @@ required-features = ["lp"]
 [[example]]
 name = "shortest_path"
 path = "examples/network/shortest_path.rs"
-required-features = ["network"]
+required-features = ["graph"]

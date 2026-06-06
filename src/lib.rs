@@ -57,8 +57,8 @@ pub use cnvx_core as core;
 #[cfg(feature = "lp")]
 pub use cnvx_lp as lp;
 
-#[cfg(feature = "network")]
-pub use cnvx_network as network;
+#[cfg(feature = "graph")]
+pub use cnvx_graph as graph;
 
 pub mod prelude {
     pub use crate::core::*;
@@ -66,14 +66,19 @@ pub mod prelude {
     #[cfg(feature = "lp")]
     pub use crate::lp::*;
 
-    #[cfg(feature = "network")]
-    pub use crate::network::*;
+    #[cfg(feature = "graph")]
+    pub use crate::graph::*;
 }
 
 // Simple re-export of main solver types for easy access without prelude baggage.
 pub mod solvers {
     #[cfg(feature = "lp")]
-    pub use crate::lp::{DualSimplexSolver, LpSolver, PrimalSimplexSolver};
+    pub use crate::lp::{
+        DualSimplexSolver,
+        LpSolver,
+        PrimalSimplexSolver,
+        Solver, // Trait
+    };
 }
 
 /// Returns the version of the `cnvx` crate.

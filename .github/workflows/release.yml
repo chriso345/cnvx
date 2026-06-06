@@ -133,6 +133,7 @@ jobs:
             cargo publish -p cnvx-math --dry-run
             cargo publish -p cnvx-parse --dry-run
             cargo publish -p cnvx-lp --dry-run
+            cargo publish -p cnvx-graph --dry-run
             cargo publish -p cnvx --dry-run
             cargo publish -p cnvx-cli --dry-run
           else
@@ -140,6 +141,7 @@ jobs:
             cargo publish -p cnvx-math
             cargo publish -p cnvx-parse
             cargo publish -p cnvx-lp
+            cargo publish -p cnvx-graph
             cargo publish -p cnvx
             cargo publish -p cnvx-cli
           fi

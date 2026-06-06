@@ -209,9 +209,9 @@ name = "cnvx"
 version = "0.0.1"
 dependencies = [
  "cnvx-core",
+ "cnvx-graph",
  "cnvx-lp",
  "cnvx-math",
- "cnvx-network",
 ]
 
 [[package]]
@@ -231,6 +231,13 @@ name = "cnvx-core"
 version = "0.0.1"
 
 [[package]]
+name = "cnvx-graph"
+version = "0.0.1"
+dependencies = [
+ "cnvx-core",
+]
+
+[[package]]
 name = "cnvx-lp"
 version = "0.0.1"
 dependencies = [
@@ -243,13 +250,6 @@ name = "cnvx-math"
 version = "0.0.1"
 dependencies = [
  "nalgebra",
-]
-
-[[package]]
-name = "cnvx-network"
-version = "0.0.1"
-dependencies = [
- "cnvx-core",
 ]
 
 [[package]]
