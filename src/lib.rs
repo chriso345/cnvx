@@ -23,10 +23,9 @@
 //!
 //! ```rust
 //! use cnvx::prelude::*;
-//! use cnvx::solvers::PrimalSimplexSolver;
 //!
 //! // Create a model
-//! let mut model = Model::new();
+//! let mut model = LpModel::new();
 //! let x = model.add_var().finish();
 //! let y = model.add_var().finish();
 //!
@@ -58,16 +57,28 @@ pub use cnvx_core as core;
 #[cfg(feature = "lp")]
 pub use cnvx_lp as lp;
 
+#[cfg(feature = "graph")]
+pub use cnvx_graph as graph;
+
 pub mod prelude {
     pub use crate::core::*;
 
     #[cfg(feature = "lp")]
     pub use crate::lp::*;
+
+    #[cfg(feature = "graph")]
+    pub use crate::graph::*;
 }
 
+// Simple re-export of main solver types for easy access without prelude baggage.
 pub mod solvers {
     #[cfg(feature = "lp")]
-    pub use crate::lp::{DualSimplexSolver, LpSolver, PrimalSimplexSolver};
+    pub use crate::lp::{
+        DualSimplexSolver,
+        LpSolver,
+        PrimalSimplexSolver,
+        Solver, // Trait
+    };
 }
 
 /// Returns the version of the `cnvx` crate.

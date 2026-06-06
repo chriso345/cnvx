@@ -1,4 +1,6 @@
-use crate::{SolveStatus, VarId};
+use cnvx_core::SolveStatus;
+
+use crate::VarId;
 use std::fmt::Display;
 
 /// Represents the result of solving an optimization problem.
@@ -9,10 +11,11 @@ use std::fmt::Display;
 /// # Examples
 ///
 /// ```rust
-/// use cnvx_core::{Solution, SolveStatus, VarId};
+/// use cnvx_core::SolveStatus;
+/// use cnvx_lp::{LpSolution, VarId};
 ///
 /// // Example solution with 3 variables
-/// let solution = Solution {
+/// let solution = LpSolution {
 ///     values: vec![1.0, 2.0, 3.0],
 ///     objective_value: Some(10.0),
 ///     status: SolveStatus::Optimal,
@@ -22,7 +25,7 @@ use std::fmt::Display;
 /// assert_eq!(solution.value(VarId(2)), 3.0);
 /// ```
 #[derive(Debug)]
-pub struct Solution {
+pub struct LpSolution {
     /// Variable assignments, indexed by variable ID.
     ///
     /// The value at index `i` corresponds to the variable with ID [`VarId(i)`](VarId).
@@ -37,16 +40,17 @@ pub struct Solution {
     pub status: SolveStatus,
 }
 
-impl Solution {
+impl LpSolution {
     /// Returns the value assigned to the variable with the given [`VarId`].
     ///
     /// # Example
     ///
     /// ```rust
-    /// # use cnvx_core::{Model, Solution, SolveStatus, VarId};
-    /// # let mut model = Model::new();
+    /// # use cnvx_core::SolveStatus;
+    /// # use cnvx_lp::{LpModel, LpSolution, VarId};
+    /// # let mut model = LpModel::new();
     /// let x1: VarId = model.add_var().finish();
-    /// let solution = Solution {
+    /// let solution = LpSolution {
     ///     values: vec![1.0], // Assuming x1 has ID 0
     ///     objective_value: Some(10.0),
     ///     status: SolveStatus::Optimal,
@@ -58,7 +62,7 @@ impl Solution {
     }
 }
 
-impl Display for Solution {
+impl Display for LpSolution {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         if let Some(obj_val) = self.objective_value {
             write!(f, "{}: {}", self.status, obj_val)?;

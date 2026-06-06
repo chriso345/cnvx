@@ -1,5 +1,6 @@
+use cnvx_lp::{LinExpr, LpModel, Objective, VarId};
+
 use super::LanguageParser;
-use cnvx_core::{LinExpr, Model, Objective, VarId};
 use std::collections::HashMap;
 
 #[derive(Default)]
@@ -12,8 +13,8 @@ impl MPSLanguage {
 }
 
 impl LanguageParser for MPSLanguage {
-    fn parse(&self, src: &str) -> Result<Model, String> {
-        let mut model = Model::new();
+    fn parse(&self, src: &str) -> Result<LpModel, String> {
+        let mut model = LpModel::new();
         let mut section = "";
 
         let mut rows: HashMap<String, char> = HashMap::new();

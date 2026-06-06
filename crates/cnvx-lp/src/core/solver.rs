@@ -1,31 +1,24 @@
-use crate::{Solution, SolveError, problem::Problem};
+use cnvx_core::SolveError;
+
+use crate::{LpModel, LpSolution};
 
 /// Trait for optimization solvers.
 ///
-/// Any struct implementing this trait can solve a [`Model`](crate::model::Model) and produce a [`Solution`].
+/// Any struct implementing this trait can solve a [`LpModel`] and produce a [`LpSolution`].
 /// This trait provides a consistent interface across different solver implementations,
 /// such as simplex, interior point, branch-and-bound, or lexicographic solvers.
 ///
 /// ```rust
-/// use cnvx_core::{Solution, SolveError, problem::Problem, solver::Solver};
+/// use cnvx_core::{SolveError};
+/// use cnvx_lp::{LpModel, LpSolution, Solver};
 ///
 /// pub struct MySolver { /* internal state */ }
 ///
 /// impl Solver for MySolver {
-///     fn supports(&self, problem: &dyn Problem) -> bool {
-///         // Accept any LP problem.
-///         problem.kind() == "lp" && problem.has_objective()
-///     }
-///
 ///     fn solve(
 ///         &mut self,
-///         problem: &dyn Problem,
-///     ) -> Result<Solution, SolveError> {
-///         let model = problem
-///             .as_any()
-///             .downcast_ref::<cnvx_core::Model>()
-///             .ok_or_else(|| SolveError::InvalidModel("expected LP Model".into()))?;
-///         // ... run algorithm on `model` ...
+///         model: &LpModel,
+///     ) -> Result<LpSolution, SolveError> {
 ///         todo!()
 ///     }
 ///
@@ -34,29 +27,7 @@ use crate::{Solution, SolveError, problem::Problem};
 /// }
 /// ```
 pub trait Solver: Send {
-    /// Returns `true` if this solver is able to handle `problem`.
-    ///
-    /// Implementations should check [`Problem::kind()`](Problem::kind) and any
-    /// other preconditions (e.g. whether an objective is defined, whether all
-    /// variables are continuous).  A return value of `false` does not mean the
-    /// problem is infeasible — only that this solver cannot attempt it.
-    ///
-    /// # Conventions
-    ///
-    /// - Return `false` early and cheaply; do not inspect the full problem.
-    /// - Document which problem kinds and properties are supported in the
-    ///   solver's own doc comment.
-    ///
-    /// # Examples
-    ///
-    /// ```rust,ignore
-    /// fn supports(&self, problem: &dyn Problem) -> bool {
-    ///     problem.kind() == "lp" && problem.has_objective()
-    /// }
-    /// ```
-    fn supports(&self, problem: &dyn Problem) -> bool;
-
-    /// Attempt to solve `problem` and return a [`Solution`].
+    /// Attempt to solve `problem` and return a [`LpSolution`].
     ///
     /// The solver borrows `problem` only for the duration of this call.  After
     /// `solve` returns, the solver retains any internal state needed for a
@@ -66,7 +37,7 @@ pub trait Solver: Send {
     ///
     /// | Error                          | Meaning                                      |
     /// |--------------------------------|----------------------------------------------|
-    /// | [`SolveError::Unsupported`]    | [`supports`](Self::supports) would be `false`|
+    /// | [`SolveError::Unsupported`]    | There is no registered solver that supports this problem |
     /// | [`SolveError::NoObjective`]    | Problem has no objective                     |
     /// | [`SolveError::InvalidModel`]   | Problem data is inconsistent                 |
     /// | [`SolveError::NumericalFailure`]| Numerical breakdown during solving           |
@@ -76,7 +47,7 @@ pub trait Solver: Send {
     ///
     /// Does not panic under normal circumstances.  Implementations may panic
     /// on internal assertion failures that indicate a programming error.
-    fn solve(&mut self, problem: &dyn Problem) -> Result<Solution, SolveError>;
+    fn solve(&mut self, model: &LpModel) -> Result<LpSolution, SolveError>;
 
     /// Returns the objective value from the most recent call to [`solve`](Self::solve).
     ///

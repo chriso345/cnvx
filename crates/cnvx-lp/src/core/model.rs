@@ -1,6 +1,5 @@
 // TODO: Move to `cnvx-lp`
 
-use std::any::Any;
 use std::ops::AddAssign;
 
 use crate::*;
@@ -10,15 +9,14 @@ use crate::*;
 ///
 /// `Model` is the concrete problem type for LP and MIP problems (both report
 /// `kind() == "lp"` until a dedicated MIP problem type is introduced in
-/// `cnvx-lp`).  It implements [`Problem`] so it can be passed directly to any
-/// [`Solver`] without wrapping.
+/// `cnvx-lp`).
 ///
 ///
 /// # Examples
 ///
 /// ```rust
-/// # use cnvx_core::*;
-/// let mut model = Model::new();
+/// # use cnvx_lp::*;
+/// let mut model = LpModel::new();
 ///
 /// let x1 = model.add_var().finish();
 /// let x2 = model.add_var().finish();
@@ -27,20 +25,14 @@ use crate::*;
 /// model += (x1 + x2).leq(10.0);
 /// model += x1.geq(0.0);
 /// model += x2.geq(0.0);
-///
-/// use cnvx_core::problem::Problem;
-/// assert_eq!(model.kind(), "lp");
-/// assert_eq!(model.num_vars(), 2);
-/// assert_eq!(model.num_constraints(), 3);
-/// assert!(model.has_objective());
 /// ```
 #[derive(Debug, Default, Clone)]
-pub struct Model {
+pub struct LpModel {
     /// List of variables in the model.
     pub vars: Vec<Var>,
 
     /// List of constraints in the model.
-    pub constraints: Vec<Constraint>,
+    pub constraints: Vec<LinearConstraint>,
 
     /// Optional objective function.
     ///
@@ -49,7 +41,7 @@ pub struct Model {
     pub objective: Option<Objective>,
 }
 
-impl Model {
+impl LpModel {
     /// Creates a new, empty model.
     pub fn new() -> Self {
         Self { ..Default::default() }
@@ -67,8 +59,8 @@ impl Model {
     /// # Example
     ///
     /// ```rust
-    /// # use cnvx_core::*;
-    /// let mut model = Model::new();
+    /// # use cnvx_lp::*;
+    /// let mut model = LpModel::new();
     /// let x = model.add_var().integer().finish();
     /// ```
     pub fn add_var(&mut self) -> VarBuilder<'_> {
@@ -89,8 +81,8 @@ impl Model {
     /// # Example
     ///
     /// ```rust
-    /// # use cnvx_core::*;
-    /// let mut model = Model::new();
+    /// # use cnvx_lp::*;
+    /// let mut model = LpModel::new();
     /// let x = model.add_var().finish();
     /// model.add_objective(Objective::maximize(1.0 * x).name("Profit"));
     /// ```
@@ -104,7 +96,7 @@ impl Model {
     }
 
     /// Returns a read-only slice of all constraints.
-    pub fn constraints(&self) -> &[Constraint] {
+    pub fn constraints(&self) -> &[LinearConstraint] {
         &self.constraints
     }
 
@@ -114,58 +106,18 @@ impl Model {
     }
 }
 
-impl Problem for Model {
-    /// Returns `"lp"` - the canonical kind tag for linear programs.
-    ///
-    /// Once a dedicated `MipModel` type is introduced in `cnvx-lp`, integer
-    /// problems should be wrapped in that type and return `"mip"` instead.
-    fn kind(&self) -> crate::problem::ProblemKind {
-        "lp"
-    }
-
-    fn num_vars(&self) -> usize {
-        self.vars.len()
-    }
-
-    fn num_constraints(&self) -> usize {
-        self.constraints.len()
-    }
-
-    fn has_objective(&self) -> bool {
-        self.objective.is_some()
-    }
-
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-
-    fn describe(&self) -> String {
-        let obj_name = self
-            .objective
-            .as_ref()
-            .and_then(|o| o.name.as_deref())
-            .unwrap_or("<unnamed>");
-        format!(
-            "LP model \"{}\" ({} vars, {} constraints)",
-            obj_name,
-            self.vars.len(),
-            self.constraints.len(),
-        )
-    }
-}
-
 /// Allows adding constraints to the model using the `+=` operator.
 ///
 /// # Example
 ///
 /// ```rust
-/// # use cnvx_core::*;
-/// let mut model = Model::new();
+/// # use cnvx_lp::*;
+/// let mut model = LpModel::new();
 /// let x = model.add_var().finish();
 /// model += x.geq(0.0);
 /// ```
-impl AddAssign<Constraint> for Model {
-    fn add_assign(&mut self, rhs: Constraint) {
+impl AddAssign<LinearConstraint> for LpModel {
+    fn add_assign(&mut self, rhs: LinearConstraint) {
         self.constraints.push(rhs);
     }
 }

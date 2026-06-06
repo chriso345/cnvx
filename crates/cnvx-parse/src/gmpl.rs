@@ -1,5 +1,6 @@
+use cnvx_lp::{LinExpr, LpModel, Objective, VarId};
+
 use super::LanguageParser;
-use cnvx_core::{LinExpr, Model, Objective, VarId};
 
 #[derive(Default)]
 pub struct GMPLLanguage;
@@ -11,8 +12,8 @@ impl GMPLLanguage {
 }
 
 impl LanguageParser for GMPLLanguage {
-    fn parse(&self, src: &str) -> Result<Model, String> {
-        let mut model = Model::new();
+    fn parse(&self, src: &str) -> Result<LpModel, String> {
+        let mut model = LpModel::new();
         let mut vars: Vec<VarId> = vec![];
 
         for line in src.lines() {

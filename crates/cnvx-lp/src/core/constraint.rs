@@ -22,16 +22,16 @@ pub enum Cmp {
 /// # Examples
 ///
 /// ```rust
-/// # use cnvx_core::{LinExpr, Constraint, VarId};
+/// # use cnvx_lp::{LinExpr, LinearConstraint, VarId};
 /// let x = VarId(0);
 /// let expr = LinExpr::new(x, 2.0) + 3.0;
 ///
-/// let c1 = Constraint::leq(expr.clone(), 5.0);  // 2*x0 + 3 <= 5
-/// let c2 = Constraint::geq(expr.clone(), 1.0);  // 2*x0 + 3 >= 1
-/// let c3 = Constraint::eq(expr, 4.0);           // 2*x0 + 3 == 4
+/// let c1 = LinearConstraint::leq(expr.clone(), 5.0);  // 2*x0 + 3 <= 5
+/// let c2 = LinearConstraint::geq(expr.clone(), 1.0);  // 2*x0 + 3 >= 1
+/// let c3 = LinearConstraint::eq(expr, 4.0);           // 2*x0 + 3 == 4
 /// ```
 #[derive(Debug)]
-pub struct Constraint {
+pub struct LinearConstraint {
     /// The left-hand side linear expression of the constraint.
     pub expr: LinExpr, // TODO: Allow for this to be a more general expression type
 
@@ -46,7 +46,7 @@ pub struct Constraint {
     pub name: Option<String>,
 }
 
-impl Clone for Constraint {
+impl Clone for LinearConstraint {
     fn clone(&self) -> Self {
         // ExtensionMap does not implement Clone (its values are `dyn Any`);
         // cloning a constraint preserves all fields but drops extensions.
@@ -60,7 +60,7 @@ impl Clone for Constraint {
     }
 }
 
-impl Constraint {
+impl LinearConstraint {
     /// Creates a `<=` constraint: `lhs <= rhs`.
     pub fn leq(lhs: LinExpr, rhs: f64) -> Self {
         Self { expr: lhs, rhs, cmp: Cmp::LEQ, name: None }
@@ -81,8 +81,8 @@ impl Constraint {
     /// # Examples
     ///
     /// ```rust
-    /// # use cnvx_core::{LinExpr, VarId, Constraint};
-    /// let c = Constraint::leq(LinExpr::from(VarId(0)), 10.0)
+    /// # use cnvx_lp::{LinExpr, VarId, LinearConstraint};
+    /// let c = LinearConstraint::leq(LinExpr::from(VarId(0)), 10.0)
     ///     .named("capacity");
     /// assert_eq!(c.name.as_deref(), Some("capacity"));
     /// ```
@@ -92,7 +92,7 @@ impl Constraint {
     }
 }
 
-impl Display for Constraint {
+impl Display for LinearConstraint {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let cmp_str = match self.cmp {
             Cmp::EQ => "==",

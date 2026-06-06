@@ -2,9 +2,6 @@ use std::fmt::Display;
 
 /// Represents the state of a solution after attempting to solve an optimization problem.
 ///
-/// Used in [`Solution`](crate::solution::Solution) to indicate whether the solver found an optimal solution,
-/// whether the problem is infeasible or unbounded, or if it encountered some other state.
-///
 /// # Examples
 ///
 /// ```rust

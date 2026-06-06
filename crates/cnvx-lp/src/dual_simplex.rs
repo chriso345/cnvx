@@ -1,5 +1,7 @@
-use cnvx_core::{Model, Solution, SolveError, problem::Problem, solver::Solver};
+use cnvx_core::SolveError;
 use cnvx_math::{DenseMatrix, Matrix};
+
+use crate::{LpModel, LpSolution, Solver};
 
 /// Dual simplex solver for linear programs.
 ///
@@ -18,7 +20,7 @@ use cnvx_math::{DenseMatrix, Matrix};
 /// ## Compatibility
 ///
 /// Accepts the same problems as [`PrimalSimplexSolver`](crate::PrimalSimplexSolver):
-/// `kind() == "lp"` with a defined objective and a successful downcast to [`Model`].
+/// `kind() == "lp"` with a defined objective operating on an [`LpModel`].
 ///
 /// ## Configuration
 ///
@@ -70,22 +72,9 @@ impl Solver for DualSimplexSolver {
         "dual-simplex"
     }
 
-    /// Returns `true` for LP problems with a defined objective that downcast to [`Model`].
-    fn supports(&self, problem: &dyn Problem) -> bool {
-        problem.kind() == "lp"
-            && problem.has_objective()
-            && problem.as_any().downcast_ref::<Model>().is_some()
-    }
-
-    fn solve(&mut self, problem: &dyn Problem) -> Result<Solution, SolveError> {
-        if !self.supports(problem) {
-            return Err(SolveError::Unsupported(format!(
-                "dual-simplex does not support {} problems",
-                problem.kind()
-            )));
-        }
-
+    fn solve(&mut self, model: &LpModel) -> Result<LpSolution, SolveError> {
         _ = self.state; // Silence unused field warning until solve() is implemented
+        _ = model; // Silence unused parameter warning until solve() is implemented
 
         // TODO: implement dual simplex iterations
         Err(SolveError::Unsupported(

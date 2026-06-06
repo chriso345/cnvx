@@ -1,6 +1,6 @@
 //! Variable types and builder API for optimization models.
 
-use crate::{Constraint, expr::LinExpr};
+use crate::{LinearConstraint, expr::LinExpr};
 use std::ops::Mul;
 
 /// A unique identifier for a variable in a model.
@@ -11,17 +11,17 @@ pub struct VarId(pub usize);
 
 impl VarId {
     /// Creates a `<=` constraint: `self <= rhs`.
-    pub fn leq<T: Into<LinExpr>>(self, rhs: T) -> Constraint {
+    pub fn leq<T: Into<LinExpr>>(self, rhs: T) -> LinearConstraint {
         (LinExpr::from(self) - rhs.into()).leq(0.0)
     }
 
     /// Creates a `>=` constraint: `self >= rhs`.
-    pub fn geq<T: Into<LinExpr>>(self, rhs: T) -> Constraint {
+    pub fn geq<T: Into<LinExpr>>(self, rhs: T) -> LinearConstraint {
         (LinExpr::from(self) - rhs.into()).geq(0.0)
     }
 
     /// Creates a `==` constraint: `self == rhs`.
-    pub fn eq<T: Into<LinExpr>>(self, rhs: T) -> Constraint {
+    pub fn eq<T: Into<LinExpr>>(self, rhs: T) -> LinearConstraint {
         (LinExpr::from(self) - rhs.into()).eq(0.0)
     }
 }
@@ -53,34 +53,34 @@ pub struct Var {
 
 /// A builder for setting properties of a variable using a fluent API.
 ///
-/// Returned by [`Model::add_var()`](crate::model::Model::add_var), this allows setting bounds, integrality,
+/// Returned by [`LpModel::add_var()`](crate::model::LpModel::add_var), this allows setting bounds, integrality,
 /// and other properties before finalizing the variable with [`finish()`](VarBuilder::finish).
 ///
 /// # Examples
 ///
 /// ```rust
-/// # use cnvx_core::{Model};
-/// let mut model = Model::new();
+/// # use cnvx_lp::LpModel;
+/// let mut model = LpModel::new();
 /// let x = model
 ///     .add_var()
 ///     .integer()
 ///     .finish();
 /// ```
 pub struct VarBuilder<'a> {
-    pub model: &'a mut crate::Model,
+    pub model: &'a mut crate::LpModel,
     pub var: VarId,
 }
 
 /// Methods for configuring a variable using a fluent API.
 ///
-/// Returned by [`Model::add_var()`](crate::model::Model::add_var). Use these methods to set bounds,
+/// Returned by [`LpModel::add_var()`](crate::model::LpModel::add_var). Use these methods to set bounds,
 /// integrality, or mark a variable as binary before calling [`finish()`](VarBuilder::finish).
 impl<'a> VarBuilder<'a> {
     /// Sets a name for the variable.
     ///
     /// ```rust, no_run
-    /// # use cnvx_core::{Model};
-    /// let mut model = Model::new();
+    /// # use cnvx_lp::LpModel;
+    /// let mut model = LpModel::new();
     /// let x = model.add_var().name("x").finish();
     /// ```
     pub fn name(self, name: &str) -> Self {
@@ -93,8 +93,8 @@ impl<'a> VarBuilder<'a> {
     /// # Examples
     ///
     /// ```rust, no_run
-    /// # use cnvx_core::{Model};
-    /// let mut model = Model::new();
+    /// # use cnvx_lp::LpModel;
+    /// let mut model = LpModel::new();
     /// let x = model.add_var().lower_bound(0.0).finish();
     /// ```
     pub fn lower_bound(self, lb: f64) -> Self {
@@ -107,8 +107,8 @@ impl<'a> VarBuilder<'a> {
     /// # Examples
     ///
     /// ```rust, no_run
-    /// # use cnvx_core::{Model};
-    /// let mut model = Model::new();
+    /// # use cnvx_lp::LpModel;
+    /// let mut model = LpModel::new();
     /// let x = model.add_var().upper_bound(10.0).finish();
     /// ```
     pub fn upper_bound(self, ub: f64) -> Self {
@@ -121,8 +121,8 @@ impl<'a> VarBuilder<'a> {
     /// # Examples
     ///
     /// ```rust
-    /// # use cnvx_core::{Model};
-    /// let mut model = Model::new();
+    /// # use cnvx_lp::LpModel;
+    /// let mut model = LpModel::new();
     /// let x = model.add_var().integer().finish();
     /// ```
     pub fn integer(self) -> Self {
@@ -135,8 +135,8 @@ impl<'a> VarBuilder<'a> {
     /// # Examples
     ///
     /// ```rust
-    /// # use cnvx_core::{Model};
-    /// let mut model = Model::new();
+    /// # use cnvx_lp::LpModel;
+    /// let mut model = LpModel::new();
     /// let x = model.add_var().binary().finish();
     /// ```
     pub fn binary(self) -> Self {
@@ -154,8 +154,8 @@ impl<'a> VarBuilder<'a> {
     /// # Examples
     ///
     /// ```rust
-    /// # use cnvx_core::{Model};
-    /// let mut model = Model::new();
+    /// # use cnvx_lp::LpModel;
+    /// let mut model = LpModel::new();
     /// let x = model.add_var().integer().finish();
     /// ```
     pub fn finish(self) -> VarId {
@@ -168,8 +168,8 @@ impl<'a> VarBuilder<'a> {
 /// # Examples
 ///
 /// ```rust
-/// # use cnvx_core::{Model};
-/// let mut model = Model::new();
+/// # use cnvx_lp::LpModel;
+/// let mut model = LpModel::new();
 /// let x = model.add_var().finish();
 /// let expr = x * 3.0; // LinExpr representing 3*x
 /// ```
@@ -186,8 +186,8 @@ impl Mul<f64> for VarId {
 /// # Examples
 ///
 /// ```rust
-/// # use cnvx_core::{Model};
-/// let mut model = Model::new();
+/// # use cnvx_lp::LpModel;
+/// let mut model = LpModel::new();
 /// let x = model.add_var().finish();
 /// let expr = 3.0 * x; // LinExpr representing 3*x
 /// ```

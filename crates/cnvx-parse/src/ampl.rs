@@ -1,4 +1,4 @@
-use cnvx_core::Model;
+use cnvx_lp::LpModel;
 
 use super::LanguageParser;
 
@@ -12,7 +12,7 @@ impl AMPLLanguage {
 }
 
 impl LanguageParser for AMPLLanguage {
-    fn parse(&self, _src: &str) -> Result<Model, String> {
+    fn parse(&self, _src: &str) -> Result<LpModel, String> {
         todo!("AMPL parser not implemented yet")
     }
 }
