@@ -22,13 +22,13 @@ pub enum Cmp {
 /// # Examples
 ///
 /// ```rust
-/// # use cnvx_core::{LinExpr, Constraint, VarId};
+/// # use cnvx_lp::{LinExpr, LinearConstraint, VarId};
 /// let x = VarId(0);
 /// let expr = LinExpr::new(x, 2.0) + 3.0;
 ///
-/// let c1 = Constraint::leq(expr.clone(), 5.0);  // 2*x0 + 3 <= 5
-/// let c2 = Constraint::geq(expr.clone(), 1.0);  // 2*x0 + 3 >= 1
-/// let c3 = Constraint::eq(expr, 4.0);           // 2*x0 + 3 == 4
+/// let c1 = LinearConstraint::leq(expr.clone(), 5.0);  // 2*x0 + 3 <= 5
+/// let c2 = LinearConstraint::geq(expr.clone(), 1.0);  // 2*x0 + 3 >= 1
+/// let c3 = LinearConstraint::eq(expr, 4.0);           // 2*x0 + 3 == 4
 /// ```
 #[derive(Debug)]
 pub struct LinearConstraint {
@@ -81,8 +81,8 @@ impl LinearConstraint {
     /// # Examples
     ///
     /// ```rust
-    /// # use cnvx_core::{LinExpr, VarId, Constraint};
-    /// let c = Constraint::leq(LinExpr::from(VarId(0)), 10.0)
+    /// # use cnvx_lp::{LinExpr, VarId, LinearConstraint};
+    /// let c = LinearConstraint::leq(LinExpr::from(VarId(0)), 10.0)
     ///     .named("capacity");
     /// assert_eq!(c.name.as_deref(), Some("capacity"));
     /// ```

@@ -10,6 +10,7 @@ use crate::{LpModel, LpSolution};
 ///
 /// ```rust
 /// use cnvx_core::{SolveError};
+/// use cnvx_lp::{LpModel, LpSolution, Solver};
 ///
 /// pub struct MySolver { /* internal state */ }
 ///

@@ -30,7 +30,7 @@ impl LinExpr {
     /// # Example
     ///
     /// ```rust
-    /// # use cnvx_core::{LinExpr, VarId};
+    /// # use cnvx_lp::{LinExpr, VarId};
     /// let x = VarId(0);
     /// let expr = LinExpr::new(x, 3.0); // 3*VarId(0)
     /// ```
@@ -43,7 +43,7 @@ impl LinExpr {
     /// # Example
     ///
     /// ```rust
-    /// # use cnvx_core::LinExpr;
+    /// # use cnvx_lp::LinExpr;
     /// let expr = LinExpr::constant(5.0); // 5
     /// ```
     pub fn constant(c: f64) -> Self {

@@ -1,7 +1,7 @@
 //! # LP Solver
 //!
 //! ```rust
-//! use crate::core::{LpModel, LpSolver, Objective};
+//! use cnvx_lp::{LpModel, LpSolver, Objective, Solver};
 //!
 //! let mut model = LpModel::new();
 //! let x = model.add_var().finish();

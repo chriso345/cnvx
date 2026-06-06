@@ -59,7 +59,7 @@ pub struct Var {
 /// # Examples
 ///
 /// ```rust
-/// # use cnvx_core::{LpModel};
+/// # use cnvx_lp::LpModel;
 /// let mut model = LpModel::new();
 /// let x = model
 ///     .add_var()
@@ -79,7 +79,7 @@ impl<'a> VarBuilder<'a> {
     /// Sets a name for the variable.
     ///
     /// ```rust, no_run
-    /// # use cnvx_core::{LpModel};
+    /// # use cnvx_lp::LpModel;
     /// let mut model = LpModel::new();
     /// let x = model.add_var().name("x").finish();
     /// ```
@@ -93,7 +93,7 @@ impl<'a> VarBuilder<'a> {
     /// # Examples
     ///
     /// ```rust, no_run
-    /// # use cnvx_core::{LpModel};
+    /// # use cnvx_lp::LpModel;
     /// let mut model = LpModel::new();
     /// let x = model.add_var().lower_bound(0.0).finish();
     /// ```
@@ -107,7 +107,7 @@ impl<'a> VarBuilder<'a> {
     /// # Examples
     ///
     /// ```rust, no_run
-    /// # use cnvx_core::{LpModel};
+    /// # use cnvx_lp::LpModel;
     /// let mut model = LpModel::new();
     /// let x = model.add_var().upper_bound(10.0).finish();
     /// ```
@@ -121,7 +121,7 @@ impl<'a> VarBuilder<'a> {
     /// # Examples
     ///
     /// ```rust
-    /// # use cnvx_core::{LpModel};
+    /// # use cnvx_lp::LpModel;
     /// let mut model = LpModel::new();
     /// let x = model.add_var().integer().finish();
     /// ```
@@ -135,7 +135,7 @@ impl<'a> VarBuilder<'a> {
     /// # Examples
     ///
     /// ```rust
-    /// # use cnvx_core::{LpModel};
+    /// # use cnvx_lp::LpModel;
     /// let mut model = LpModel::new();
     /// let x = model.add_var().binary().finish();
     /// ```
@@ -154,7 +154,7 @@ impl<'a> VarBuilder<'a> {
     /// # Examples
     ///
     /// ```rust
-    /// # use cnvx_core::{LpModel};
+    /// # use cnvx_lp::LpModel;
     /// let mut model = LpModel::new();
     /// let x = model.add_var().integer().finish();
     /// ```
@@ -168,7 +168,7 @@ impl<'a> VarBuilder<'a> {
 /// # Examples
 ///
 /// ```rust
-/// # use cnvx_core::{LpModel};
+/// # use cnvx_lp::LpModel;
 /// let mut model = LpModel::new();
 /// let x = model.add_var().finish();
 /// let expr = x * 3.0; // LinExpr representing 3*x
@@ -186,7 +186,7 @@ impl Mul<f64> for VarId {
 /// # Examples
 ///
 /// ```rust
-/// # use cnvx_core::{LpModel};
+/// # use cnvx_lp::LpModel;
 /// let mut model = LpModel::new();
 /// let x = model.add_var().finish();
 /// let expr = 3.0 * x; // LinExpr representing 3*x

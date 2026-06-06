@@ -14,8 +14,8 @@ use crate::LinExpr;
 /// # Examples
 ///
 /// ```rust
-/// # use cnvx_core::{Objective, LinExpr, Model};
-/// # let mut model = Model::new();
+/// # use cnvx_lp::{Objective, LinExpr, LpModel};
+/// # let mut model = LpModel::new();
 ///
 /// let x = model.add_var().finish(); // VarId
 /// let objective = Objective::maximize(3.0 * x).name("Profit");
@@ -62,8 +62,8 @@ impl ObjectiveBuilder {
     /// # Example
     ///
     /// ```rust, no_run
-    /// # use cnvx_core::{Objective, LinExpr, Model};
-    /// # let mut model = Model::new();
+    /// # use cnvx_lp::{Objective, LinExpr, LpModel};
+    /// # let mut model = LpModel::new();
     /// let x = model.add_var().finish(); // VarId
     /// let obj = Objective::maximize(2.0 * x).priority(1);
     /// ```
@@ -79,8 +79,8 @@ impl ObjectiveBuilder {
     /// # Example
     ///
     /// ```rust
-    /// # use cnvx_core::{Objective, LinExpr, Model};
-    /// # let mut model = Model::new();
+    /// # use cnvx_lp::{Objective, LinExpr, LpModel};
+    /// # let mut model = LpModel::new();
     /// let x = model.add_var().finish(); // VarId
     /// let obj = Objective::maximize(2.0 * x).name("Profit");
     /// ```
@@ -98,8 +98,8 @@ impl Objective {
     /// # Example
     ///
     /// ```rust
-    /// # use cnvx_core::{Objective, LinExpr, Model};
-    /// # let mut model = Model::new();
+    /// # use cnvx_lp::{Objective, LinExpr, LpModel};
+    /// # let mut model = LpModel::new();
     /// let x = model.add_var().finish(); // VarId
     /// let obj = Objective::minimize(3.0 * x).name("Cost");
     /// ```
@@ -121,8 +121,8 @@ impl Objective {
     /// # Example
     ///
     /// ```rust
-    /// # use cnvx_core::{Objective, LinExpr, Model};
-    /// # let mut model = Model::new();
+    /// # use cnvx_lp::{Objective, LinExpr, LpModel};
+    /// # let mut model = LpModel::new();
     /// let x = model.add_var().finish(); // VarId
     /// let obj = Objective::maximize(3.0 * x).name("Profit");
     /// ```

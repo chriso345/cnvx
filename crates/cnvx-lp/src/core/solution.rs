@@ -11,10 +11,11 @@ use std::fmt::Display;
 /// # Examples
 ///
 /// ```rust
-/// use cnvx_core::{Solution, SolveStatus, VarId};
+/// use cnvx_core::SolveStatus;
+/// use cnvx_lp::{LpSolution, VarId};
 ///
 /// // Example solution with 3 variables
-/// let solution = Solution {
+/// let solution = LpSolution {
 ///     values: vec![1.0, 2.0, 3.0],
 ///     objective_value: Some(10.0),
 ///     status: SolveStatus::Optimal,
@@ -45,10 +46,11 @@ impl LpSolution {
     /// # Example
     ///
     /// ```rust
-    /// # use cnvx_core::{Model, Solution, SolveStatus, VarId};
-    /// # let mut model = Model::new();
+    /// # use cnvx_core::SolveStatus;
+    /// # use cnvx_lp::{LpModel, LpSolution, VarId};
+    /// # let mut model = LpModel::new();
     /// let x1: VarId = model.add_var().finish();
-    /// let solution = Solution {
+    /// let solution = LpSolution {
     ///     values: vec![1.0], // Assuming x1 has ID 0
     ///     objective_value: Some(10.0),
     ///     status: SolveStatus::Optimal,

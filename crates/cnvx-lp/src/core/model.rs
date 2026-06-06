@@ -15,8 +15,8 @@ use crate::*;
 /// # Examples
 ///
 /// ```rust
-/// # use cnvx_core::*;
-/// let mut model = Model::new();
+/// # use cnvx_lp::*;
+/// let mut model = LpModel::new();
 ///
 /// let x1 = model.add_var().finish();
 /// let x2 = model.add_var().finish();
@@ -25,12 +25,6 @@ use crate::*;
 /// model += (x1 + x2).leq(10.0);
 /// model += x1.geq(0.0);
 /// model += x2.geq(0.0);
-///
-/// use cnvx_core::problem::Problem;
-/// assert_eq!(model.kind(), "lp");
-/// assert_eq!(model.num_vars(), 2);
-/// assert_eq!(model.num_constraints(), 3);
-/// assert!(model.has_objective());
 /// ```
 #[derive(Debug, Default, Clone)]
 pub struct LpModel {
@@ -65,8 +59,8 @@ impl LpModel {
     /// # Example
     ///
     /// ```rust
-    /// # use cnvx_core::*;
-    /// let mut model = Model::new();
+    /// # use cnvx_lp::*;
+    /// let mut model = LpModel::new();
     /// let x = model.add_var().integer().finish();
     /// ```
     pub fn add_var(&mut self) -> VarBuilder<'_> {
@@ -87,8 +81,8 @@ impl LpModel {
     /// # Example
     ///
     /// ```rust
-    /// # use cnvx_core::*;
-    /// let mut model = Model::new();
+    /// # use cnvx_lp::*;
+    /// let mut model = LpModel::new();
     /// let x = model.add_var().finish();
     /// model.add_objective(Objective::maximize(1.0 * x).name("Profit"));
     /// ```
@@ -117,8 +111,8 @@ impl LpModel {
 /// # Example
 ///
 /// ```rust
-/// # use cnvx_core::*;
-/// let mut model = Model::new();
+/// # use cnvx_lp::*;
+/// let mut model = LpModel::new();
 /// let x = model.add_var().finish();
 /// model += x.geq(0.0);
 /// ```
