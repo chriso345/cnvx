@@ -25,7 +25,7 @@ cnvx-graph = { workspace = true, optional = true }
 workspace = true
 
 [workspace]
-members = ["crates/*", "tests"]
+members = ["crates/*", "tests", "bindings/*"]
 default-members = ["crates/cnvx-cli"]
 resolver = "2"
 
@@ -39,7 +39,7 @@ keywords = ["optimization", "linear-programming", "convex"]
 readme = "README.md"
 
 [workspace.dependencies]
-cnvx = { path = "crates/cnvx", version = "0.0.1" }
+cnvx = { path = ".", version = "0.0.1" }
 cnvx-cli = { path = "crates/cnvx-cli", version = "0.0.1" }
 cnvx-core = { path = "crates/cnvx-core", version = "0.0.1" }
 cnvx-lp = { path = "crates/cnvx-lp", version = "0.0.1" }
