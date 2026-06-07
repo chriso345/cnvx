@@ -1,0 +1,21 @@
+[build-system]
+requires = ["maturin>=1.8,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "cnvx"
+version = "0.0.1"
+description = "Python bindings for the cnvx optimization library"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+dependencies = ["pulp>=3.3.2"]
+
+[tool.maturin]
+manifest-path = "Cargo.toml"
+module-name = "cnvx"
+python-source = "src"
+features = ["pyo3/extension-module"]
+include = [{ path = "src/cnvx/**/*.pyi", format = "wheel" }]
+
+[dependency-groups]
+dev = ["maturin>=1.13.3"]
