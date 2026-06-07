@@ -1,0 +1,21 @@
+[package]
+name = "cnvx-python"
+version = "0.0.1"
+edition = "2024"
+publish = false
+
+[lib]
+name = "cnvx"
+crate-type = ["cdylib"]
+path = "src/lib.rs"
+doc = false
+
+[dependencies]
+cnvx-core = { workspace = true }
+cnvx-lp = { workspace = true }
+cnvx-math = { workspace = true }
+cnvx-graph = { workspace = true }
+pyo3 = { version = "0.28.3", features = ["extension-module", "abi3-py39"] }
+
+[lints]
+workspace = true
