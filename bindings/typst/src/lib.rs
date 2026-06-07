@@ -70,7 +70,6 @@ fn run_solve(req: SolveRequest) -> SolveResponse {
     for def in &req.vars {
         let b = model.add_var();
         let id = b.var;
-        drop(b);
         let var = &mut model.vars[id.0];
         var.name = Some(def.name.clone());
         var.lb = def.lb;
