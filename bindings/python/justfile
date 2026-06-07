@@ -1,0 +1,20 @@
+# List tasks available
+default:
+    @just --list --list-prefix " - "
+
+# Initialize the virtual environment
+init:
+    uv sync
+
+# Build the project using maturin to create a Python package
+build:
+    uv run maturin develop
+
+# Run the specified command inside the virtual environment
+run *ARGS: build
+    uv run {{ ARGS }}
+
+# Remove build artifacts
+clean:
+    cargo clean
+    rm -rf dist
