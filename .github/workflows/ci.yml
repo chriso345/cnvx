@@ -27,10 +27,22 @@ jobs:
         run: |
           crates=$(find crates -maxdepth 1 -mindepth 1 -type d -exec basename {} \; | jq -R -s -c 'split("\n")[:-1]')
           echo "crates=$crates" >> $GITHUB_OUTPUT
-          filters=$(find crates -maxdepth 1 -mindepth 1 -type d -exec basename {} \; | jq -R -s -c '
-            split("\n")[:-1] | map({ key: ., value: ["crates/" + . + "/**", "Cargo.toml", "Cargo.lock"] }) | from_entries
-          ')
-          echo "filters=$filters" >> $GITHUB_OUTPUT
+          filters=$(find crates -maxdepth 1 -mindepth 1 -type d -exec basename {} \; | while read -r crate; do
+            echo "${crate}:"
+            echo "  - 'crates/${crate}/**'"
+            echo "  - 'Cargo.toml'"
+            echo "  - 'Cargo.lock'"
+          done)
+          filters="${filters}
+          integration:
+            - 'crates/**'
+            - 'tests/**'
+            - 'Cargo.toml'
+            - 'Cargo.lock'"
+          echo "filters<<EOF" >> $GITHUB_OUTPUT
+          echo "$filters" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
   changes:
     name: Detect Changes
     runs-on: ubuntu-latest
@@ -43,13 +55,8 @@ jobs:
       - uses: dorny/paths-filter@v3
         id: filter
         with:
-          filters: |
-            ${{ fromJSON(needs.find-crates.outputs.filters) }}
-            integration:
-              - 'crates/**'
-              - 'tests/**'
-              - 'Cargo.toml'
-              - 'Cargo.lock'
+          filters: ${{ needs.find-crates.outputs.filters }}
+
   required:
     name: Required Checks
     runs-on: ubuntu-latest
