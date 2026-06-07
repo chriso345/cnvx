@@ -22,7 +22,7 @@ jobs:
       crates: '${{ steps.list-crates.outputs.crates }}'
       filters: '${{ steps.list-crates.outputs.filters }}'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - id: list-crates
         run: >
           crates=$(find crates -maxdepth 1 -mindepth 1 -type d -exec basename {}
@@ -58,8 +58,8 @@ jobs:
       crates: '${{ steps.build-outputs.outputs.crates }}'
       testing: '${{ steps.filter.outputs.integration }}'
     steps:
-      - uses: actions/checkout@v4
-      - uses: dorny/paths-filter@v3
+      - uses: actions/checkout@v6
+      - uses: dorny/paths-filter@v4
         id: filter
         with:
           list-files: none
@@ -105,7 +105,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Build
         run: cargo build --workspace --all-targets
   lint:
@@ -113,7 +113,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Run Clippy
         run: cargo clippy --workspace --all-targets -- -D warnings
       - name: Check Formatting
@@ -133,7 +133,7 @@ jobs:
       matrix:
         crate: '${{ fromJSON(needs.changes.outputs.crates) }}'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: 'Run ${{ matrix.crate }} tests'
         run: 'cargo test -p ${{ matrix.crate }}'
   integration-test:
@@ -148,6 +148,6 @@ jobs:
       needs.test.result != 'failure'
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Run integration tests
         run: timeout 240s cargo netlib -- --nocapture
