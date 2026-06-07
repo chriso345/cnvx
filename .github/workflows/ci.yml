@@ -15,6 +15,27 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
+  changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      crates: ${{ steps.filter.outputs.crates }}
+      integration: ${{ steps.filter.outputs.integration }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            crates:
+              - 'crates/**'
+              - 'Cargo.toml'
+              - 'Cargo.lock'
+            integration:
+              - 'crates/**'
+              - 'tests/**'
+              - 'Cargo.toml'
+              - 'Cargo.lock'
   required:
     name: Required Checks
     runs-on: ubuntu-latest
@@ -34,7 +55,7 @@ jobs:
 
           echo "Upstream results: $results"
 
-          if echo "$results" | grep -qE '(failure|cancelled|skipped)'; then
+          if echo "$results" | grep -qE '(failure|cancelled)'; then
             result="failed"
           else
             result="success"
@@ -78,7 +99,10 @@ jobs:
   test:
     name: Test - Crate
     runs-on: ubuntu-latest
-    needs: find-crates
+    needs:
+      - changes
+      - find-crates
+    if: needs.changes.outputs.crates == 'true'
     strategy:
       matrix:
         crate: ${{ fromJSON(needs.find-crates.outputs.crates) }}
@@ -91,8 +115,12 @@ jobs:
     name: Integration Test - Crate
     runs-on: ubuntu-latest
     needs:
+      - changes
       - build
       - test
+    if: |
+      needs.changes.outputs.integration == 'true' &&
+      needs.test.result != 'failure'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
