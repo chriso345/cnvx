@@ -31,7 +31,6 @@ impl Model {
         // VarBuilder consumes self on each call, so we apply via the model directly
         // after finish()
         let id = b.var;
-        drop(b); // finish implicitly; var is already pushed
 
         let var = &mut self.inner.vars[id.0];
         if let Some(n) = name {
