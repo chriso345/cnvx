@@ -39,6 +39,7 @@ keywords = ["optimization", "linear-programming", "convex"]
 readme = "README.md"
 
 [workspace.dependencies]
+cnvx = { path = ".", version = "0.0.1" }
 cnvx-cli = { path = "crates/cnvx-cli", version = "0.0.1" }
 cnvx-core = { path = "crates/cnvx-core", version = "0.0.1" }
 cnvx-lp = { path = "crates/cnvx-lp", version = "0.0.1" }
