@@ -10,6 +10,9 @@ keywords = { workspace = true }
 readme = { workspace = true }
 
 [dependencies]
+cblas = { workspace = true }
+lapacke = { workspace = true }
+openblas-src = { workspace = true } # Links with openblas, which provides BLAS and LAPACK implementations
 
 [lints]
 workspace = true

@@ -1,4 +1,5 @@
-use crate::matrix::Matrix;
+use crate::matrix::{Matrix, solvers};
+use cblas::{Layout, Transpose, dgemm, dgemv};
 
 /// A dense matrix stored in row-major order using a flat 1D vector.
 #[derive(Debug, Clone, PartialEq)]
@@ -13,6 +14,11 @@ impl DenseMatrix {
     #[inline(always)]
     fn index(&self, row: usize, col: usize) -> usize {
         row * self.cols + col
+    }
+
+    /// Expose the underlying data slice to internal LAPACK solvers
+    pub(crate) fn data(&self) -> &[f64] {
+        &self.data
     }
 }
 
@@ -65,18 +71,28 @@ impl Matrix for DenseMatrix {
             return Err("Incompatible dimensions for matrix multiplication".to_string());
         }
 
+        let m = self.rows as i32;
+        let k = self.cols as i32;
+        let n = other.cols as i32;
         let mut result = Self::new(self.rows, other.cols);
 
-        // IKJ loop ordering for cache-friendly memory access
-        for i in 0..self.rows {
-            for k in 0..self.cols {
-                let a_ik = self.get(i, k);
-                for j in 0..other.cols {
-                    let b_kj = other.get(k, j);
-                    let current = result.get(i, j);
-                    result.set(i, j, current + a_ik * b_kj);
-                }
-            }
+        unsafe {
+            dgemm(
+                Layout::RowMajor,
+                Transpose::None,
+                Transpose::None,
+                m,
+                n,
+                k,
+                1.0,
+                &self.data,
+                k, // lda
+                &other.data,
+                n, // ldb
+                0.0,
+                &mut result.data,
+                n, // ldc
+            );
         }
         Ok(result)
     }
@@ -85,13 +101,26 @@ impl Matrix for DenseMatrix {
         if self.cols != rhs.len() {
             return Err("Matrix columns must match vector length".to_string());
         }
+
+        let m = self.rows as i32;
+        let n = self.cols as i32;
         let mut result = vec![0.0; self.rows];
-        for i in 0..self.rows {
-            let mut sum = 0.0;
-            for j in 0..self.cols {
-                sum += self.get(i, j) * rhs[j];
-            }
-            result[i] = sum;
+
+        unsafe {
+            dgemv(
+                Layout::RowMajor,
+                Transpose::None,
+                m,
+                n,
+                1.0,
+                &self.data,
+                n, // lda
+                rhs,
+                1, // incx
+                0.0,
+                &mut result,
+                1, // incy
+            );
         }
         Ok(result)
     }
@@ -171,7 +200,6 @@ impl Matrix for DenseMatrix {
         if row1 == row2 {
             return;
         }
-        // Ensure row1 is the smaller index to safely split the slice
         let (r1, r2) = if row1 < row2 { (row1, row2) } else { (row2, row1) };
         let (first, second) = self.data.split_at_mut(r2 * self.cols);
 
@@ -225,68 +253,7 @@ impl Matrix for DenseMatrix {
         (0..size).map(|i| self.get(i, i)).collect()
     }
 
-    fn mldivide(&self, rhs: &mut [f64]) -> Result<(), String> {
-        if self.rows != self.cols {
-            return Err("Matrix must be square to solve linear systems".to_string());
-        }
-        if self.rows != rhs.len() {
-            return Err("RHS vector length must match matrix dimensions".to_string());
-        }
-
-        let n = self.rows;
-        let mut lu = self.data.clone();
-        let mut p: Vec<usize> = (0..n).collect();
-
-        // LU Decomposition with Partial Pivoting
-        for i in 0..n {
-            let mut max_a = 0.0;
-            let mut imax = i;
-            for k in i..n {
-                let abs_a = lu[k * n + i].abs();
-                if abs_a > max_a {
-                    max_a = abs_a;
-                    imax = k;
-                }
-            }
-
-            if max_a < 1e-12 {
-                return Err("Matrix is singular or nearly singular".to_string());
-            }
-
-            if imax != i {
-                for k in 0..n {
-                    lu.swap(i * n + k, imax * n + k);
-                }
-                p.swap(i, imax);
-            }
-
-            for j in (i + 1)..n {
-                lu[j * n + i] /= lu[i * n + i];
-                for k in (i + 1)..n {
-                    let factor = lu[j * n + i] * lu[i * n + k];
-                    lu[j * n + k] -= factor;
-                }
-            }
-        }
-
-        // Forward substitution
-        let mut x = vec![0.0; n];
-        for i in 0..n {
-            x[i] = rhs[p[i]];
-            for k in 0..i {
-                x[i] -= lu[i * n + k] * x[k];
-            }
-        }
-
-        // Backward substitution
-        for i in (0..n).rev() {
-            for k in (i + 1)..n {
-                x[i] -= lu[i * n + k] * x[k];
-            }
-            x[i] /= lu[i * n + i];
-        }
-
-        rhs.copy_from_slice(&x);
-        Ok(())
+    fn mldivide(&self, rhs: &[f64]) -> Result<Vec<f64>, String> {
+        solvers::mldivide_dense(self, rhs)
     }
 }

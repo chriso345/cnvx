@@ -47,7 +47,9 @@ cnvx-math = { path = "crates/cnvx-math", version = "0.0.1" }
 cnvx-graph = { path = "crates/cnvx-graph", version = "0.0.1" }
 cnvx-parse = { path = "crates/cnvx-parse", version = "0.0.1" }
 clap = { version = "4.5.57", features = ["derive"] }
-nalgebra = "0.34.2"
+cblas = { version = "0.5.0" }
+lapacke = { version = "0.5.0" }
+openblas-src = { version = "0.10.16" }
 
 [workspace.lints]
 

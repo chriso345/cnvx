@@ -8,6 +8,8 @@
 //!
 //! - [`matrix`]: Defines [`DenseMatrix`] and the [`Matrix`] trait for linear algebra operations.
 
+extern crate openblas_src;
+
 pub mod matrix;
 
 pub use matrix::{DenseMatrix, Matrix, SparseMatrix};

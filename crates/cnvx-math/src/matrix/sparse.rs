@@ -83,7 +83,7 @@ impl Matrix for SparseMatrix {
         unimplemented!()
     }
 
-    fn mldivide(&self, rhs: &mut [f64]) -> Result<(), String> {
+    fn mldivide(&self, rhs: &[f64]) -> Result<Vec<f64>, String> {
         unimplemented!()
     }
 }

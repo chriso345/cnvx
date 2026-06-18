@@ -1,4 +1,5 @@
 mod dense;
+mod solvers;
 mod sparse;
 
 pub use dense::DenseMatrix;
@@ -9,8 +10,6 @@ pub use sparse::SparseMatrix;
 /// This trait defines the interface for matrices used in the LP solver,
 /// including creation, element access, arithmetic, and solving linear systems.
 pub trait Matrix: Clone {
-    // --- 1. Core Constructors and Accessors ---
-
     /// Create a new matrix with the given number of rows and columns,
     /// initialized with zeros.
     fn new(rows: usize, cols: usize) -> Self
@@ -35,8 +34,6 @@ pub trait Matrix: Clone {
     /// Panics if `row` or `col` are out of bounds.
     fn set(&mut self, row: usize, col: usize, value: f64);
 
-    // --- 2. Standard Arithmetic ---
-
     /// Adds another matrix to this matrix.
     fn add(&self, other: &Self) -> Result<Self, String>
     where
@@ -54,8 +51,6 @@ pub trait Matrix: Clone {
 
     /// Multiplies this matrix by a column vector.
     fn mul_vec(&self, rhs: &[f64]) -> Result<Vec<f64>, String>;
-
-    // --- 3. Scalar and Element-wise Operations ---
 
     /// Adds a scalar to every element in the matrix.
     fn add_scalar(&self, scalar: f64) -> Self
@@ -82,8 +77,6 @@ pub trait Matrix: Clone {
     where
         Self: Sized;
 
-    // --- 4. Row and Column Manipulations ---
-
     /// Extracts a specific row as a standard vector.
     fn get_row(&self, row: usize) -> Vec<f64>;
 
@@ -99,12 +92,8 @@ pub trait Matrix: Clone {
     /// Swaps two rows in place.
     fn swap_rows(&mut self, row1: usize, row2: usize);
 
-    // --- 5. Norms and Convergence Checks ---
-
     /// Calculates the L_infinity norm (maximum absolute row sum).
     fn norm_inf(&self) -> f64;
-
-    // --- 6. Constructors and Utilities ---
 
     /// Returns the transpose of the matrix.
     fn transpose(&self) -> Self
@@ -124,14 +113,10 @@ pub trait Matrix: Clone {
     /// Extracts the diagonal elements of the matrix as a vector.
     fn diagonal(&self) -> Vec<f64>;
 
-    // --- 7. Solvers ---
-
-    /// Solve a square linear system `Ax = rhs`
-    ///
-    /// On success, `rhs` is overwritten with the solution vector `x`.
-    fn mldivide(&self, rhs: &mut [f64]) -> Result<(), String>
-    where
-        Self: Sized;
+    /// Solves Ax = b.
+    /// Returns a dynamically allocated Vec<f64> to support both square
+    /// and rectangular (least-squares) solutions.
+    fn mldivide(&self, rhs: &[f64]) -> Result<Vec<f64>, String>;
 }
 
 /// Helper function to calculate the L2 (Euclidean) norm of a standard vector.
