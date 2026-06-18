@@ -51,8 +51,8 @@ pub fn solve(a: &DenseMatrix, b: &[f64], tri_type: TriType) -> Result<Vec<f64>, 
         TriType::Lower => Part::Lower,
         TriType::Diagonal => {
             // Pure diagonal division is faster than invoking BLAS
-            for i in 0..a.rows() {
-                x[i] /= a.get(i, i);
+            for (i, xi) in x.iter_mut().enumerate() {
+                *xi /= a.get(i, i);
             }
             return Ok(x);
         }

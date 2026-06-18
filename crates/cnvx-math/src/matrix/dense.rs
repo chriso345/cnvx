@@ -189,8 +189,8 @@ impl Matrix for DenseMatrix {
         if vec.len() != self.rows {
             return Err("Vector length must match matrix rows".to_string());
         }
-        for i in 0..self.rows {
-            self.data[i * self.cols + col] = vec[i];
+        for (i, &val) in vec.iter().enumerate() {
+            self.data[i * self.cols + col] = val;
         }
         Ok(())
     }
@@ -242,8 +242,8 @@ impl Matrix for DenseMatrix {
     fn from_diagonal(vec: &[f64]) -> Self {
         let size = vec.len();
         let mut m = Self::new(size, size);
-        for i in 0..size {
-            m.set(i, i, vec[i]);
+        for (i, &val) in vec.iter().enumerate() {
+            m.data[i * size + i] = val; // More efficient than set() for diagonal
         }
         m
     }
