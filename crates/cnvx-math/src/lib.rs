@@ -1,8 +1,8 @@
 //! # CNVX Math
 //!
 //! Linear algebra utilities for LP solvers and numerical algorithms.
-//! Provides matrix types and traits used in simplex computations and
-//! other numerical routines.
+//! Provides native matrix types and traits used in simplex computations and
+//! other numerical routines without relying on external heavy dependencies.
 //!
 //! # Modules
 //!
@@ -10,4 +10,4 @@
 
 pub mod matrix;
 
-pub use matrix::{DenseMatrix, MatrixWrapper as Matrix, SparseMatrix};
+pub use matrix::{DenseMatrix, Matrix, SparseMatrix};
