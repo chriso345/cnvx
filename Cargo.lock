@@ -269,6 +269,7 @@ dependencies = [
  "cblas",
  "lapacke",
  "openblas-src",
+ "pkg-config",
 ]
 
 [[package]]
