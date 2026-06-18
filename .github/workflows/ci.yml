@@ -108,6 +108,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+      - name: Install OpenBLAS
+        run: sudo apt-get update && sudo apt-get install -y libopenblas-dev liblapacke-dev
       - name: Build
         run: cargo build --workspace --all-targets
 

@@ -49,7 +49,11 @@ cnvx-parse = { path = "crates/cnvx-parse", version = "0.0.1" }
 clap = { version = "4.5.57", features = ["derive"] }
 cblas = { version = "0.5.0" }
 lapacke = { version = "0.5.0" }
-openblas-src = { version = "0.10.16" }
+openblas-src = { version = "0.10.16", features = [
+    "cblas",
+    "lapacke",
+    "system",
+] }
 
 [workspace.lints]
 

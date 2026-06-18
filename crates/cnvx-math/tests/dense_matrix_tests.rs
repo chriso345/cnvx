@@ -124,7 +124,7 @@ fn test_mldivide_singular_matrix() {
     a.set(1, 1, 1.0); // Singular
 
     let mut rhs = vec![2.0, 2.0];
-    let result = a.mldivide(&mut rhs);
+    let result = a.mldivide(&rhs);
 
     assert!(result.is_err());
 }
