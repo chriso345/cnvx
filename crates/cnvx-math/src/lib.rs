@@ -8,6 +8,7 @@
 //!
 //! - [`matrix`]: Defines [`DenseMatrix`] and the [`Matrix`] trait for linear algebra operations.
 
+#[cfg(not(target_arch = "wasm32"))]
 extern crate openblas_src;
 
 pub mod matrix;

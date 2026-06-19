@@ -10,6 +10,8 @@ keywords = { workspace = true }
 readme = { workspace = true }
 
 [dependencies]
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 cblas = { workspace = true }
 lapacke = { workspace = true }
 openblas-src = { workspace = true } # Links with openblas, which provides BLAS and LAPACK implementations

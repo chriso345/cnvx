@@ -1,6 +1,8 @@
 mod dense;
-mod solvers;
 mod sparse;
+
+#[cfg(not(target_arch = "wasm32"))]
+mod solvers; // Only include LAPACK-based solvers on non-WASM targets
 
 pub use dense::DenseMatrix;
 pub use sparse::SparseMatrix;
