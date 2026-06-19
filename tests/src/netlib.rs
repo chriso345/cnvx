@@ -144,7 +144,7 @@ fn run_cnvx(mps: &Path) -> Result<LpSolution, String> {
 }
 
 #[test_case("afiro", Some(-4.6475314286E+02))]
-// #[test_case("adlittle", Some(2.2549496316E+05))]
+#[test_case("adlittle", Some(2.2549496316E+05))]
 #[test_case("sc50a", Some(-6.4575077059E+01))]
 #[test_case("sc50b", Some(-7.0000000000E+01))]
 // #[test_case("sc105", Some(-5.2202061212E+01))]

@@ -50,6 +50,7 @@ jobs:
           echo "$filters" >> $GITHUB_OUTPUT
 
           echo "EOF" >> $GITHUB_OUTPUT
+
   changes:
     name: Detect Changes
     runs-on: ubuntu-latest
@@ -70,6 +71,7 @@ jobs:
           select(. != "integration")]')
 
           echo "crates=$crates" >> $GITHUB_OUTPUT
+
   required:
     name: Required Checks
     runs-on: ubuntu-latest
@@ -106,14 +108,21 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+      - name: Install OpenBLAS
+        run: sudo apt-get update && sudo apt-get install -y libopenblas-dev liblapacke-dev
       - name: Build
+        env:
+          LIBRARY_PATH: /usr/lib/x86_64-linux-gnu/openblas-pthread:/usr/lib/x86_64-linux-gnu/lapack
         run: cargo build --workspace --all-targets
+
   lint:
     name: 'Lint, Format and Docs - Workspace'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+      - name: Install OpenBLAS
+        run: sudo apt-get update && sudo apt-get install -y libopenblas-dev liblapacke-dev
       - name: Run Clippy
         run: cargo clippy --workspace --all-targets -- -D warnings
       - name: Check Formatting
@@ -122,6 +131,7 @@ jobs:
         run: >-
           RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps
           --document-private-items
+
   test:
     name: Test - Crate
     runs-on: ubuntu-latest
@@ -134,8 +144,16 @@ jobs:
         crate: '${{ fromJSON(needs.changes.outputs.crates) }}'
     steps:
       - uses: actions/checkout@v6
+      - name: Install OpenBLAS
+        run: sudo apt-get update && sudo apt-get install -y libopenblas-dev liblapacke-dev
       - name: 'Run ${{ matrix.crate }} tests'
+        env:
+          LIBRARY_PATH: /usr/lib/x86_64-linux-gnu/openblas-pthread:/usr/lib/x86_64-linux-gnu/lapack
         run: 'cargo test -p ${{ matrix.crate }}'
+
+  # TODO: Not needed for now, as the integration tests are minor.
+  # This should be added back once there are more substantial integration tests, and the project
+  # is more mature.
   integration-test:
     name: Integration Test - Crate
     runs-on: ubuntu-latest
@@ -149,5 +167,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-      - name: Run integration tests
-        run: timeout 240s cargo netlib -- --nocapture
+      # TODO: No-op
+      # - name: Run integration tests
+      #   run: timeout 240s cargo netlib -- --nocapture

@@ -264,7 +264,7 @@ impl<A: Matrix> PrimalSimplexState<A> {
     /// Attempt to directly run phase 2 if the initial basis is feasible.
     fn try_phase2(&mut self, max_iter: usize, tol: f64) -> Result<bool, SolveError> {
         let mut bmat = self.build_bmat();
-        match self.compute_basic_solution(&mut bmat) {
+        match self.compute_basic_solution(&bmat) {
             Ok(xb) if xb.iter().all(|&v| v >= -tol) => {
                 self.x_b = xb;
                 self.remove_artificial_from_basis(&mut bmat, self.a.cols())
@@ -366,19 +366,16 @@ impl<A: Matrix> PrimalSimplexState<A> {
     pub fn build_bmat(&self) -> A {
         let m = self.a.rows();
         let mut bmat = A::new(m, m);
-        for i in 0..m {
-            for j in 0..m {
-                bmat.set(i, j, self.a.get(i, self.basis[j]));
-            }
+        for j in 0..m {
+            let col = self.a.get_col(self.basis[j]);
+            bmat.set_col(j, &col).unwrap();
         }
         bmat
     }
 
     /// Compute the values of the basic variables by solving `B x_B = b`.
-    pub fn compute_basic_solution(&self, bmat: &mut A) -> Result<Vec<f64>, String> {
-        let mut xb = self.b.clone();
-        bmat.mldivide(&mut xb).map_err(|e| format!("gauss failed: {e}"))?;
-        Ok(xb)
+    pub fn compute_basic_solution(&self, bmat: &A) -> Result<Vec<f64>, String> {
+        bmat.mldivide(&self.b).map_err(|e| format!("gauss failed: {e}"))
     }
 
     /// Run the main simplex iteration loop.
@@ -423,19 +420,11 @@ impl<A: Matrix> PrimalSimplexState<A> {
     /// Compute dual variables for the current basis.
     fn compute_duals(&self, bmat: &A) -> Result<Vec<f64>, SolveError> {
         let m = bmat.rows();
-        let mut pi = (0..m).map(|i| self.c[self.basis[i]]).collect::<Vec<_>>();
+        let pi_input: Vec<f64> = (0..m).map(|i| self.c[self.basis[i]]).collect();
 
-        let mut bt = A::new(m, m);
-        for i in 0..m {
-            for j in 0..m {
-                bt.set(i, j, bmat.get(j, i));
-            }
-        }
-
-        bt.mldivide(&mut pi)
-            .map_err(|e| SolveError::Other(format!("dual solve failed: {e}")))?;
-
-        Ok(pi)
+        let bt = bmat.transpose();
+        bt.mldivide(&pi_input)
+            .map_err(|e| SolveError::Other(format!("dual solve failed: {e}")))
     }
 
     /// Choose entering variable using reduced costs.
@@ -455,15 +444,12 @@ impl<A: Matrix> PrimalSimplexState<A> {
     /// Compute the simplex direction `d = B^{-1} A_j`.
     fn compute_direction(
         &self,
-        bmat: &mut A,
+        bmat: &A,
         entering: usize,
     ) -> Result<Vec<f64>, SolveError> {
-        let mut d = (0..bmat.rows()).map(|i| self.a.get(i, entering)).collect::<Vec<_>>();
-
-        bmat.mldivide(&mut d)
-            .map_err(|e| SolveError::Other(format!("direction solve failed: {e}")))?;
-
-        Ok(d)
+        let d_input = self.a.get_col(entering);
+        bmat.mldivide(&d_input)
+            .map_err(|e| SolveError::Other(format!("direction solve failed: {e}")))
     }
 
     /// Choose leaving variable using minimum ratio test.
@@ -497,9 +483,8 @@ impl<A: Matrix> PrimalSimplexState<A> {
         self.basis[leave_row] = entering;
         self.non_basis[enter_pos] = leaving;
 
-        for i in 0..bmat.rows() {
-            bmat.set(i, leave_row, self.a.get(i, entering));
-        }
+        let col = self.a.get_col(entering);
+        bmat.set_col(leave_row, &col).unwrap();
     }
 
     /// Update the current objective value.
@@ -552,10 +537,9 @@ impl<A: Matrix> PrimalSimplexState<A> {
         self.x_b = b_aug;
 
         let mut bmat = A::new(m, m);
-        for i in 0..m {
-            for j in 0..m {
-                bmat.set(i, j, self.a.get(i, self.basis[j]));
-            }
+        for j in 0..m {
+            let col = self.a.get_col(self.basis[j]);
+            bmat.set_col(j, &col).unwrap();
         }
 
         (orig_a, orig_c, bmat)
@@ -582,9 +566,8 @@ impl<A: Matrix> PrimalSimplexState<A> {
                     let leaving = self.basis[row];
                     self.basis[row] = j;
                     self.non_basis[nb_pos] = leaving;
-                    for i in 0..m {
-                        bmat.set(i, row, self.a.get(i, j));
-                    }
+                    let col = self.a.get_col(j);
+                    bmat.set_col(row, &col).unwrap();
                 } else if self.x_b[row].abs() > 1e-12 {
                     return Err(
                         "artificial variable left in basis with non-zero value".into()
@@ -595,9 +578,8 @@ impl<A: Matrix> PrimalSimplexState<A> {
                             let leaving = self.basis[row];
                             self.basis[row] = j;
                             self.non_basis[nb_pos] = leaving;
-                            for i in 0..m {
-                                bmat.set(i, row, self.a.get(i, j));
-                            }
+                            let col = self.a.get_col(j);
+                            bmat.set_col(row, &col).unwrap();
                             break;
                         }
                     }

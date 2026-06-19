@@ -10,7 +10,14 @@ keywords = { workspace = true }
 readme = { workspace = true }
 
 [dependencies]
-nalgebra = { workspace = true }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+cblas = { workspace = true }
+lapacke = { workspace = true }
+openblas-src = { workspace = true } # Links with openblas, which provides BLAS and LAPACK implementations
+
+[build-dependencies]
+pkg-config = { version = "0.3.33" }
 
 [lints]
 workspace = true
