@@ -6,7 +6,7 @@ pub mod triangular;
 use crate::matrix::{DenseMatrix, Matrix};
 
 /// MATLAB-style mldivide dispatcher for full matrices
-/// See https://mathworks.com/help/matlab/ref/double.mldivide.html
+/// See <https://mathworks.com/help/matlab/ref/double.mldivide.html>
 pub fn mldivide_dense(a: &DenseMatrix, b: &[f64]) -> Result<Vec<f64>, String> {
     let m = a.rows();
     let n = a.cols();

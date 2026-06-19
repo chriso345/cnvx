@@ -116,7 +116,7 @@ pub trait Matrix: Clone {
     fn diagonal(&self) -> Vec<f64>;
 
     /// Solves Ax = b.
-    /// Returns a dynamically allocated Vec<f64> to support both square
+    /// Returns a dynamically allocated `Vec<f64>` to support both square
     /// and rectangular (least-squares) solutions.
     fn mldivide(&self, rhs: &[f64]) -> Result<Vec<f64>, String>;
 }
