@@ -15,16 +15,16 @@ coal = model.add_var(name="Coal", lb=0.0, ub=180.0)
 wind = model.add_var(name="Wind", lb=0.0, ub=120.0)
 
 # Total generation must meet demand
-model.add_constraint((gas.expr().__add__(coal.expr()).__add__(wind.expr())).eq(300.0))
+model.add_constraint(gas + coal + wind == 300.0)
 
 # Gas emissions <= 0.5 * coal
-model.add_constraint(gas.leq(coal.__mul__(0.5)))
+model.add_constraint(gas <= 0.5 * coal)
 
 # At least 150 MW from thermal
-model.add_constraint((gas.expr().__add__(coal.expr())).geq(150.0))
+model.add_constraint(gas + coal >= 150.0)
 
 # Minimize cost: gas=$50, coal=$80, wind=$0
-cost = gas.__mul__(50.0).__add__(coal.__mul__(80.0))
+cost = 50.0 * gas + 80.0 * coal
 model.minimize(cost, name="TotalCost")
 
 solution = model.solve()

@@ -1,7 +1,7 @@
 use crate::{LinearConstraint, VarId};
 use std::{
     fmt::Display,
-    ops::{Add, AddAssign},
+    ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign},
 };
 
 /// A single term in a linear expression: `coeff * var`.
@@ -145,6 +145,13 @@ impl AddAssign<VarId> for LinExpr {
     }
 }
 
+/// LinExpr += f64
+impl AddAssign<f64> for LinExpr {
+    fn add_assign(&mut self, rhs: f64) {
+        self.constant += rhs;
+    }
+}
+
 /// f64 + LinExpr
 impl Add<LinExpr> for f64 {
     type Output = LinExpr;
@@ -166,8 +173,21 @@ impl Add<f64> for LinExpr {
     }
 }
 
+/// -LinExpr
+impl Neg for LinExpr {
+    type Output = LinExpr;
+
+    fn neg(mut self) -> LinExpr {
+        for term in &mut self.terms {
+            term.coeff = -term.coeff;
+        }
+        self.constant = -self.constant;
+        self
+    }
+}
+
 /// LinExpr - LinExpr
-impl std::ops::Sub for LinExpr {
+impl Sub for LinExpr {
     type Output = LinExpr;
 
     fn sub(self, rhs: LinExpr) -> LinExpr {
@@ -179,6 +199,127 @@ impl std::ops::Sub for LinExpr {
     }
 }
 
+/// LinExpr - VarId
+impl Sub<VarId> for LinExpr {
+    type Output = LinExpr;
+
+    fn sub(mut self, rhs: VarId) -> LinExpr {
+        self.terms.push(LinTerm { var: rhs, coeff: -1.0 });
+        self
+    }
+}
+
+/// VarId - LinExpr
+impl Sub<LinExpr> for VarId {
+    type Output = LinExpr;
+
+    fn sub(self, rhs: LinExpr) -> LinExpr {
+        let mut expr = -rhs;
+        expr.terms.push(LinTerm { var: self, coeff: 1.0 });
+        expr
+    }
+}
+
+/// LinExpr - f64
+impl Sub<f64> for LinExpr {
+    type Output = LinExpr;
+
+    fn sub(mut self, rhs: f64) -> LinExpr {
+        self.constant -= rhs;
+        self
+    }
+}
+
+/// f64 - LinExpr
+impl Sub<LinExpr> for f64 {
+    type Output = LinExpr;
+
+    fn sub(self, rhs: LinExpr) -> LinExpr {
+        let mut expr = -rhs;
+        expr.constant += self;
+        expr
+    }
+}
+
+/// LinExpr -= LinExpr
+impl SubAssign for LinExpr {
+    fn sub_assign(&mut self, rhs: LinExpr) {
+        for term in rhs.terms {
+            self.terms.push(LinTerm { var: term.var, coeff: -term.coeff });
+        }
+        self.constant -= rhs.constant;
+    }
+}
+
+/// LinExpr -= VarId
+impl SubAssign<VarId> for LinExpr {
+    fn sub_assign(&mut self, rhs: VarId) {
+        self.terms.push(LinTerm { var: rhs, coeff: -1.0 });
+    }
+}
+
+/// LinExpr -= f64
+impl SubAssign<f64> for LinExpr {
+    fn sub_assign(&mut self, rhs: f64) {
+        self.constant -= rhs;
+    }
+}
+
+/// LinExpr * f64
+impl Mul<f64> for LinExpr {
+    type Output = LinExpr;
+
+    fn mul(mut self, rhs: f64) -> LinExpr {
+        for term in &mut self.terms {
+            term.coeff *= rhs;
+        }
+        self.constant *= rhs;
+        self
+    }
+}
+
+/// f64 * LinExpr
+impl Mul<LinExpr> for f64 {
+    type Output = LinExpr;
+
+    fn mul(self, rhs: LinExpr) -> LinExpr {
+        rhs * self
+    }
+}
+
+/// LinExpr *= f64
+impl MulAssign<f64> for LinExpr {
+    fn mul_assign(&mut self, rhs: f64) {
+        for term in &mut self.terms {
+            term.coeff *= rhs;
+        }
+        self.constant *= rhs;
+    }
+}
+
+/// LinExpr / f64
+impl Div<f64> for LinExpr {
+    type Output = LinExpr;
+
+    fn div(mut self, rhs: f64) -> LinExpr {
+        for term in &mut self.terms {
+            term.coeff /= rhs;
+        }
+        self.constant /= rhs;
+        self
+    }
+}
+
+/// LinExpr /= f64
+impl DivAssign<f64> for LinExpr {
+    fn div_assign(&mut self, rhs: f64) {
+        for term in &mut self.terms {
+            term.coeff /= rhs;
+        }
+        self.constant /= rhs;
+    }
+}
+
 /// Allows converting a single variable into a linear expression with coefficient 1.0.
 impl From<VarId> for LinExpr {
     fn from(var: VarId) -> Self {
@@ -186,6 +327,7 @@ impl From<VarId> for LinExpr {
     }
 }
 
+/// Allows converting a constant into a linear expression.
 impl From<f64> for LinExpr {
     fn from(c: f64) -> Self {
         LinExpr::constant(c)

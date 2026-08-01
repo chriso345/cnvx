@@ -8,7 +8,9 @@ version = "0.0.1"
 description = "Python bindings for the cnvx optimization library"
 requires-python = ">=3.10"
 license = { file = "LICENSE" }
-dependencies = ["pulp>=3.3.2"]
+
+[project.optional-dependencies]
+pulp = ["pulp>=3.3.2"]
 
 [tool.maturin]
 manifest-path = "Cargo.toml"
@@ -18,4 +20,4 @@ features = ["pyo3/extension-module"]
 include = [{ path = "src/cnvx/**/*.pyi", format = "wheel" }]
 
 [dependency-groups]
-dev = ["maturin>=1.13.3"]
+dev = ["maturin[patchelf]>=1.13.3"]

@@ -1,7 +1,23 @@
 use cnvx_lp::*;
 use pyo3::prelude::*;
 
-/// Wraps VarId so Python can hold a reference to a variable
+#[derive(FromPyObject)]
+pub enum Operand<'a> {
+    Expr(PyRef<'a, LinExprPy>),
+    Var(PyRef<'a, Var>),
+    Float(f64),
+}
+
+impl Operand<'_> {
+    fn into_expr(self) -> LinExpr {
+        match self {
+            Operand::Expr(e) => e.inner.clone(),
+            Operand::Var(v) => LinExpr::from(v.inner),
+            Operand::Float(f) => LinExpr::constant(f),
+        }
+    }
+}
+
 #[pyclass]
 pub struct Var {
     inner: VarId,
@@ -19,48 +35,38 @@ impl Model {
         Self { inner: LpModel::new() }
     }
 
-    /// model.add_var(name="Gas", lb=0.0, ub=200.0)
     pub fn add_var(
         &mut self,
         name: Option<&str>,
         lb: Option<f64>,
         ub: Option<f64>,
     ) -> Var {
-        let b = self.inner.add_var();
-
-        // VarBuilder consumes self on each call, so we apply via the model directly
-        // after finish()
-        let id = b.var;
-
-        let var = &mut self.inner.vars[id.0];
+        let mut b = self.inner.add_var();
         if let Some(n) = name {
-            var.name = Some(n.to_string());
+            b = b.name(n);
         }
         if let Some(l) = lb {
-            var.lb = Some(l);
+            b = b.lower_bound(l);
         }
         if let Some(u) = ub {
-            var.ub = Some(u);
+            b = b.upper_bound(u);
         }
 
-        Var { inner: id }
+        Var { inner: b.finish() }
     }
 
-    /// model.minimize(expr, name="Cost")
     pub fn minimize(&mut self, expr: &LinExprPy, name: Option<&str>) {
         let b = Objective::minimize(expr.inner.clone());
         let obj = if let Some(n) = name { b.name(n) } else { b.name("objective") };
         self.inner.add_objective(obj);
     }
 
-    /// model.maximize(expr, name="Profit")
     pub fn maximize(&mut self, expr: &LinExprPy, name: Option<&str>) {
         let b = Objective::maximize(expr.inner.clone());
         let obj = if let Some(n) = name { b.name(n) } else { b.name("objective") };
         self.inner.add_objective(obj);
     }
 
-    /// model.add_constraint(expr.eq(300.0))
     pub fn add_constraint(&mut self, c: &ConstraintPy) {
         self.inner += c.inner.clone();
     }
@@ -81,77 +87,199 @@ pub struct LinExprPy {
 
 #[pymethods]
 impl LinExprPy {
-    /// expr.eq(rhs) - ConstraintPy
-    pub fn eq(&self, rhs: f64) -> ConstraintPy {
-        ConstraintPy { inner: self.inner.clone().eq(rhs) }
+    pub fn eq(&self, rhs: Operand) -> ConstraintPy {
+        self.__eq__(rhs)
+    }
+    pub fn leq(&self, rhs: Operand) -> ConstraintPy {
+        self.__le__(rhs)
+    }
+    pub fn geq(&self, rhs: Operand) -> ConstraintPy {
+        self.__ge__(rhs)
     }
 
-    pub fn leq(&self, rhs: f64) -> ConstraintPy {
-        ConstraintPy { inner: self.inner.clone().leq(rhs) }
+    pub fn __eq__(&self, rhs: Operand) -> ConstraintPy {
+        match rhs {
+            Operand::Float(f) => ConstraintPy { inner: self.inner.clone().eq(f) },
+            _ => {
+                let mut diff = self.inner.clone() - rhs.into_expr();
+                let bound = -diff.constant;
+                diff.constant = 0.0;
+                ConstraintPy { inner: diff.eq(bound) }
+            }
+        }
     }
 
-    pub fn geq(&self, rhs: f64) -> ConstraintPy {
-        ConstraintPy { inner: self.inner.clone().geq(rhs) }
+    pub fn __le__(&self, rhs: Operand) -> ConstraintPy {
+        match rhs {
+            Operand::Float(f) => ConstraintPy { inner: self.inner.clone().leq(f) },
+            _ => {
+                let mut diff = self.inner.clone() - rhs.into_expr();
+                let bound = -diff.constant;
+                diff.constant = 0.0;
+                ConstraintPy { inner: diff.leq(bound) }
+            }
+        }
     }
 
-    /// expr + expr  or  expr + var
-    pub fn __add__(&self, other: &LinExprPy) -> LinExprPy {
-        LinExprPy { inner: self.inner.clone() + other.inner.clone() }
+    pub fn __ge__(&self, rhs: Operand) -> ConstraintPy {
+        match rhs {
+            Operand::Float(f) => ConstraintPy { inner: self.inner.clone().geq(f) },
+            _ => {
+                let mut diff = self.inner.clone() - rhs.into_expr();
+                let bound = -diff.constant;
+                diff.constant = 0.0;
+                ConstraintPy { inner: diff.geq(bound) }
+            }
+        }
     }
 
-    /// expr * scalar
+    pub fn __add__(&self, rhs: Operand) -> LinExprPy {
+        match rhs {
+            Operand::Float(f) => {
+                let mut e = self.inner.clone();
+                e.constant += f;
+                LinExprPy { inner: e }
+            }
+            _ => LinExprPy { inner: self.inner.clone() + rhs.into_expr() },
+        }
+    }
+    pub fn __radd__(&self, lhs: Operand) -> LinExprPy {
+        self.__add__(lhs)
+    }
+
+    pub fn __sub__(&self, rhs: Operand) -> LinExprPy {
+        match rhs {
+            Operand::Float(f) => {
+                let mut e = self.inner.clone();
+                e.constant -= f;
+                LinExprPy { inner: e }
+            }
+            _ => LinExprPy { inner: self.inner.clone() - rhs.into_expr() },
+        }
+    }
+    pub fn __rsub__(&self, lhs: Operand) -> LinExprPy {
+        match lhs {
+            Operand::Float(f) => {
+                let mut e = -self.inner.clone();
+                e.constant += f;
+                LinExprPy { inner: e }
+            }
+            _ => LinExprPy { inner: lhs.into_expr() - self.inner.clone() },
+        }
+    }
+
     pub fn __mul__(&self, rhs: f64) -> LinExprPy {
-        let scaled: LinExpr = self
-            .inner
-            .terms
-            .iter()
-            .map(|t| LinExpr::new(t.var, t.coeff * rhs))
-            .fold(LinExpr::constant(self.inner.constant * rhs), |acc, e| acc + e);
-        LinExprPy { inner: scaled }
+        LinExprPy { inner: self.inner.clone() * rhs }
     }
-
     pub fn __rmul__(&self, lhs: f64) -> LinExprPy {
-        self.__mul__(lhs)
+        LinExprPy { inner: lhs * self.inner.clone() }
+    }
+    pub fn __truediv__(&self, rhs: f64) -> LinExprPy {
+        LinExprPy { inner: self.inner.clone() / rhs }
+    }
+    pub fn __neg__(&self) -> LinExprPy {
+        LinExprPy { inner: -self.inner.clone() }
     }
 }
 
 #[pymethods]
 impl Var {
-    /// var.expr() - LinExprPy  (used for arithmetic)
     pub fn expr(&self) -> LinExprPy {
         LinExprPy { inner: LinExpr::from(self.inner) }
     }
 
-    pub fn leq(&self, other: &LinExprPy) -> ConstraintPy {
-        ConstraintPy { inner: self.inner.leq(other.inner.clone()) }
+    pub fn eq(&self, rhs: Operand) -> ConstraintPy {
+        self.__eq__(rhs)
+    }
+    pub fn leq(&self, rhs: Operand) -> ConstraintPy {
+        self.__le__(rhs)
+    }
+    pub fn geq(&self, rhs: Operand) -> ConstraintPy {
+        self.__ge__(rhs)
     }
 
-    pub fn geq(&self, other: &LinExprPy) -> ConstraintPy {
-        ConstraintPy { inner: self.inner.geq(other.inner.clone()) }
-    }
-
-    pub fn eq(&self, other: &LinExprPy) -> ConstraintPy {
-        ConstraintPy { inner: self.inner.eq(other.inner.clone()) }
-    }
-
-    /// Scalar multiply: var * 50.0
-    pub fn __mul__(&self, rhs: f64) -> LinExprPy {
-        LinExprPy { inner: self.inner * rhs }
-    }
-
-    pub fn __rmul__(&self, lhs: f64) -> LinExprPy {
-        self.__mul__(lhs)
-    }
-
-    /// var + var  or  var + expr
-    pub fn __add__(&self, other: &LinExprPy) -> LinExprPy {
-        LinExprPy {
-            inner: LinExpr::from(self.inner) + other.inner.clone(),
+    pub fn __eq__(&self, rhs: Operand) -> ConstraintPy {
+        match rhs {
+            Operand::Float(f) => ConstraintPy { inner: LinExpr::from(self.inner).eq(f) },
+            _ => {
+                let mut diff = LinExpr::from(self.inner) - rhs.into_expr();
+                let bound = -diff.constant;
+                diff.constant = 0.0;
+                ConstraintPy { inner: diff.eq(bound) }
+            }
         }
     }
 
-    pub fn __radd__(&self, other: &LinExprPy) -> LinExprPy {
-        self.__add__(other)
+    pub fn __le__(&self, rhs: Operand) -> ConstraintPy {
+        match rhs {
+            Operand::Float(f) => ConstraintPy { inner: LinExpr::from(self.inner).leq(f) },
+            _ => {
+                let mut diff = LinExpr::from(self.inner) - rhs.into_expr();
+                let bound = -diff.constant;
+                diff.constant = 0.0;
+                ConstraintPy { inner: diff.leq(bound) }
+            }
+        }
+    }
+
+    pub fn __ge__(&self, rhs: Operand) -> ConstraintPy {
+        match rhs {
+            Operand::Float(f) => ConstraintPy { inner: LinExpr::from(self.inner).geq(f) },
+            _ => {
+                let mut diff = LinExpr::from(self.inner) - rhs.into_expr();
+                let bound = -diff.constant;
+                diff.constant = 0.0;
+                ConstraintPy { inner: diff.geq(bound) }
+            }
+        }
+    }
+
+    pub fn __add__(&self, rhs: Operand) -> LinExprPy {
+        match rhs {
+            Operand::Float(f) => {
+                let mut e = LinExpr::from(self.inner);
+                e.constant += f;
+                LinExprPy { inner: e }
+            }
+            _ => LinExprPy { inner: LinExpr::from(self.inner) + rhs.into_expr() },
+        }
+    }
+    pub fn __radd__(&self, lhs: Operand) -> LinExprPy {
+        self.__add__(lhs)
+    }
+
+    pub fn __sub__(&self, rhs: Operand) -> LinExprPy {
+        match rhs {
+            Operand::Float(f) => {
+                let mut e = LinExpr::from(self.inner);
+                e.constant -= f;
+                LinExprPy { inner: e }
+            }
+            _ => LinExprPy { inner: LinExpr::from(self.inner) - rhs.into_expr() },
+        }
+    }
+    pub fn __rsub__(&self, lhs: Operand) -> LinExprPy {
+        match lhs {
+            Operand::Float(f) => {
+                let mut e = -LinExpr::from(self.inner);
+                e.constant += f;
+                LinExprPy { inner: e }
+            }
+            _ => LinExprPy { inner: lhs.into_expr() - LinExpr::from(self.inner) },
+        }
+    }
+
+    pub fn __mul__(&self, rhs: f64) -> LinExprPy {
+        LinExprPy { inner: self.inner * rhs }
+    }
+    pub fn __rmul__(&self, lhs: f64) -> LinExprPy {
+        LinExprPy { inner: lhs * self.inner }
+    }
+    pub fn __truediv__(&self, rhs: f64) -> LinExprPy {
+        LinExprPy { inner: self.inner / rhs }
+    }
+    pub fn __neg__(&self) -> LinExprPy {
+        LinExprPy { inner: -self.inner }
     }
 }
 
@@ -167,7 +295,6 @@ pub struct Solution {
 
 #[pymethods]
 impl Solution {
-    /// solution.value(var) - f64
     pub fn value(&self, var: &Var) -> f64 {
         self.inner.value(var.inner)
     }
