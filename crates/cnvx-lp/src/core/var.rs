@@ -1,7 +1,7 @@
 //! Variable types and builder API for optimization models.
 
 use crate::{LinearConstraint, expr::LinExpr};
-use std::ops::Mul;
+use std::ops::{Add, Div, Mul, Neg, Sub};
 
 /// A unique identifier for a variable in a model.
 ///
@@ -163,16 +163,80 @@ impl<'a> VarBuilder<'a> {
     }
 }
 
-/// Allows multiplying a variable by a constant to create a linear expression.
-///
-/// # Examples
-///
-/// ```rust
-/// # use cnvx_lp::LpModel;
-/// let mut model = LpModel::new();
-/// let x = model.add_var().finish();
-/// let expr = x * 3.0; // LinExpr representing 3*x
-/// ```
+/////////////////////////////////////////////////////////////////////////////
+// Operator Overloads for VarId
+/////////////////////////////////////////////////////////////////////////////
+
+/// -VarId
+impl Neg for VarId {
+    type Output = LinExpr;
+
+    fn neg(self) -> LinExpr {
+        LinExpr::new(self, -1.0)
+    }
+}
+
+/// VarId + f64
+impl Add<f64> for VarId {
+    type Output = LinExpr;
+
+    fn add(self, rhs: f64) -> LinExpr {
+        LinExpr {
+            terms: vec![crate::LinTerm { var: self, coeff: 1.0 }],
+            constant: rhs,
+        }
+    }
+}
+
+/// f64 + VarId
+impl Add<VarId> for f64 {
+    type Output = LinExpr;
+
+    fn add(self, rhs: VarId) -> LinExpr {
+        rhs + self
+    }
+}
+
+/// VarId - VarId
+impl Sub for VarId {
+    type Output = LinExpr;
+
+    fn sub(self, rhs: VarId) -> LinExpr {
+        LinExpr {
+            terms: vec![
+                crate::LinTerm { var: self, coeff: 1.0 },
+                crate::LinTerm { var: rhs, coeff: -1.0 },
+            ],
+            constant: 0.0,
+        }
+    }
+}
+
+/// VarId - f64
+impl Sub<f64> for VarId {
+    type Output = LinExpr;
+
+    fn sub(self, rhs: f64) -> LinExpr {
+        LinExpr {
+            terms: vec![crate::LinTerm { var: self, coeff: 1.0 }],
+            constant: -rhs,
+        }
+    }
+}
+
+/// f64 - VarId
+impl Sub<VarId> for f64 {
+    type Output = LinExpr;
+
+    fn sub(self, rhs: VarId) -> LinExpr {
+        LinExpr {
+            terms: vec![crate::LinTerm { var: rhs, coeff: -1.0 }],
+            constant: self,
+        }
+    }
+}
+
+/// VarId * f64
 impl Mul<f64> for VarId {
     type Output = LinExpr;
 
@@ -181,20 +245,20 @@ impl Mul<f64> for VarId {
     }
 }
 
-/// Allows multiplying a constant by a variable to create a linear expression.
-///
-/// # Examples
-///
-/// ```rust
-/// # use cnvx_lp::LpModel;
-/// let mut model = LpModel::new();
-/// let x = model.add_var().finish();
-/// let expr = 3.0 * x; // LinExpr representing 3*x
-/// ```
+/// f64 * VarId
 impl Mul<VarId> for f64 {
     type Output = LinExpr;
 
     fn mul(self, rhs: VarId) -> LinExpr {
         rhs * self
+    }
+}
+
+/// VarId / f64
+impl Div<f64> for VarId {
+    type Output = LinExpr;
+
+    fn div(self, rhs: f64) -> LinExpr {
+        LinExpr::new(self, 1.0 / rhs)
     }
 }
