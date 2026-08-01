@@ -24,8 +24,8 @@ fn identity_matrix_returns_rhs() {
         a.set(i, i, 1.0);
     }
 
-    let mut rhs = vec![5.0, -2.0, 10.0];
-    a.mldivide(&mut rhs).unwrap();
+    let rhs = vec![5.0, -2.0, 10.0];
+    a.mldivide(&rhs).unwrap();
 
     assert_eq!(rhs, vec![5.0, -2.0, 10.0]);
 }
@@ -39,8 +39,8 @@ fn singular_matrix_errors() {
     a.set(1, 0, 2.0);
     a.set(1, 1, 4.0); // dependent row
 
-    let mut rhs = vec![3.0, 6.0];
-    let result = a.mldivide(&mut rhs);
+    let rhs = vec![3.0, 6.0];
+    let result = a.mldivide(&rhs);
 
     assert!(result.is_err());
 }
@@ -48,7 +48,7 @@ fn singular_matrix_errors() {
 #[test]
 fn non_square_matrix_errors() {
     let a = DenseMatrix::new(2, 3);
-    let mut rhs = vec![1.0, 2.0];
+    let rhs = vec![1.0, 2.0];
 
-    assert!(a.mldivide(&mut rhs).is_err());
+    assert!(a.mldivide(&rhs).is_err());
 }
