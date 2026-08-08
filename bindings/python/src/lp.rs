@@ -90,9 +90,11 @@ impl LinExprPy {
     pub fn eq(&self, rhs: Operand) -> ConstraintPy {
         self.__eq__(rhs)
     }
+
     pub fn leq(&self, rhs: Operand) -> ConstraintPy {
         self.__le__(rhs)
     }
+
     pub fn geq(&self, rhs: Operand) -> ConstraintPy {
         self.__ge__(rhs)
     }
@@ -143,6 +145,7 @@ impl LinExprPy {
             _ => LinExprPy { inner: self.inner.clone() + rhs.into_expr() },
         }
     }
+
     pub fn __radd__(&self, lhs: Operand) -> LinExprPy {
         self.__add__(lhs)
     }
@@ -157,6 +160,7 @@ impl LinExprPy {
             _ => LinExprPy { inner: self.inner.clone() - rhs.into_expr() },
         }
     }
+
     pub fn __rsub__(&self, lhs: Operand) -> LinExprPy {
         match lhs {
             Operand::Float(f) => {
@@ -171,12 +175,15 @@ impl LinExprPy {
     pub fn __mul__(&self, rhs: f64) -> LinExprPy {
         LinExprPy { inner: self.inner.clone() * rhs }
     }
+
     pub fn __rmul__(&self, lhs: f64) -> LinExprPy {
         LinExprPy { inner: lhs * self.inner.clone() }
     }
+
     pub fn __truediv__(&self, rhs: f64) -> LinExprPy {
         LinExprPy { inner: self.inner.clone() / rhs }
     }
+
     pub fn __neg__(&self) -> LinExprPy {
         LinExprPy { inner: -self.inner.clone() }
     }
@@ -191,9 +198,11 @@ impl Var {
     pub fn eq(&self, rhs: Operand) -> ConstraintPy {
         self.__eq__(rhs)
     }
+
     pub fn leq(&self, rhs: Operand) -> ConstraintPy {
         self.__le__(rhs)
     }
+
     pub fn geq(&self, rhs: Operand) -> ConstraintPy {
         self.__ge__(rhs)
     }
@@ -244,6 +253,7 @@ impl Var {
             _ => LinExprPy { inner: LinExpr::from(self.inner) + rhs.into_expr() },
         }
     }
+
     pub fn __radd__(&self, lhs: Operand) -> LinExprPy {
         self.__add__(lhs)
     }
@@ -258,6 +268,7 @@ impl Var {
             _ => LinExprPy { inner: LinExpr::from(self.inner) - rhs.into_expr() },
         }
     }
+
     pub fn __rsub__(&self, lhs: Operand) -> LinExprPy {
         match lhs {
             Operand::Float(f) => {
@@ -272,12 +283,15 @@ impl Var {
     pub fn __mul__(&self, rhs: f64) -> LinExprPy {
         LinExprPy { inner: self.inner * rhs }
     }
+
     pub fn __rmul__(&self, lhs: f64) -> LinExprPy {
         LinExprPy { inner: lhs * self.inner }
     }
+
     pub fn __truediv__(&self, rhs: f64) -> LinExprPy {
         LinExprPy { inner: self.inner / rhs }
     }
+
     pub fn __neg__(&self) -> LinExprPy {
         LinExprPy { inner: -self.inner }
     }

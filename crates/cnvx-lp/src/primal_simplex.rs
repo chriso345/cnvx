@@ -2,7 +2,8 @@ use std::ops::Neg;
 
 // FIXME: Replace with better solving techniques.
 use cnvx_core::*;
-use cnvx_math::{DenseMatrix, Matrix, matrix::SparseMatrix};
+use cnvx_math::matrix::SparseMatrix;
+use cnvx_math::{DenseMatrix, Matrix};
 
 use crate::{Cmp, LinExpr, LinearConstraint, LpModel, LpSolution, Solver};
 
@@ -23,11 +24,13 @@ use crate::{Cmp, LinExpr, LinearConstraint, LpModel, LpSolution, Solver};
 /// println!("Solution value: {}", solution.value(x));
 /// ```
 pub struct PrimalSimplexSolver {
-    // Internal state of the simplex algorithm, including the tableau and current solution.
+    // Internal state of the simplex algorithm, including the tableau and current
+    // solution.
     state: Option<State>,
     /// The numerical tolerance used for feasibility and optimality checks.
     pub tolerance: f64,
-    /// The maximum number of simplex iterations before terminating with an error.
+    /// The maximum number of simplex iterations before terminating with an
+    /// error.
     pub max_iter: usize,
     /// Whether to log iteration details during the simplex algorithm.
     pub logging: bool,
@@ -106,8 +109,8 @@ enum State {
 
 /// Internal state for the simplex algorithm.
 ///
-/// Tracks the current basis, non-basis variables, solution vector, objective value,
-/// and the LP tableau.
+/// Tracks the current basis, non-basis variables, solution vector, objective
+/// value, and the LP tableau.
 #[derive(Clone)]
 pub struct PrimalSimplexState<A: Matrix> {
     /// Current iteration count of the simplex algorithm.
@@ -145,10 +148,12 @@ pub struct PrimalSimplexState<A: Matrix> {
 impl<A: Matrix> PrimalSimplexState<A> {
     /// Initialize a new simplex state from a given `Model`.
     ///
-    /// Constructs the tableau, sets up artificial variables for inequalities, and
-    /// computes the objective coefficients based on the problem's sense (min/max).
+    /// Constructs the tableau, sets up artificial variables for inequalities,
+    /// and computes the objective coefficients based on the problem's sense
+    /// (min/max).
     pub fn new(model: &LpModel) -> Self {
-        // Clone the model so we can inject bound constraints without mutating the original
+        // Clone the model so we can inject bound constraints without mutating the
+        // original
         let mut model = model.clone();
 
         // Inject variable bounds as constraints
@@ -240,7 +245,8 @@ impl<A: Matrix> PrimalSimplexState<A> {
 
     /// Solve the LP using the simplex method.
     ///
-    /// Performs a two-phase simplex if necessary (phase 1 for feasibility, phase 2 for optimality).
+    /// Performs a two-phase simplex if necessary (phase 1 for feasibility,
+    /// phase 2 for optimality).
     ///
     /// Returns the solution vector and the objective value.
     pub fn solve_lp(
@@ -497,7 +503,8 @@ impl<A: Matrix> PrimalSimplexState<A> {
             .sum();
     }
 
-    /// Prepare the LP for phase 1 of two-phase simplex by adding artificial variables.
+    /// Prepare the LP for phase 1 of two-phase simplex by adding artificial
+    /// variables.
     pub fn setup_phase1(&mut self, orig_n: usize) -> (A, Vec<f64>, A) {
         let m = self.a.rows();
         let n = self.a.cols();
@@ -545,7 +552,8 @@ impl<A: Matrix> PrimalSimplexState<A> {
         (orig_a, orig_c, bmat)
     }
 
-    /// Remove artificial variables from the basis once feasibility is established.
+    /// Remove artificial variables from the basis once feasibility is
+    /// established.
     pub fn remove_artificial_from_basis(
         &mut self,
         bmat: &mut A,

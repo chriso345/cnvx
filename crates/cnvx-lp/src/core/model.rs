@@ -4,8 +4,8 @@ use std::ops::AddAssign;
 
 use crate::*;
 
-/// Represents an extensible optimization model containing variables, constraints,
-/// and an objective function.
+/// Represents an extensible optimization model containing variables,
+/// constraints, and an objective function.
 ///
 /// `Model` is the concrete problem type for LP and MIP problems (both report
 /// `kind() == "lp"` until a dedicated MIP problem type is introduced in

@@ -1,7 +1,7 @@
-use crate::matrix::Matrix;
-
 #[cfg(not(target_arch = "wasm32"))]
 use cblas::{Layout, Transpose, dgemm, dgemv};
+
+use crate::matrix::Matrix;
 
 /// A dense matrix stored in row-major order using a flat 1D vector.
 #[derive(Debug, Clone, PartialEq)]

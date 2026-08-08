@@ -8,8 +8,9 @@ use crate::LinExpr;
 
 /// Represents an objective function in a model.
 ///
-/// Contains the linear expression to optimize, the optimization sense (min/max),
-/// an optional name, and an optional priority (useful for multi-objective problems).
+/// Contains the linear expression to optimize, the optimization sense
+/// (min/max), an optional name, and an optional priority (useful for
+/// multi-objective problems).
 ///
 /// # Examples
 ///
@@ -74,7 +75,8 @@ impl ObjectiveBuilder {
         );
     }
 
-    /// Sets a human-readable name for the objective and returns the final [`Objective`].
+    /// Sets a human-readable name for the objective and returns the final
+    /// [`Objective`].
     ///
     /// # Example
     ///

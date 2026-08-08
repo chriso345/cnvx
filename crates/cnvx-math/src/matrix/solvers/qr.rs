@@ -1,7 +1,9 @@
-use crate::matrix::{DenseMatrix, Matrix};
 use lapacke::{Layout, dgels};
 
-/// Solves overdetermined rectangular systems (Least Squares) using QR factorization.
+use crate::matrix::{DenseMatrix, Matrix};
+
+/// Solves overdetermined rectangular systems (Least Squares) using QR
+/// factorization.
 pub fn solve(a: &DenseMatrix, b: &[f64]) -> Result<Vec<f64>, String> {
     let m = a.rows() as i32;
     let n = a.cols() as i32;

@@ -26,9 +26,9 @@ pub enum Cmp {
 /// let x = VarId(0);
 /// let expr = LinExpr::new(x, 2.0) + 3.0;
 ///
-/// let c1 = LinearConstraint::leq(expr.clone(), 5.0);  // 2*x0 + 3 <= 5
-/// let c2 = LinearConstraint::geq(expr.clone(), 1.0);  // 2*x0 + 3 >= 1
-/// let c3 = LinearConstraint::eq(expr, 4.0);           // 2*x0 + 3 == 4
+/// let c1 = LinearConstraint::leq(expr.clone(), 5.0); // 2*x0 + 3 <= 5
+/// let c2 = LinearConstraint::geq(expr.clone(), 1.0); // 2*x0 + 3 >= 1
+/// let c3 = LinearConstraint::eq(expr, 4.0); // 2*x0 + 3 == 4
 /// ```
 #[derive(Debug)]
 pub struct LinearConstraint {
@@ -82,8 +82,7 @@ impl LinearConstraint {
     ///
     /// ```rust
     /// # use cnvx_lp::{LinExpr, VarId, LinearConstraint};
-    /// let c = LinearConstraint::leq(LinExpr::from(VarId(0)), 10.0)
-    ///     .named("capacity");
+    /// let c = LinearConstraint::leq(LinExpr::from(VarId(0)), 10.0).named("capacity");
     /// assert_eq!(c.name.as_deref(), Some("capacity"));
     /// ```
     pub fn named(mut self, name: &str) -> Self {

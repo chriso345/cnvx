@@ -1,4 +1,6 @@
-use std::{cell::Cell, process::ExitCode, sync::LazyLock};
+use std::cell::Cell;
+use std::process::ExitCode;
+use std::sync::LazyLock;
 
 use clap::Parser;
 

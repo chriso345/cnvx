@@ -44,7 +44,8 @@ impl ParetoResult {
         self.labels[target].first().map(|l| &l.cost)
     }
 
-    /// Ordered node ids on the path corresponding to label `label_idx` at `target`.
+    /// Ordered node ids on the path corresponding to label `label_idx` at
+    /// `target`.
     ///
     /// Returns an empty vec if `label_idx` is out of range or the path
     /// does not originate at `source`.
@@ -77,7 +78,8 @@ impl ParetoResult {
         path
     }
 
-    /// Ordered edge ids on the path corresponding to label `label_idx` at `target`.
+    /// Ordered edge ids on the path corresponding to label `label_idx` at
+    /// `target`.
     pub fn edge_path(
         &self,
         source: usize,

@@ -4,26 +4,31 @@ use crate::{LpModel, LpSolution};
 
 /// Trait for optimization solvers.
 ///
-/// Any struct implementing this trait can solve a [`LpModel`] and produce a [`LpSolution`].
-/// This trait provides a consistent interface across different solver implementations,
-/// such as simplex, interior point, branch-and-bound, or lexicographic solvers.
+/// Any struct implementing this trait can solve a [`LpModel`] and produce a
+/// [`LpSolution`]. This trait provides a consistent interface across different
+/// solver implementations, such as simplex, interior point, branch-and-bound,
+/// or lexicographic solvers.
 ///
 /// ```rust
-/// use cnvx_core::{SolveError};
+/// use cnvx_core::SolveError;
 /// use cnvx_lp::{LpModel, LpSolution, Solver};
 ///
-/// pub struct MySolver { /* internal state */ }
+/// pub struct MySolver {
+///     // internal state
+/// }
 ///
 /// impl Solver for MySolver {
-///     fn solve(
-///         &mut self,
-///         model: &LpModel,
-///     ) -> Result<LpSolution, SolveError> {
+///     fn solve(&mut self, model: &LpModel) -> Result<LpSolution, SolveError> {
 ///         todo!()
 ///     }
 ///
-///     fn objective_value(&self) -> Option<f64> { todo!() }
-///     fn solution_vector(&self) -> Vec<f64> { todo!() }
+///     fn objective_value(&self) -> Option<f64> {
+///         todo!()
+///     }
+///
+///     fn solution_vector(&self) -> Vec<f64> {
+///         todo!()
+///     }
 /// }
 /// ```
 pub trait Solver: Send {
@@ -49,7 +54,8 @@ pub trait Solver: Send {
     /// on internal assertion failures that indicate a programming error.
     fn solve(&mut self, model: &LpModel) -> Result<LpSolution, SolveError>;
 
-    /// Returns the objective value from the most recent call to [`solve`](Self::solve).
+    /// Returns the objective value from the most recent call to
+    /// [`solve`](Self::solve).
     ///
     /// Returns `None` if `solve` has not been called yet, or if the most
     /// recent solve did not produce a primal solution (e.g. infeasible).

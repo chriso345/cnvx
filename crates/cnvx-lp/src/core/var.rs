@@ -1,11 +1,14 @@
 //! Variable types and builder API for optimization models.
 
-use crate::{LinearConstraint, expr::LinExpr};
 use std::ops::{Add, Div, Mul, Neg, Sub};
+
+use crate::LinearConstraint;
+use crate::expr::LinExpr;
 
 /// A unique identifier for a variable in a model.
 ///
-/// This is used internally by the solver and the model to index variable values.
+/// This is used internally by the solver and the model to index variable
+/// values.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct VarId(pub usize);
 
@@ -47,24 +50,23 @@ pub struct Var {
     /// Whether the variable is restricted to integer values.
     pub is_integer: bool,
 
-    /// Whether this is an artificial variable (used for inequality constraints in simplex initialization).
+    /// Whether this is an artificial variable (used for inequality constraints
+    /// in simplex initialization).
     pub is_artificial: bool,
 }
 
 /// A builder for setting properties of a variable using a fluent API.
 ///
-/// Returned by [`LpModel::add_var()`](crate::model::LpModel::add_var), this allows setting bounds, integrality,
-/// and other properties before finalizing the variable with [`finish()`](VarBuilder::finish).
+/// Returned by [`LpModel::add_var()`](crate::model::LpModel::add_var), this
+/// allows setting bounds, integrality, and other properties before finalizing
+/// the variable with [`finish()`](VarBuilder::finish).
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use cnvx_lp::LpModel;
 /// let mut model = LpModel::new();
-/// let x = model
-///     .add_var()
-///     .integer()
-///     .finish();
+/// let x = model.add_var().integer().finish();
 /// ```
 pub struct VarBuilder<'a> {
     pub model: &'a mut crate::LpModel,
@@ -73,8 +75,9 @@ pub struct VarBuilder<'a> {
 
 /// Methods for configuring a variable using a fluent API.
 ///
-/// Returned by [`LpModel::add_var()`](crate::model::LpModel::add_var). Use these methods to set bounds,
-/// integrality, or mark a variable as binary before calling [`finish()`](VarBuilder::finish).
+/// Returned by [`LpModel::add_var()`](crate::model::LpModel::add_var). Use
+/// these methods to set bounds, integrality, or mark a variable as binary
+/// before calling [`finish()`](VarBuilder::finish).
 impl<'a> VarBuilder<'a> {
     /// Sets a name for the variable.
     ///
