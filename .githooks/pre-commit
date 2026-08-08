@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+set -eux
+
+# Clippy (Lint)
+cargo clippy --workspace --all-targets -- -D warnings
+
+# Format (Check)
+cargo fmt --all -- --check
+
+# Documentation (Check)
+RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps --document-private-items

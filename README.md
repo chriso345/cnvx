@@ -80,6 +80,18 @@ fn main() -> Result<(), SolveError> {
 
 ---
 
+## Contributing
+
+Contributions to **cnvx** are welcome via pull requests and issues.
+
+To ensure certain quality standards, this project uses [pre-commit hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks). These hooks can be registerd by running the following command:
+
+```sh
+cp .githooks/pre-commit .git/hooks
+```
+
+---
+
 ## License
 
 Licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
