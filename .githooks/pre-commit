@@ -1,12 +1,7 @@
 #!/usr/bin/env bash
 
-set -eux
+set -e
 
-# Clippy (Lint)
-cargo clippy --workspace --all-targets -- -D warnings
-
-# Format (Check)
-cargo fmt --all -- --check
-
-# Documentation (Check)
-RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps --document-private-items
+./scripts/lint.sh --pre-commit
+./scripts/fmt.sh --pre-commit
+./scripts/docs.sh --pre-commit
