@@ -1,8 +1,7 @@
+use std::fmt::Display;
+use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
+
 use crate::{LinearConstraint, VarId};
-use std::{
-    fmt::Display,
-    ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign},
-};
 
 /// A single term in a linear expression: `coeff * var`.
 #[derive(Clone, Debug)]
@@ -22,7 +21,8 @@ pub struct LinExpr {
     pub constant: f64,
 }
 
-// TODO: This will later likely pivot to a more general `Expr` type for non-linear support.
+// TODO: This will later likely pivot to a more general `Expr` type for
+// non-linear support.
 
 impl LinExpr {
     /// Creates a new linear expression from a single variable and coefficient.
@@ -320,7 +320,8 @@ impl DivAssign<f64> for LinExpr {
     }
 }
 
-/// Allows converting a single variable into a linear expression with coefficient 1.0.
+/// Allows converting a single variable into a linear expression with
+/// coefficient 1.0.
 impl From<VarId> for LinExpr {
     fn from(var: VarId) -> Self {
         LinExpr::new(var, 1.0)

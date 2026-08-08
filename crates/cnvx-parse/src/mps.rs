@@ -1,7 +1,8 @@
+use std::collections::HashMap;
+
 use cnvx_lp::{LinExpr, LpModel, Objective, VarId};
 
 use super::LanguageParser;
-use std::collections::HashMap;
 
 #[derive(Default)]
 pub struct MPSLanguage;

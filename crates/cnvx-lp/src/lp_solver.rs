@@ -58,9 +58,7 @@ impl LpSolver {
     /// ```rust
     /// use cnvx_lp::{LpSolver, PrimalSimplexSolver};
     ///
-    /// let solver = LpSolver::from_solvers(vec![
-    ///     Box::new(PrimalSimplexSolver::new()),
-    /// ]);
+    /// let solver = LpSolver::from_solvers(vec![Box::new(PrimalSimplexSolver::new())]);
     /// ```
     pub fn from_solvers(solvers: Vec<Box<dyn Solver>>) -> Self {
         Self { solvers }

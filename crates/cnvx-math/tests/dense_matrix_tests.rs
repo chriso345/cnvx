@@ -1,4 +1,5 @@
-use cnvx_math::{DenseMatrix, Matrix, matrix::vector_norm_l2};
+use cnvx_math::matrix::vector_norm_l2;
+use cnvx_math::{DenseMatrix, Matrix};
 
 // const EPSILON: f64 = 1e-9;
 

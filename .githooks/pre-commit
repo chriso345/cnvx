@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -e
+
+./scripts/lint.sh --pre-commit
+./scripts/fmt.sh --pre-commit
+./scripts/docs.sh --pre-commit

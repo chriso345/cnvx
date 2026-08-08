@@ -1,6 +1,7 @@
 use std::fmt::Display;
 
-/// Represents the state of a solution after attempting to solve an optimization problem.
+/// Represents the state of a solution after attempting to solve an optimization
+/// problem.
 ///
 /// # Examples
 ///
@@ -20,7 +21,8 @@ pub enum SolveStatus {
     /// The problem is infeasible: no solution satisfies all constraints.
     Infeasible,
 
-    /// The problem is unbounded: the objective can increase/decrease without limit.
+    /// The problem is unbounded: the objective can increase/decrease without
+    /// limit.
     Unbounded,
 
     Other(String),
@@ -57,7 +59,8 @@ pub enum SolveError {
     /// Internal solver error (unexpected state or panic inside the solver).
     InternalSolverError(String),
 
-    /// The solver does not support a required feature (e.g., non-linear constraints).
+    /// The solver does not support a required feature (e.g., non-linear
+    /// constraints).
     Unsupported(String),
 
     Other(String),

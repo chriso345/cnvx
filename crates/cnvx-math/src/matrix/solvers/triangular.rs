@@ -1,5 +1,6 @@
-use crate::matrix::{DenseMatrix, Matrix};
 use cblas::{Diagonal, Layout, Part, Transpose, dtrsv};
+
+use crate::matrix::{DenseMatrix, Matrix};
 
 pub enum TriType {
     Upper,

@@ -1,12 +1,13 @@
+use std::fmt::Display;
+
 use cnvx_core::SolveStatus;
 
 use crate::VarId;
-use std::fmt::Display;
 
 /// Represents the result of solving an optimization problem.
 ///
-/// Contains the values assigned to each variable, the value of the objective function,
-/// and the solver status.
+/// Contains the values assigned to each variable, the value of the objective
+/// function, and the solver status.
 ///
 /// # Examples
 ///
@@ -28,15 +29,18 @@ use std::fmt::Display;
 pub struct LpSolution {
     /// Variable assignments, indexed by variable ID.
     ///
-    /// The value at index `i` corresponds to the variable with ID [`VarId(i)`](VarId).
+    /// The value at index `i` corresponds to the variable with ID
+    /// [`VarId(i)`](VarId).
     pub values: Vec<f64>,
 
     /// The value of the objective function at the solution.
     ///
-    /// [`None`] if the solver did not produce an objective value (e.g. infeasible or unbounded problem).
+    /// [`None`] if the solver did not produce an objective value (e.g.
+    /// infeasible or unbounded problem).
     pub objective_value: Option<f64>,
 
-    /// The solver status indicating whether the solution is optimal, feasible, infeasible, or unbounded.
+    /// The solver status indicating whether the solution is optimal, feasible,
+    /// infeasible, or unbounded.
     pub status: SolveStatus,
 }
 

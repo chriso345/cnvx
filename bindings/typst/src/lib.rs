@@ -1,6 +1,7 @@
+use std::collections::HashMap;
+
 use cnvx_lp::*;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use wasm_minimal_protocol::*;
 
 initiate_protocol!();

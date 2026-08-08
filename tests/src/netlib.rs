@@ -1,10 +1,8 @@
-use std::{
-    fs,
-    io::Write,
-    path::{Path, PathBuf},
-    process::Command,
-    sync::LazyLock,
-};
+use std::fs;
+use std::io::Write;
+use std::path::{Path, PathBuf};
+use std::process::Command;
+use std::sync::LazyLock;
 
 use cnvx_core::SolveStatus;
 use cnvx_lp::{LpModel, LpSolution, LpSolver, Solver};

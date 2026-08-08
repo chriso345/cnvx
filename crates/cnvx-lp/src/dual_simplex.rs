@@ -19,8 +19,9 @@ use crate::{LpModel, LpSolution, Solver};
 ///
 /// ## Compatibility
 ///
-/// Accepts the same problems as [`PrimalSimplexSolver`](crate::PrimalSimplexSolver):
-/// `kind() == "lp"` with a defined objective operating on an [`LpModel`].
+/// Accepts the same problems as
+/// [`PrimalSimplexSolver`](crate::PrimalSimplexSolver): `kind() == "lp"` with a
+/// defined objective operating on an [`LpModel`].
 ///
 /// ## Configuration
 ///
@@ -93,7 +94,8 @@ impl Solver for DualSimplexSolver {
 
 /// State used internally by the dual simplex solver.
 ///
-/// Mirrors the fields in [`PrimalSimplexState`](crate::primal_simplex::PrimalSimplexState)
+/// Mirrors the fields in
+/// [`PrimalSimplexState`](crate::primal_simplex::PrimalSimplexState)
 /// so that the two implementations share a common structure and can eventually
 /// share helper utilities (e.g. pivot, basis update, dual computation).
 #[derive(Clone)]

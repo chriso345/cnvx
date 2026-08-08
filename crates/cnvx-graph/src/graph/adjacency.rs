@@ -14,10 +14,10 @@ pub struct EdgeRecord<E> {
 }
 
 impl<N, E> Graph for AdjacencyGraph<N, E> {
-    type Vertex = usize;
     type Edge = usize;
-    type NodeData = N;
     type EdgeData = E;
+    type NodeData = N;
+    type Vertex = usize;
 
     fn add_vertex(&mut self, data: N) -> usize {
         let id = self.nodes.len();
@@ -46,12 +46,15 @@ impl<N, E> Graph for AdjacencyGraph<N, E> {
     fn num_nodes(&self) -> usize {
         self.nodes.len()
     }
+
     fn num_edges(&self) -> usize {
         self.edges.len()
     }
+
     fn source(&self, e: usize) -> usize {
         self.edges[e].from
     }
+
     fn target(&self, e: usize) -> usize {
         self.edges[e].to
     }

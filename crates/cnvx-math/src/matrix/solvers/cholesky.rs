@@ -1,5 +1,6 @@
-use crate::matrix::{DenseMatrix, Matrix};
 use lapacke::{Layout, dposv};
+
+use crate::matrix::{DenseMatrix, Matrix};
 
 pub fn solve(a: &DenseMatrix, b: &[f64]) -> Result<Vec<f64>, String> {
     let n = a.rows() as i32;

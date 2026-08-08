@@ -4,7 +4,8 @@ use crate::{Entry, Graph, ParetoLabel, ParetoResult, SPType};
 
 /// Label-setting solver over any [`Graph`].
 ///
-/// Single-criterion shortest paths are the special case of a 1-element cost vector.
+/// Single-criterion shortest paths are the special case of a 1-element cost
+/// vector.
 pub struct LabelSet<'g, G>
 where
     G: Graph<Vertex = usize, Edge = usize>,
@@ -36,7 +37,8 @@ where
         }
     }
 
-    /// Run the multicriteria label-setting algorithm with a vector cost closure.
+    /// Run the multicriteria label-setting algorithm with a vector cost
+    /// closure.
     ///
     /// `cost_fn` must return a `Vec<f64>` of the same length for every edge,
     /// with all components non-negative.
