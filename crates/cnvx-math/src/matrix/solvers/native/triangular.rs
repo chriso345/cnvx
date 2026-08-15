@@ -1,8 +1,7 @@
+use super::super::TriType;
 use crate::error::MathError;
 use crate::matrix::Matrix;
 use crate::vector::Vector;
-
-use super::super::TriType;
 
 /// Solves a triangular (or diagonal) system via forward/back substitution.
 pub(crate) fn solve(a: &Matrix, b: &Vector, tri: TriType) -> Result<Vector, MathError> {

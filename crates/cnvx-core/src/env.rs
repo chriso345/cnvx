@@ -1,6 +1,10 @@
 /// ```rust
 /// # use cnvx_core::Env;
-/// let env = Env::with_params(Params { time_limit: Some(30.0), threads: Some(8), ..Default::default() });
+/// let env = Env::with_params(Params {
+///     time_limit: Some(30.0),
+///     threads: Some(8),
+///     ..Default::default()
+/// });
 /// ```
 pub struct Env {
     pub params: Params,
@@ -13,6 +17,12 @@ impl Env {
 
     pub fn with_params(params: Params) -> Self {
         Env { params }
+    }
+}
+
+impl Default for Env {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -29,7 +39,7 @@ pub struct Params {
 }
 
 impl Default for Params {
-    /* Gurobi-like sane defaults */
+    // Gurobi-like sane defaults
     fn default() -> Self {
         Params {
             time_limit: None,

@@ -42,11 +42,10 @@ pub(crate) fn solve_dense(a: &Matrix, rhs: &Vector) -> Result<Vector, MathError>
     }
 
     // 3. Symmetric: try Cholesky (i.e. is it also positive-definite?).
-    if is_symmetric(a) {
-        if let Ok(x) = solve_cholesky(a, rhs) {
+    if is_symmetric(a)
+        && let Ok(x) = solve_cholesky(a, rhs) {
             return Ok(x);
         }
-    }
 
     // 4. General square fallback: LU with partial pivoting.
     solve_lu(a, rhs)

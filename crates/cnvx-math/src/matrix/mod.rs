@@ -350,8 +350,8 @@ impl Matrix {
     ///
     /// Dispatches on the structure of `A` (MATLAB-style `mldivide`):
     /// 1. If `A` is rectangular, solves the least-squares problem via QR.
-    /// 2. If `A` is triangular (or diagonal), uses forward/back
-    ///    substitution directly.
+    /// 2. If `A` is triangular (or diagonal), uses forward/back substitution
+    ///    directly.
     /// 3. If `A` is symmetric, tries a Cholesky factorization (i.e. `A` is
     ///    symmetric positive-definite).
     /// 4. Otherwise, falls back to LU decomposition with partial pivoting.

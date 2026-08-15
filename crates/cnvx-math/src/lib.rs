@@ -5,8 +5,7 @@
 //! - [`Vector`] - a thin, owned wrapper around `Vec<f64>`.
 //! - [`Matrix`] - a dense, row-major matrix.
 //! - [`SparseMatrix`] - a CSR matrix.
-//! - [`MathError`] - the error type shared by all fallible operations
-//!   above.
+//! - [`MathError`] - the error type shared by all fallible operations above.
 //!
 //! ## Native vs. WebAssembly
 //!

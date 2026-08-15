@@ -10,23 +10,23 @@ keywords = { workspace = true }
 readme = { workspace = true }
 
 [features]
-default = ["lp"]
-all = ["lp", "graph"]
-lp = ["cnvx-lp"]
-graph = ["cnvx-graph"]
+# default = ["lp"]
+# all = ["lp", "graph"]
+# lp = ["cnvx-lp"]
+# graph = ["cnvx-graph"]
 
 [dependencies]
 cnvx-core = { workspace = true }
-cnvx-lp = { workspace = true, optional = true }
+# cnvx-lp = { workspace = true, optional = true }
 cnvx-math = { workspace = true }
-cnvx-graph = { workspace = true, optional = true }
+# cnvx-graph = { workspace = true, optional = true }
 
 [lints]
 workspace = true
 
 [workspace]
-members = ["crates/*", "tests", "bindings/*"]
-default-members = ["crates/cnvx-cli"]
+members = ["crates/*"]
+# default-members = ["crates/cnvx-cli"]
 resolver = "2"
 
 [workspace.package]
@@ -40,12 +40,11 @@ readme = "README.md"
 
 [workspace.dependencies]
 cnvx = { path = ".", version = "0.0.1" }
-cnvx-cli = { path = "crates/cnvx-cli", version = "0.0.1" }
+# cnvx-cli = { path = "crates/cnvx-cli", version = "0.0.1" }
 cnvx-core = { path = "crates/cnvx-core", version = "0.0.1" }
-cnvx-lp = { path = "crates/cnvx-lp", version = "0.0.1" }
+# cnvx-lp = { path = "crates/cnvx-lp", version = "0.0.1" }
 cnvx-math = { path = "crates/cnvx-math", version = "0.0.1" }
-cnvx-graph = { path = "crates/cnvx-graph", version = "0.0.1" }
-cnvx-parse = { path = "crates/cnvx-parse", version = "0.0.1" }
+# cnvx-graph = { path = "crates/cnvx-graph", version = "0.0.1" }
 clap = { version = "4.5.57", features = ["derive"] }
 cblas = { version = "0.5.0" }
 lapacke = { version = "0.5.0" }
@@ -75,17 +74,17 @@ debug = 2
 overflow-checks = true
 incremental = true
 
-[[example]]
-name = "cocktail"
-path = "examples/lp/cocktail.rs"
-required-features = ["lp"]
-
-[[example]]
-name = "power"
-path = "examples/lp/power.rs"
-required-features = ["lp"]
-
-[[example]]
-name = "shortest_path"
-path = "examples/network/shortest_path.rs"
-required-features = ["graph"]
+# [[example]]
+# name = "cocktail"
+# path = "examples/lp/cocktail.rs"
+# required-features = ["lp"]
+#
+# [[example]]
+# name = "power"
+# path = "examples/lp/power.rs"
+# required-features = ["lp"]
+#
+# [[example]]
+# name = "shortest_path"
+# path = "examples/network/shortest_path.rs"
+# required-features = ["graph"]
