@@ -1,52 +1,89 @@
-pub mod cholesky;
-pub mod lu;
-pub mod qr;
-pub mod triangular;
+//! `Matrix::solve`'s MATLAB-style `mldivide` dispatcher.
+//!
+//! Structure detection ([`check_triangular`], [`is_symmetric`]) is pure
+//! Rust and shared by both backends. The actual factorization/substitution
+//! work is backend-specific: native LAPACK/BLAS (`lapack`) on non-`wasm32`
+//! targets, a pure-Rust reimplementation (`native`) on `wasm32`.
 
-use crate::matrix::{DenseMatrix, Matrix};
+use crate::error::MathError;
+use crate::matrix::Matrix;
+use crate::vector::Vector;
 
-/// MATLAB-style mldivide dispatcher for full matrices
-/// See <https://mathworks.com/help/matlab/ref/double.mldivide.html>
-pub fn mldivide_dense(a: &DenseMatrix, b: &[f64]) -> Result<Vec<f64>, String> {
+#[cfg(not(target_arch = "wasm32"))]
+mod lapack;
+#[cfg(target_arch = "wasm32")]
+mod native;
+
+mod structure;
+
+pub(crate) use structure::{TriType, check_triangular, is_symmetric};
+
+/// Solves `A x = rhs`. See [`crate::Matrix::solve`] for the dispatch
+/// order.
+pub(crate) fn solve_dense(a: &Matrix, rhs: &Vector) -> Result<Vector, MathError> {
     let m = a.rows();
     let n = a.cols();
 
-    // 1. Is matrix square? If not, use QR for least squares.
+    // 1. Non-square: least squares via QR.
     if m != n {
-        return qr::solve(a, b);
+        return solve_least_squares(a, rhs);
     }
 
-    if b.len() != n {
-        return Err("RHS vector length must match matrix rows".to_string());
+    if rhs.len() != n {
+        return Err(MathError::DimensionMismatch(format!(
+            "right-hand side has {} entries, matrix has {n} columns",
+            rhs.len()
+        )));
     }
 
-    // 2. Is it perfectly triangular?
-    if let Some(tri_type) = triangular::check_structure(a) {
-        return triangular::solve(a, b, tri_type);
+    // 2. Triangular (or diagonal): substitution fast-path.
+    if let Some(tri) = check_triangular(a) {
+        return solve_triangular(a, rhs, tri);
     }
 
-    // 3. Is it symmetric?
+    // 3. Symmetric: try Cholesky (i.e. is it also positive-definite?).
     if is_symmetric(a) {
-        // Try Cholesky decomposition (Symmetric Positive Definite)
-        // If it succeeds, we are done. If it fails, fall through to LU.
-        if let Ok(x) = cholesky::solve(a, b) {
+        if let Ok(x) = solve_cholesky(a, rhs) {
             return Ok(x);
         }
     }
 
-    // 4. Fallback: LU Decomposition with partial pivoting
-    lu::solve(a, b)
+    // 4. General square fallback: LU with partial pivoting.
+    solve_lu(a, rhs)
 }
 
-/// Checks if A is symmetric: A_ij == A_ji
-fn is_symmetric(a: &DenseMatrix) -> bool {
-    let n = a.rows();
-    for i in 0..n {
-        for j in (i + 1)..n {
-            if (a.get(i, j) - a.get(j, i)).abs() > 1e-12 {
-                return false;
-            }
-        }
-    }
-    true
+#[cfg(not(target_arch = "wasm32"))]
+fn solve_triangular(a: &Matrix, rhs: &Vector, tri: TriType) -> Result<Vector, MathError> {
+    lapack::triangular::solve(a, rhs, tri)
+}
+#[cfg(target_arch = "wasm32")]
+fn solve_triangular(a: &Matrix, rhs: &Vector, tri: TriType) -> Result<Vector, MathError> {
+    native::triangular::solve(a, rhs, tri)
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn solve_cholesky(a: &Matrix, rhs: &Vector) -> Result<Vector, MathError> {
+    lapack::cholesky::solve(a, rhs)
+}
+#[cfg(target_arch = "wasm32")]
+fn solve_cholesky(a: &Matrix, rhs: &Vector) -> Result<Vector, MathError> {
+    native::cholesky::solve(a, rhs)
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn solve_lu(a: &Matrix, rhs: &Vector) -> Result<Vector, MathError> {
+    lapack::lu::solve(a, rhs)
+}
+#[cfg(target_arch = "wasm32")]
+fn solve_lu(a: &Matrix, rhs: &Vector) -> Result<Vector, MathError> {
+    native::lu::solve(a, rhs)
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn solve_least_squares(a: &Matrix, rhs: &Vector) -> Result<Vector, MathError> {
+    lapack::qr::solve(a, rhs)
+}
+#[cfg(target_arch = "wasm32")]
+fn solve_least_squares(a: &Matrix, rhs: &Vector) -> Result<Vector, MathError> {
+    native::qr::solve(a, rhs)
 }

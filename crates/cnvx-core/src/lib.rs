@@ -14,9 +14,15 @@
 //!   [`Optimal`](SolveStatus::Optimal) or
 //!   [`Infeasible`](SolveStatus::Infeasible).
 
+pub mod bounds;
+pub mod env;
+pub mod error;
 pub mod sense;
 pub mod status;
 
 // Re-export all submodules for easy access via `cnvx_core::*`
+pub use bounds::*;
+pub use env::*;
+pub use error::*;
 pub use sense::*;
 pub use status::*;

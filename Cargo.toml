@@ -54,6 +54,8 @@ openblas-src = { version = "0.10.16", features = [
     "lapacke",
     "system",
 ] }
+thiserror = { version = "2.0.20" }
+strum = { version = "0.28.0", features = ["derive"] }
 
 [workspace.lints]
 

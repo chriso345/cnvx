@@ -1,17 +1,17 @@
 use lapacke::{Layout, dgesv};
 
-use crate::matrix::{DenseMatrix, Matrix};
+use crate::error::MathError;
+use crate::matrix::Matrix;
+use crate::vector::Vector;
 
-pub fn solve(a: &DenseMatrix, b: &[f64]) -> Result<Vec<f64>, String> {
+/// General square solve via LAPACK's `dgesv` (LU with partial pivoting).
+pub(crate) fn solve(a: &Matrix, b: &Vector) -> Result<Vector, MathError> {
     let n = a.rows() as i32;
 
     // LAPACK mutates A to store the LU factors, so we must clone it.
     let mut a_copy = a.data().to_vec();
-
     // LAPACK mutates b to store the solution x.
     let mut x = b.to_vec();
-
-    // Pivot indices array
     let mut ipiv = vec![0; n as usize];
 
     let info = unsafe {
@@ -28,10 +28,13 @@ pub fn solve(a: &DenseMatrix, b: &[f64]) -> Result<Vec<f64>, String> {
     };
 
     if info > 0 {
-        return Err("Matrix is singular (U(i,i) is exactly zero)".into());
+        return Err(MathError::Singular);
     } else if info < 0 {
-        return Err(format!("Illegal value in argument {}", -info));
+        return Err(MathError::InvalidArgument(format!(
+            "illegal value in argument {}",
+            -info
+        )));
     }
 
-    Ok(x)
+    Ok(Vector::from(x))
 }

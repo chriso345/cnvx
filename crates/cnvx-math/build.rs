@@ -8,7 +8,7 @@ fn main() {
 
     if target_arch == "wasm32" {
         println!(
-            "cargo:warning=WebAssembly target detected, skipping lapack probe, using custom implementations."
+            "cargo:warning=WebAssembly target detected, skipping lapack probe, using the pure-Rust solver implementations instead."
         );
     } else {
         probe_lapack();

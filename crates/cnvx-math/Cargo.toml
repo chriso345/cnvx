@@ -10,6 +10,7 @@ keywords = { workspace = true }
 readme = { workspace = true }
 
 [dependencies]
+thiserror = { workspace = true }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 cblas = { workspace = true }
