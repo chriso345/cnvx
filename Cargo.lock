@@ -79,6 +79,7 @@ name = "cnvx"
 version = "0.0.1"
 dependencies = [
  "cnvx-core",
+ "cnvx-lp",
  "cnvx-math",
 ]
 
@@ -89,6 +90,15 @@ dependencies = [
  "cnvx-math",
  "strum",
  "thiserror",
+]
+
+[[package]]
+name = "cnvx-lp"
+version = "0.0.1"
+dependencies = [
+ "cnvx-core",
+ "cnvx-math",
+ "strum",
 ]
 
 [[package]]

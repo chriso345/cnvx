@@ -105,14 +105,14 @@ impl SparseMatrix {
     pub fn mul_vec(&self, v: &Vector) -> Vector {
         assert_eq!(self.cols, v.len(), "SparseMatrix::mul_vec: dimension mismatch");
         let mut result = vec![0.0; self.rows];
-        for row in 0..self.rows {
+        for (row, result_row) in result.iter_mut().enumerate() {
             let start = self.row_ptr[row];
             let end = self.row_ptr[row + 1];
             let mut sum = 0.0;
             for k in start..end {
                 sum += self.values[k] * v[self.col_idx[k]];
             }
-            result[row] = sum;
+            *result_row = sum;
         }
         Vector::from(result)
     }

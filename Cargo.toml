@@ -10,14 +10,14 @@ keywords = { workspace = true }
 readme = { workspace = true }
 
 [features]
-# default = ["lp"]
+default = ["lp"]
 # all = ["lp", "graph"]
-# lp = ["cnvx-lp"]
+lp = ["cnvx-lp"]
 # graph = ["cnvx-graph"]
 
 [dependencies]
 cnvx-core = { workspace = true }
-# cnvx-lp = { workspace = true, optional = true }
+cnvx-lp = { workspace = true, optional = true }
 cnvx-math = { workspace = true }
 # cnvx-graph = { workspace = true, optional = true }
 
@@ -42,7 +42,7 @@ readme = "README.md"
 cnvx = { path = ".", version = "0.0.1" }
 # cnvx-cli = { path = "crates/cnvx-cli", version = "0.0.1" }
 cnvx-core = { path = "crates/cnvx-core", version = "0.0.1" }
-# cnvx-lp = { path = "crates/cnvx-lp", version = "0.0.1" }
+cnvx-lp = { path = "crates/cnvx-lp", version = "0.0.1" }
 cnvx-math = { path = "crates/cnvx-math", version = "0.0.1" }
 # cnvx-graph = { path = "crates/cnvx-graph", version = "0.0.1" }
 clap = { version = "4.5.57", features = ["derive"] }
@@ -73,6 +73,11 @@ opt-level = 0
 debug = 2
 overflow-checks = true
 incremental = true
+
+[[example]]
+name = "diet"
+path = "examples/lp/diet.rs"
+required-features = ["lp"]
 
 # [[example]]
 # name = "cocktail"

@@ -1,0 +1,18 @@
+[package]
+name = "cnvx-lp"
+description = "linear programming solvers for cnvx"
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
+repository = { workspace = true }
+license = { workspace = true }
+keywords = { workspace = true }
+readme = { workspace = true }
+
+[dependencies]
+cnvx-core = { workspace = true }
+cnvx-math = { workspace = true }
+strum = { workspace = true }
+
+[lints]
+workspace = true
