@@ -18,10 +18,10 @@ Additionally, **cnvx** offers a command-line interface (CLI) for solving models 
 
 **cnvx** can be customized using Cargo features:
 
-* `lp` – enable linear programming solvers (**default**)
-* `mop` – enable multi-objective problem support (planned)
-* `sat` – enable satisfiability problem support (planned)
-* `nlp` – enable non-linear problem support (planned)
+* `lp` - enable linear programming solvers (**default**)
+* `mop` - enable multi-objective problem support (planned)
+* `sat` - enable satisfiability problem support (planned)
+* `nlp` - enable non-linear problem support (planned)
 
 These features allow the use of specific solvers and functionalities while keeping the core library lightweight.
 

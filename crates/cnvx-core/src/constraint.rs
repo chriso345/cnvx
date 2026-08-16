@@ -1,9 +1,10 @@
+use crate::Var;
 use crate::expr::Expression;
 
 /// The comparison a [`Constraint`] enforces on its linear part.
 ///
-/// All bounds here have already had the originating [`Expression`]'s
-/// constant term folded in, so a `Constraint`'s [`Constraint::expr`] is
+/// All bounds here have already had the originating [`Expression`]s'
+/// constant terms folded in, so a `Constraint`'s [`Constraint::expr`] is
 /// always a pure linear combination (constant term `0.0`).
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum ConstraintKind {
@@ -17,14 +18,17 @@ pub enum ConstraintKind {
     Ranged {
         /// The lower bound.
         lower: f64,
+
         /// The upper bound.
         upper: f64,
     },
 }
 
 impl ConstraintKind {
-    /// Shifts every bound by `delta`. Used to move an expression's constant
-    /// term onto the right-hand side during [`Constraint`] construction.
+    /// Shifts every bound by `delta`.
+    ///
+    /// Used to move an expression's constant term onto the right-hand
+    /// side during [`Constraint`] construction.
     fn shifted(self, delta: f64) -> ConstraintKind {
         match self {
             ConstraintKind::Leq(rhs) => ConstraintKind::Leq(rhs + delta),
@@ -53,6 +57,7 @@ pub struct Constraint {
 impl Constraint {
     fn new(expr: Expression, kind: ConstraintKind) -> Self {
         let (constant, linear) = expr.without_constant();
+
         Constraint {
             expr: linear,
             kind: kind.shifted(-constant),
@@ -60,9 +65,10 @@ impl Constraint {
         }
     }
 
-    /// The linear part being compared. Its constant term is always `0.0`;
-    /// any constant from the originating expression has already been moved
-    /// into [`Constraint::kind`]'s bound(s).
+    /// The linear part being compared.
+    ///
+    /// Its constant term is always `0.0`; any constant from the originating
+    /// expression has already been moved into [`Constraint::kind`]'s bound(s).
     pub fn expr(&self) -> &Expression {
         &self.expr
     }
@@ -96,18 +102,42 @@ impl Constraint {
 
 impl Expression {
     /// Builds `self <= rhs`.
-    pub fn leq(self, rhs: f64) -> Constraint {
-        Constraint::new(self, ConstraintKind::Leq(rhs))
+    ///
+    /// The right-hand side may be either a scalar or another linear
+    /// expression. Internally this is normalized as:
+    ///
+    /// `self - rhs <= 0`
+    pub fn leq<Rhs>(self, rhs: Rhs) -> Constraint
+    where
+        Rhs: Into<Expression>,
+    {
+        Constraint::new(self - rhs.into(), ConstraintKind::Leq(0.0))
     }
 
     /// Builds `self >= rhs`.
-    pub fn geq(self, rhs: f64) -> Constraint {
-        Constraint::new(self, ConstraintKind::Geq(rhs))
+    ///
+    /// The right-hand side may be either a scalar or another linear
+    /// expression. Internally this is normalized as:
+    ///
+    /// `self - rhs >= 0`
+    pub fn geq<Rhs>(self, rhs: Rhs) -> Constraint
+    where
+        Rhs: Into<Expression>,
+    {
+        Constraint::new(self - rhs.into(), ConstraintKind::Geq(0.0))
     }
 
     /// Builds `self == rhs`.
-    pub fn eq(self, rhs: f64) -> Constraint {
-        Constraint::new(self, ConstraintKind::Eq(rhs))
+    ///
+    /// The right-hand side may be either a scalar or another linear
+    /// expression. Internally this is normalized as:
+    ///
+    /// `self - rhs == 0`
+    pub fn eq<Rhs>(self, rhs: Rhs) -> Constraint
+    where
+        Rhs: Into<Expression>,
+    {
+        Constraint::new(self - rhs.into(), ConstraintKind::Eq(0.0))
     }
 
     /// Builds `lower <= self <= upper`, a ranged constraint.
@@ -117,5 +147,45 @@ impl Expression {
     /// [`Model`](crate::Model).
     pub fn between(self, lower: f64, upper: f64) -> Constraint {
         Constraint::new(self, ConstraintKind::Ranged { lower, upper })
+    }
+}
+
+impl Var {
+    /// Builds `self <= rhs`.
+    ///
+    /// The right-hand side may be either a scalar or another linear
+    /// expression.
+    pub fn leq<Rhs>(self, rhs: Rhs) -> Constraint
+    where
+        Rhs: Into<Expression>,
+    {
+        Expression::from(self).leq(rhs)
+    }
+
+    /// Builds `self >= rhs`.
+    ///
+    /// The right-hand side may be either a scalar or another linear
+    /// expression.
+    pub fn geq<Rhs>(self, rhs: Rhs) -> Constraint
+    where
+        Rhs: Into<Expression>,
+    {
+        Expression::from(self).geq(rhs)
+    }
+
+    /// Builds `self == rhs`.
+    ///
+    /// The right-hand side may be either a scalar or another linear
+    /// expression.
+    pub fn eq<Rhs>(self, rhs: Rhs) -> Constraint
+    where
+        Rhs: Into<Expression>,
+    {
+        Expression::from(self).eq(rhs)
+    }
+
+    /// Builds `lower <= self <= upper`.
+    pub fn between(self, lower: f64, upper: f64) -> Constraint {
+        Expression::from(self).between(lower, upper)
     }
 }

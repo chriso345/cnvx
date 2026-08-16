@@ -75,19 +75,19 @@ overflow-checks = true
 incremental = true
 
 [[example]]
+name = "cocktail"
+path = "examples/lp/cocktail.rs"
+required-features = ["lp"]
+
+[[example]]
 name = "diet"
 path = "examples/lp/diet.rs"
 required-features = ["lp"]
 
-# [[example]]
-# name = "cocktail"
-# path = "examples/lp/cocktail.rs"
-# required-features = ["lp"]
-#
-# [[example]]
-# name = "power"
-# path = "examples/lp/power.rs"
-# required-features = ["lp"]
+[[example]]
+name = "power"
+path = "examples/lp/power.rs"
+required-features = ["lp"]
 #
 # [[example]]
 # name = "shortest_path"
