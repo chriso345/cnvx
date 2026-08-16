@@ -1,2 +1,2 @@
 * text=auto eol=lf
-tests/vendor/* linguist-vendored
+tests/vendor/** linguist-vendored

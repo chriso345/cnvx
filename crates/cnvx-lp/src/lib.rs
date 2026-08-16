@@ -39,3 +39,7 @@ pub use basis::{Basis, VarStatus};
 pub use method::LpMethod;
 pub use solution::{CostRange, LpSolution, RhsRange};
 pub use solver::LpSolver;
+
+mod io;
+
+pub use io::LpModelIo;
