@@ -7,6 +7,9 @@ if [ "$1" = "--pre-commit" ]; then
     echo "Nightly toolchain is not installed. Please install it with 'rustup toolchain install nightly' and try again."
     exit 1
   fi
+elif [ "$1" = "--fix" ]; then
+  cargo +nightly clippy --workspace --all-targets --fix --allow-dirty -- -D warnings
 fi
 
+# Default to checking linting
 cargo +nightly clippy --workspace --all-targets -- -D warnings

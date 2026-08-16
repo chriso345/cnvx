@@ -7,8 +7,10 @@
 /// # use cnvx_core::Status;
 /// let status = Status::Optimal;
 /// assert_eq!(status.to_string(), "Optimal");
+/// let status = Status::Infeasible;
+/// assert_eq!(status.to_string(), "Infeasible");
 /// ```
-#[derive(Debug, strum::Display)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, strum::Display)]
 pub enum Status {
     /// The solver has found an optimal solution to the problem.
     Optimal,

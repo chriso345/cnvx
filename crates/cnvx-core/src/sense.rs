@@ -3,7 +3,6 @@
 pub enum Sense {
     /// Minimize the objective function.
     Minimize,
-
     /// Maximize the objective function.
     Maximize,
 }
