@@ -12,13 +12,14 @@ readme = { workspace = true }
 [features]
 default = ["lp"]
 # all = ["lp", "graph"]
-lp = ["cnvx-lp"]
+lp = ["cnvx-lp", "cnvx-milp"]
 # graph = ["cnvx-graph"]
 
 [dependencies]
 cnvx-core = { workspace = true }
 cnvx-lp = { workspace = true, optional = true }
 cnvx-math = { workspace = true }
+cnvx-milp = { workspace = true, optional = true }
 # cnvx-graph = { workspace = true, optional = true }
 
 [lints]
@@ -44,6 +45,7 @@ cnvx = { path = ".", version = "0.0.1" }
 cnvx-core = { path = "crates/cnvx-core", version = "0.0.1" }
 cnvx-lp = { path = "crates/cnvx-lp", version = "0.0.1" }
 cnvx-math = { path = "crates/cnvx-math", version = "0.0.1" }
+cnvx-milp = { path = "crates/cnvx-milp", version = "0.0.1" }
 # cnvx-graph = { path = "crates/cnvx-graph", version = "0.0.1" }
 clap = { version = "4.5.57", features = ["derive"] }
 cblas = { version = "0.5.0" }
@@ -85,11 +87,21 @@ path = "examples/lp/diet.rs"
 required-features = ["lp"]
 
 [[example]]
+name = "knapsack"
+path = "examples/lp/knapsack.rs"
+required-features = ["lp"]
+
+[[example]]
 name = "power"
 path = "examples/lp/power.rs"
 required-features = ["lp"]
-#
-# [[example]]
-# name = "shortest_path"
-# path = "examples/network/shortest_path.rs"
-# required-features = ["graph"]
+
+[[example]]
+name = "production_planning"
+path = "examples/lp/production_planning.rs"
+required-features = ["lp"]
+
+[[example]]
+name = "tsp"
+path = "examples/lp/tsp.rs"
+required-features = ["lp"]

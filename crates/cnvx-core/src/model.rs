@@ -64,8 +64,8 @@ impl Model {
     }
 
     /// Creates an empty model whose default solve parameters come from
-    /// `env`, mirroring Gurobi's `Model(env)`. Per-solve overrides on a
-    /// solver builder still take precedence over these defaults.
+    /// `env`. Per-solve overrides on a solver builder still take precedence
+    /// over these defaults.
     ///
     /// # Examples
     ///
@@ -113,14 +113,12 @@ impl Model {
         Var { index, generation: self.generation }
     }
 
-    /// Adds an integer variable, mirroring Gurobi's
-    /// `addVar(vtype=GRB.INTEGER)`.
+    /// Adds an integer variable.
     pub fn add_integer(&mut self, bounds: impl Into<Bounds>, name: &str) -> Var {
         self.add_kind_var(bounds, VarKind::Integer, name)
     }
 
-    /// Adds a binary variable (bounds fixed to `[0, 1]`), mirroring
-    /// Gurobi's `addVar(vtype=GRB.BINARY)`.
+    /// Adds a binary variable (bounds fixed to `[0, 1]`).
     pub fn add_binary(&mut self, name: &str) -> Var {
         self.add_kind_var(Bounds::new(0.0, 1.0), VarKind::Binary, name)
     }
@@ -132,8 +130,7 @@ impl Model {
     }
 
     /// Adds `n` continuous variables sharing the same bounds, named
-    /// `"{prefix}[0]"`, `"{prefix}[1]"`, ..., mirroring Gurobi's
-    /// `addVars(n, name="x")`.
+    /// `"{prefix}[0]"`, `"{prefix}[1]"`, ...
     pub fn add_named_vars(
         &mut self,
         n: usize,

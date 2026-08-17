@@ -139,6 +139,7 @@ fn run_cnvx(mps: &Path) -> Result<LpSolution, String> {
 #[test_case("sc105", Some(-5.2202061212E+01))]
 #[test_case("share1b", Some(-7.6589318579E+04))]
 #[test_case("share2b", Some(-4.1573224074E+02))]
+#[test_case("lotfi", Some(-2.5264706062E+01))]
 fn netlib_test(name: &str, expected: Option<f64>) {
     let lp = ensure_lp_file(name, expected);
     run_emps(&lp);

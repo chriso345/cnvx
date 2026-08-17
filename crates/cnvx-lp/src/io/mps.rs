@@ -336,8 +336,6 @@ pub(super) fn parse(contents: &str) -> Result<Model, CnvxError> {
                         ))
                     })?;
                     if Some(row_name) == objective_row.as_deref() {
-                        // Convention (matches CPLEX/lp_solve): an RHS entry
-                        // for the objective row is subtracted from it.
                         objective_constant = -value;
                     } else {
                         rhs.insert(row_name.to_string(), value);
@@ -455,10 +453,6 @@ fn apply_bound(
         "UP" => {
             let v = require_value(value, line)?;
             state.upper = v;
-            // Convention (matches CPLEX/lp_solve): a negative UP with no
-            // preceding explicit lower bound implies the lower bound is
-            // -inf, not the MPS default of 0 (which would otherwise make
-            // lower > upper).
             if v < 0.0 && !state.lower_explicit {
                 state.lower = f64::NEG_INFINITY;
             }

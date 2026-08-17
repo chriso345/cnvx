@@ -234,6 +234,7 @@ dependencies = [
  "cnvx-core",
  "cnvx-lp",
  "cnvx-math",
+ "cnvx-milp",
 ]
 
 [[package]]
@@ -263,6 +264,15 @@ dependencies = [
  "openblas-src",
  "pkg-config",
  "thiserror",
+]
+
+[[package]]
+name = "cnvx-milp"
+version = "0.0.1"
+dependencies = [
+ "cnvx-core",
+ "cnvx-lp",
+ "strum",
 ]
 
 [[package]]

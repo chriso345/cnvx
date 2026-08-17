@@ -1,8 +1,6 @@
 use crate::{Basis, LpMethod};
 
-/// A configured LP solver, built fluently, mirroring Gurobi's
-/// `Model.optimize()` setup: pick a method, tune tolerances, optionally
-/// warm-start.
+/// A configured LP solver.
 ///
 /// # Examples
 ///

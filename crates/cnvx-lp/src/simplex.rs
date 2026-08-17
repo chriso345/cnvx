@@ -94,6 +94,50 @@ pub(crate) fn solve(
         };
     }
 
+    let mut is_basic = vec![false; form.num_cols];
+    for &b in basis.iter() {
+        is_basic[b] = true;
+    }
+
+    for r in 0..basis.len() {
+        if !is_artificial[basis[r]] {
+            continue;
+        }
+
+        let row = tableau.get_row(r);
+        let replacement = (0..form.num_cols)
+            .find(|&j| !is_artificial[j] && !is_basic[j] && row[j].abs() > tolerance);
+
+        if let Some(q) = replacement {
+            // Gauss-Jordan pivot on (r, q).
+            let pivot = row[q];
+            let pivot_row = &row * (1.0 / pivot);
+            tableau
+                .set_row(r, &pivot_row)
+                .expect("pivot row has the tableau's own width");
+            rhs[r] /= pivot;
+
+            for rr in 0..tableau.rows() {
+                if rr == r {
+                    continue;
+                }
+                let factor = tableau.get_col(q)[rr];
+                if factor != 0.0 {
+                    let row_rr = tableau.get_row(rr);
+                    let updated = &row_rr - &(&pivot_row * factor);
+                    tableau
+                        .set_row(rr, &updated)
+                        .expect("row has the tableau's own width");
+                    rhs[rr] -= factor * rhs[r];
+                }
+            }
+
+            is_basic[basis[r]] = false;
+            is_basic[q] = true;
+            basis[r] = q;
+        }
+    }
+
     let mut z_row = initial_reduced_costs(&tableau, &basis, &form.objective);
     let phase2_status = run_phase(
         &mut tableau,
