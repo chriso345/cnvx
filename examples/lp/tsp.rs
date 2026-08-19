@@ -64,9 +64,7 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
     }
 
     // Exactly one edge must enter every city.
-    // (column access into `x`, not row-major — enumerate() doesn't fit naturally here)
-    #[allow(clippy::needless_range_loop)]
-    for j in 0..n {
+    for (j, _) in x.iter().enumerate().take(n) {
         let incoming = sum((0..n).filter(|&i| i != j).map(|i| x[i][j]));
 
         model.add_named_constraint(incoming.eq(1.0), &format!("one_arrival_{j}"))?;
@@ -161,7 +159,7 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
     //
     // status: Optimal
     // total distance: 33.00
-    // tour: A -> C -> B -> D -> E -> A
+    // tour: A -> E -> D -> B -> C -> A
 
     Ok(())
 }
