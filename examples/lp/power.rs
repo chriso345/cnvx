@@ -10,7 +10,7 @@
 //! - Emissions cap
 //! - Minimum thermal generation requirement
 //!
-//! Category: Linear Programming
+//! Features: `lp`
 
 use cnvx_core::{Model, Sense, Solve};
 use cnvx_lp::LpSolver;

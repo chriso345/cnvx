@@ -3,7 +3,7 @@
 //! Minimize the cost of buying bread and milk while satisfying
 //! a minimum protein requirement and a shelf-space limit.
 //!
-//! Category: Linear Programming
+//! Features: `lp`
 
 use cnvx_core::{Model, Sense, Solve};
 use cnvx_lp::LpSolver;

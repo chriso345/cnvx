@@ -11,9 +11,9 @@ readme = { workspace = true }
 
 [features]
 default = ["lp"]
-# all = ["lp", "graph"]
-lp = ["cnvx-lp", "cnvx-milp"]
-# graph = ["cnvx-graph"]
+all = ["lp", "milp"]
+lp = ["cnvx-lp"]
+milp = ["cnvx-milp"]
 
 [dependencies]
 cnvx-core = { workspace = true }
@@ -50,11 +50,6 @@ cnvx-milp = { path = "crates/cnvx-milp", version = "0.0.1" }
 clap = { version = "4.5.57", features = ["derive"] }
 cblas = { version = "0.5.0" }
 lapacke = { version = "0.5.0" }
-openblas-src = { version = "0.10.16", features = [
-    "cblas",
-    "lapacke",
-    "system",
-] }
 thiserror = { version = "2.0.20" }
 strum = { version = "0.28.0", features = ["derive"] }
 
@@ -76,6 +71,8 @@ debug = 2
 overflow-checks = true
 incremental = true
 
+## AUTO GENERATED EXAMPLES - DO NOT EDIT MANUALLY
+
 [[example]]
 name = "cocktail"
 path = "examples/lp/cocktail.rs"
@@ -87,21 +84,22 @@ path = "examples/lp/diet.rs"
 required-features = ["lp"]
 
 [[example]]
-name = "knapsack"
-path = "examples/lp/knapsack.rs"
-required-features = ["lp"]
-
-[[example]]
 name = "power"
 path = "examples/lp/power.rs"
 required-features = ["lp"]
 
 [[example]]
+name = "knapsack"
+path = "examples/milp/knapsack.rs"
+required-features = ["lp", "milp"]
+
+[[example]]
 name = "production_planning"
-path = "examples/lp/production_planning.rs"
-required-features = ["lp"]
+path = "examples/milp/production_planning.rs"
+required-features = ["lp", "milp"]
 
 [[example]]
 name = "tsp"
-path = "examples/lp/tsp.rs"
-required-features = ["lp"]
+path = "examples/milp/tsp.rs"
+required-features = ["lp", "milp"]
+

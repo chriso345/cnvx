@@ -10,7 +10,7 @@
 //! - Exactly one edge enters each city
 //! - Subtours are eliminated using MTZ constraints
 //!
-//! Category: Mixed-Integer Linear Programming
+//! Features: `lp`, `milp`
 
 use cnvx_core::{Model, Sense, Solve, sum};
 use cnvx_milp::MilpSolver;

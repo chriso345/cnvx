@@ -7,7 +7,7 @@
 //! Subject to limited supplies of rum and tequila and a bartender
 //! capacity limit.
 //!
-//! Category: Linear Programming
+//! Features: `lp`
 
 use cnvx_core::{Model, Sense, Solve};
 use cnvx_lp::LpSolver;

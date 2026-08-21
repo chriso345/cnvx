@@ -9,7 +9,7 @@
 //! - Each item is either selected or not selected
 //! - Total weight must not exceed 50
 //!
-//! Category: Mixed-Integer Linear Programming
+//! Features: `lp`, `milp`
 
 use cnvx_core::{Model, Sense, Solve, sum};
 use cnvx_milp::MilpSolver;

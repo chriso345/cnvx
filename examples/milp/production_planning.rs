@@ -9,7 +9,7 @@
 //! - Batches must be whole numbers
 //! - Additional production must be non-negative
 //!
-//! Category: Mixed-Integer Linear Programming
+//! Features: `lp`, `milp`
 
 use cnvx_core::{Model, Sense, Solve};
 use cnvx_milp::MilpSolver;
