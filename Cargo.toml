@@ -89,6 +89,22 @@ path = "examples/lp/power.rs"
 required-features = ["lp"]
 
 [[example]]
+name = "calculus"
+path = "examples/math/calculus.rs"
+
+[[example]]
+name = "dense_linalg"
+path = "examples/math/dense_linalg.rs"
+
+[[example]]
+name = "random_and_stats"
+path = "examples/math/random_and_stats.rs"
+
+[[example]]
+name = "sparse_solvers"
+path = "examples/math/sparse_solvers.rs"
+
+[[example]]
 name = "knapsack"
 path = "examples/milp/knapsack.rs"
 required-features = ["lp", "milp"]

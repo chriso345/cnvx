@@ -19,7 +19,7 @@
 //!
 //! // Add constraints
 //! model.add_constraint((x + y).leq(5.0)).unwrap();
-//! model.aad_constraint((x + 0.5 * y).geq(10.0)).unwrap();
+//! model.add_constraint((x + 0.5 * y).geq(10.0)).unwrap();
 //!
 //! // Set objective
 //! model.set_objective(Sense::Maximize, x + 2.0 * y).unwrap();

@@ -15,10 +15,10 @@ thiserror = { workspace = true }
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 cblas = { workspace = true }
 lapacke = { workspace = true }
-openblas-src = { workspace = true } # Links with openblas, which provides BLAS and LAPACK implementations
 
 [build-dependencies]
 pkg-config = { version = "0.3.33" }
+cc = { version = "1.0" }
 
 [lints]
 workspace = true

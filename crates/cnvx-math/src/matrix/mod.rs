@@ -4,6 +4,10 @@
 use cblas::{Layout, Transpose, dgemm, dgemv};
 
 use crate::error::MathError;
+use crate::linalg::{
+    CholeskyDecomposition, EigenDecomposition, LuDecomposition, QrDecomposition,
+    SvdDecomposition,
+};
 use crate::vector::Vector;
 
 mod solvers;
@@ -20,6 +24,8 @@ pub struct Matrix {
 }
 
 impl Matrix {
+    crate::elementwise::elementwise_fn_set!();
+
     #[inline(always)]
     fn index(&self, row: usize, col: usize) -> usize {
         row * self.cols + col
@@ -29,6 +35,21 @@ impl Matrix {
     /// by the native LAPACK/BLAS solvers.
     pub(crate) fn data(&self) -> &[f64] {
         &self.data
+    }
+
+    /// Creates a matrix directly from row-major data. Crate-internal:
+    /// used to build decomposition results from LAPACK output buffers
+    /// (which are already row-major, matching this crate's own layout).
+    ///
+    /// # Panics
+    /// Panics if `data.len() != rows * cols`.
+    pub(crate) fn from_row_major(rows: usize, cols: usize, data: Vec<f64>) -> Self {
+        assert_eq!(
+            data.len(),
+            rows * cols,
+            "Matrix::from_row_major: data length mismatch"
+        );
+        Self { rows, cols, data }
     }
 
     /// Creates a `rows` x `cols` matrix of zeros.
@@ -357,6 +378,273 @@ impl Matrix {
     /// 4. Otherwise, falls back to LU decomposition with partial pivoting.
     pub fn solve(&self, rhs: &Vector) -> Result<Vector, MathError> {
         solvers::solve_dense(self, rhs)
+    }
+
+    /// The trace: the sum of the diagonal elements.
+    ///
+    /// # Panics
+    /// Panics if the matrix isn't square.
+    pub fn trace(&self) -> f64 {
+        assert_eq!(self.rows, self.cols, "Matrix::trace requires a square matrix");
+        (0..self.rows).map(|i| self.get(i, i)).sum()
+    }
+
+    /// The Frobenius norm: `sqrt(sum(a_ij^2))`.
+    pub fn frobenius_norm(&self) -> f64 {
+        self.data.iter().map(|x| x * x).sum::<f64>().sqrt()
+    }
+
+    /// Whether `self` is symmetric to within `tol`: `|a[i][j] - a[j][i]| <=
+    /// tol` for every `i`, `j`.
+    ///
+    /// Non-square matrices are never symmetric.
+    pub fn is_symmetric(&self, tol: f64) -> bool {
+        if self.rows != self.cols {
+            return false;
+        }
+        for i in 0..self.rows {
+            for j in (i + 1)..self.cols {
+                if (self.get(i, j) - self.get(j, i)).abs() > tol {
+                    return false;
+                }
+            }
+        }
+        true
+    }
+
+    /// Scales every element by `s`. An alias for [`Matrix::mul_scalar`]
+    /// matching the design document's naming.
+    pub fn scale(&self, s: f64) -> Matrix {
+        self.mul_scalar(s)
+    }
+
+    /// Extracts row `r` as a [`Vector`]. An alias for [`Matrix::get_row`].
+    pub fn row(&self, r: usize) -> Vector {
+        self.get_row(r)
+    }
+
+    /// Extracts column `c` as a [`Vector`]. An alias for [`Matrix::get_col`].
+    pub fn col(&self, c: usize) -> Vector {
+        self.get_col(c)
+    }
+
+    /// Extracts the diagonal as a [`Vector`]. An alias for
+    /// [`Matrix::diagonal`].
+    pub fn diag(&self) -> Vector {
+        self.diagonal()
+    }
+
+    /// Applies `f` to every element, producing a new matrix of the same
+    /// shape.
+    pub fn map(&self, f: impl Fn(f64) -> f64) -> Matrix {
+        Matrix {
+            rows: self.rows,
+            cols: self.cols,
+            data: self.data.iter().map(|&x| f(x)).collect(),
+        }
+    }
+
+    /// LU decomposition with partial pivoting: `P A = L U`.
+    ///
+    /// This is the same factorization [`Matrix::solve`] already uses
+    /// internally for general square systems, exposed directly so callers
+    /// solving against the same matrix with multiple right-hand sides can
+    /// factorize once and reuse `l`/`u`/`p`.
+    ///
+    /// # Errors
+    /// Returns [`MathError::Singular`] if `A` is numerically singular, and
+    /// [`MathError::DimensionMismatch`] if `A` isn't square.
+    pub fn lu(&self) -> Result<LuDecomposition, MathError> {
+        crate::linalg::lu(self)
+    }
+
+    /// QR decomposition via Householder reflections: `A = Q R`.
+    ///
+    /// Requires `rows >= cols`. This is the numerically-preferred building
+    /// block for least-squares regression (see [`Matrix::least_squares`]).
+    ///
+    /// # Errors
+    /// Returns [`MathError::Unsupported`] if `rows < cols`, and
+    /// [`MathError::RankDeficient`] if `A` doesn't have full column rank.
+    pub fn qr(&self) -> Result<QrDecomposition, MathError> {
+        crate::linalg::qr(self)
+    }
+
+    /// Cholesky decomposition: `A = L L^T`, valid only for symmetric
+    /// positive-definite `A`.
+    ///
+    /// Roughly half the cost of a general LU factorization for the
+    /// symmetric positive-definite systems it applies to (covariance
+    /// matrices, kernel/Gram matrices).
+    ///
+    /// # Errors
+    /// Returns [`MathError::NotPositiveDefinite`] if `A` isn't symmetric
+    /// positive-definite, and [`MathError::DimensionMismatch`] if `A`
+    /// isn't square.
+    pub fn cholesky(&self) -> Result<CholeskyDecomposition, MathError> {
+        crate::linalg::cholesky(self)
+    }
+
+    /// Eigendecomposition for symmetric matrices: real eigenvalues and an
+    /// orthonormal eigenvector basis, sorted by descending eigenvalue.
+    ///
+    /// # Errors
+    /// Returns [`MathError::DimensionMismatch`] if `A` isn't square.
+    pub fn eigen_symmetric(&self) -> Result<EigenDecomposition, MathError> {
+        crate::linalg::eigen_symmetric(self)
+    }
+
+    /// Eigendecomposition for general (possibly non-symmetric) square
+    /// matrices, which may have complex-conjugate eigenvalue pairs. See
+    /// [`EigenDecomposition`]'s documentation for how complex eigenvalues
+    /// are represented.
+    ///
+    /// # Errors
+    /// Returns [`MathError::DimensionMismatch`] if `A` isn't square, and
+    /// [`MathError::Unsupported`] if the underlying iteration fails to
+    /// converge.
+    pub fn eigen_general(&self) -> Result<EigenDecomposition, MathError> {
+        crate::linalg::eigen_general(self)
+    }
+
+    /// Singular value decomposition: `A = U * diag(s) * V^T`, with
+    /// singular values in `s` sorted in descending order.
+    ///
+    /// [`Matrix::condition_number`], [`Matrix::rank`], and
+    /// [`Matrix::pseudo_inverse`] are all derived from this one
+    /// decomposition rather than three separate implementations.
+    pub fn svd(&self) -> Result<SvdDecomposition, MathError> {
+        crate::linalg::svd(self)
+    }
+
+    /// The determinant, via LU decomposition:
+    /// `det(A) = (-1)^(number of row swaps) * product(diag(U))`.
+    ///
+    /// Returns `0.0` (rather than an error) for numerically singular `A`.
+    ///
+    /// # Errors
+    /// Returns [`MathError::DimensionMismatch`] if `A` isn't square.
+    pub fn determinant(&self) -> Result<f64, MathError> {
+        let lu = match self.lu() {
+            Ok(lu) => lu,
+            Err(MathError::Singular) => return Ok(0.0),
+            Err(e) => return Err(e),
+        };
+        let n = self.rows;
+        let mut swaps = 0usize;
+        let mut visited = vec![false; n];
+        for i in 0..n {
+            if visited[i] || lu.p[i] == i {
+                continue;
+            }
+            let mut j = i;
+            let mut cycle_len = 0;
+            while !visited[j] {
+                visited[j] = true;
+                j = lu.p[j];
+                cycle_len += 1;
+            }
+            swaps += cycle_len - 1;
+        }
+        let sign = if swaps.is_multiple_of(2) { 1.0 } else { -1.0 };
+        let product: f64 = (0..n).map(|i| lu.u.get(i, i)).product();
+        Ok(sign * product)
+    }
+
+    /// The numerical rank: the number of singular values greater than
+    /// `tol`, via SVD.
+    pub fn rank(&self, tol: f64) -> Result<usize, MathError> {
+        let svd = self.svd()?;
+        Ok(svd.s.iter().filter(|&&s| s > tol).count())
+    }
+
+    /// The 2-norm condition number: the ratio of the largest to smallest
+    /// singular value, via SVD. A large condition number means `A` is
+    /// close to singular / `Matrix::solve` results will be numerically
+    /// sensitive to input perturbations.
+    ///
+    /// Returns `f64::INFINITY` if the smallest singular value is exactly
+    /// zero (i.e. `A` is exactly singular).
+    pub fn condition_number(&self) -> Result<f64, MathError> {
+        let svd = self.svd()?;
+        let max_s = svd.s.iter().copied().fold(0.0_f64, f64::max);
+        let min_s = svd.s.iter().copied().fold(f64::INFINITY, f64::min);
+        if min_s == 0.0 {
+            return Ok(f64::INFINITY);
+        }
+        Ok(max_s / min_s)
+    }
+
+    /// The Moore-Penrose pseudo-inverse, via SVD: `A^+ = V * diag(1/s) * U^T`,
+    /// with singular values below `1e-12` treated as zero (i.e. their
+    /// corresponding term is dropped rather than blowing up numerically).
+    pub fn pseudo_inverse(&self) -> Result<Matrix, MathError> {
+        let svd = self.svd()?;
+        let tol = 1e-12;
+        let k = svd.s.len();
+        let mut s_inv = Matrix::zeros(k, k);
+        for i in 0..k {
+            if svd.s[i] > tol {
+                s_inv.set(i, i, 1.0 / svd.s[i]);
+            }
+        }
+        // A^+ = V S^+ U^T, truncated to the k = min(rows, cols) reduced
+        // singular basis.
+        let v = svd.vt.transpose();
+        let v_ref = &v;
+        let v_k = Matrix::from_row_major(
+            v.rows(),
+            k,
+            (0..v.rows())
+                .flat_map(|i| (0..k).map(move |j| v_ref.get(i, j)))
+                .collect(),
+        );
+        let u = &svd.u;
+        let u_k = Matrix::from_row_major(
+            u.rows(),
+            k,
+            (0..u.rows()).flat_map(|i| (0..k).map(move |j| u.get(i, j))).collect(),
+        );
+        v_k.mul(&s_inv)?.mul(&u_k.transpose())
+    }
+
+    /// Solves the least-squares problem `min ||A x - rhs||` via QR
+    /// decomposition.
+    ///
+    /// Prefer this over [`Matrix::solve`]'s LU-based normal-equations-free
+    /// path for overdetermined regression-style systems: QR is
+    /// numerically better-conditioned than solving the normal equations
+    /// `(A^T A) x = A^T rhs` directly (squaring `A`'s condition number).
+    ///
+    /// # Errors
+    /// Returns [`MathError::Unsupported`] if `A` has fewer rows than
+    /// columns, and [`MathError::RankDeficient`] if `A` doesn't have full
+    /// column rank.
+    pub fn least_squares(&self, rhs: &Vector) -> Result<Vector, MathError> {
+        if rhs.len() != self.rows {
+            return Err(MathError::DimensionMismatch(format!(
+                "right-hand side has {} entries, matrix has {} rows",
+                rhs.len(),
+                self.rows
+            )));
+        }
+        let qr = self.qr()?;
+        // Solve R x = Q^T rhs via back substitution (R is upper triangular).
+        let qtb = qr.q.transpose().mul_vec(rhs);
+        let n = qr.r.cols();
+        let mut x = vec![0.0; n];
+        for i in (0..n).rev() {
+            let diag = qr.r.get(i, i);
+            if diag.abs() < 1e-12 {
+                return Err(MathError::RankDeficient);
+            }
+            let mut sum = qtb[i];
+            for (k, &xk) in x.iter().enumerate().skip(i + 1).take(n - i - 1) {
+                sum -= qr.r.get(i, k) * xk;
+            }
+            x[i] = sum / diag;
+        }
+        Ok(Vector::from(x))
     }
 
     fn check_same_shape(&self, other: &Matrix, op: &str) -> Result<(), MathError> {

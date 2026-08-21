@@ -1,5 +1,7 @@
 //! `Matrix::solve`'s MATLAB-style `mldivide` dispatcher.
 //!
+//! <https://au.mathworks.com/help/matlab/ref/mldivide_full.png>
+//!
 //! Structure detection ([`check_triangular`], [`is_symmetric`]) is pure
 //! Rust and shared by both backends. The actual factorization/substitution
 //! work is backend-specific: native LAPACK/BLAS (`lapack`) on non-`wasm32`

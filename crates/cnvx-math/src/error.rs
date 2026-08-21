@@ -34,4 +34,16 @@ pub enum MathError {
     /// The requested system shape/kind isn't supported by `solve`.
     #[error("unsupported system: {0}")]
     Unsupported(String),
+
+    /// An iterative solver (`solve_cg`/`solve_gmres`) or an
+    /// iterative eigensolver (`smallest_eigenpairs`/`largest_eigenpairs`)
+    /// exhausted its iteration budget without reaching the requested
+    /// tolerance.
+    #[error("iterative method did not converge within {0} iterations")]
+    NotConverged(u32),
+
+    /// A [`crate::random::Distribution`] was constructed with an
+    /// out-of-domain parameter (e.g. a negative standard deviation).
+    #[error("invalid parameter for distribution: {0}")]
+    InvalidDistributionParameter(String),
 }

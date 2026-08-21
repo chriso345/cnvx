@@ -1,7 +1,5 @@
-//! [`Vector`]: a thin, owned wrapper around `Vec<f64>`.
-
 use std::iter::FromIterator;
-use std::ops::{Add, Deref, Index, Mul, Neg, Sub};
+use std::ops::{Add, Deref, Index, IndexMut, Mul, Neg, Sub};
 
 /// A dense vector.
 ///
@@ -19,6 +17,8 @@ pub struct Vector {
 }
 
 impl Vector {
+    crate::elementwise::elementwise_fn_set!();
+
     /// Creates a vector of `n` zeros.
     pub fn zeros(n: usize) -> Self {
         Self { data: vec![0.0; n] }
@@ -57,6 +57,165 @@ impl Vector {
     pub fn norm_inf(&self) -> f64 {
         self.data.iter().fold(0.0_f64, |acc, &x| acc.max(x.abs()))
     }
+
+    /// Creates a vector of `n` ones.
+    pub fn ones(n: usize) -> Self {
+        Self { data: vec![1.0; n] }
+    }
+
+    /// Creates a vector of `n` evenly spaced values from `start` to `end`
+    /// inclusive.
+    ///
+    /// Returns an empty vector if `n == 0`, and `[start]` if `n == 1`
+    /// (matching NumPy's `linspace` conventions).
+    pub fn linspace(start: f64, end: f64, n: usize) -> Self {
+        if n == 0 {
+            return Self::zeros(0);
+        }
+        if n == 1 {
+            return Self { data: vec![start] };
+        }
+        let step = (end - start) / (n - 1) as f64;
+        (0..n).map(|i| start + step * i as f64).collect()
+    }
+
+    /// The general `p`-norm: `(sum(|x_i|^p))^(1/p)`.
+    ///
+    /// `p = 2.0` matches [`Vector::norm`]; `p = f64::INFINITY` matches
+    /// [`Vector::norm_inf`].
+    pub fn norm_p(&self, p: f64) -> f64 {
+        if p.is_infinite() {
+            return self.norm_inf();
+        }
+        self.data.iter().map(|x| x.abs().powf(p)).sum::<f64>().powf(1.0 / p)
+    }
+
+    /// Sum of all elements.
+    pub fn sum(&self) -> f64 {
+        self.data.iter().sum()
+    }
+
+    /// Arithmetic mean of all elements. Thin wrapper over
+    /// [`crate::stats::mean`].
+    ///
+    /// # Panics
+    /// Panics if the vector is empty.
+    pub fn mean(&self) -> f64 {
+        crate::stats::mean(self)
+    }
+
+    /// The largest element.
+    ///
+    /// # Panics
+    /// Panics if the vector is empty.
+    pub fn max(&self) -> f64 {
+        self.data.iter().copied().fold(f64::NEG_INFINITY, f64::max)
+    }
+
+    /// The smallest element.
+    ///
+    /// # Panics
+    /// Panics if the vector is empty.
+    pub fn min(&self) -> f64 {
+        self.data.iter().copied().fold(f64::INFINITY, f64::min)
+    }
+
+    /// The index of the largest element. Ties return the first occurrence.
+    ///
+    /// # Panics
+    /// Panics if the vector is empty.
+    pub fn argmax(&self) -> usize {
+        assert!(!self.data.is_empty(), "Vector::argmax: empty vector");
+        let mut best = 0;
+        for i in 1..self.data.len() {
+            if self.data[i] > self.data[best] {
+                best = i;
+            }
+        }
+        best
+    }
+
+    /// The index of the smallest element. Ties return the first occurrence.
+    ///
+    /// # Panics
+    /// Panics if the vector is empty.
+    pub fn argmin(&self) -> usize {
+        assert!(!self.data.is_empty(), "Vector::argmin: empty vector");
+        let mut best = 0;
+        for i in 1..self.data.len() {
+            if self.data[i] < self.data[best] {
+                best = i;
+            }
+        }
+        best
+    }
+
+    /// Elementwise Pareto dominance: `self` is no worse than `other` in
+    /// every component, and strictly better in at least one.
+    ///
+    /// This is the routine multi-criteria/multi-objective search (e.g.
+    /// Pareto-optimal shortest paths, Pareto fronts in evolutionary search)
+    /// is built on: lower is assumed better in every component, matching
+    /// the usual "minimize every objective" convention.
+    ///
+    /// # Panics
+    /// Panics if `self.len() != other.len()`.
+    ///
+    /// # Examples
+    /// ```
+    /// use cnvx_math::Vector;
+    ///
+    /// let a = Vector::from_slice(&[1.0, 2.0]);
+    /// let b = Vector::from_slice(&[1.0, 3.0]);
+    /// assert!(a.dominates(&b));
+    /// assert!(!b.dominates(&a));
+    /// ```
+    pub fn dominates(&self, other: &Vector) -> bool {
+        assert_eq!(self.len(), other.len(), "Vector::dominates: dimension mismatch");
+        let mut strictly_better = false;
+        for (a, b) in self.data.iter().zip(&other.data) {
+            if a > b {
+                return false;
+            }
+            if a < b {
+                strictly_better = true;
+            }
+        }
+        strictly_better
+    }
+
+    /// Like [`Vector::dominates`], but also returns `true` when `self` and
+    /// `other` are equal in every component (weak dominance).
+    ///
+    /// # Panics
+    /// Panics if `self.len() != other.len()`.
+    pub fn dominates_or_equal(&self, other: &Vector) -> bool {
+        assert_eq!(
+            self.len(),
+            other.len(),
+            "Vector::dominates_or_equal: dimension mismatch"
+        );
+        self.data.iter().zip(&other.data).all(|(a, b)| a <= b)
+    }
+
+    /// Epsilon-tolerant elementwise equality: `true` if every pair of
+    /// corresponding elements differs by no more than `tol`.
+    ///
+    /// Useful for dominance/correctness checks where exact floating-point
+    /// equality is too strict (e.g. after arithmetic that accumulates
+    /// rounding error).
+    ///
+    /// # Panics
+    /// Panics if `self.len() != other.len()`.
+    pub fn approx_eq(&self, other: &Vector, tol: f64) -> bool {
+        assert_eq!(self.len(), other.len(), "Vector::approx_eq: dimension mismatch");
+        self.data.iter().zip(&other.data).all(|(a, b)| (a - b).abs() <= tol)
+    }
+
+    /// Applies `f` to every element, producing a new vector.
+    pub fn map(&self, f: impl Fn(f64) -> f64) -> Vector {
+        self.data.iter().map(|&x| f(x)).collect()
+    }
 }
 
 impl Deref for Vector {
@@ -72,6 +231,12 @@ impl Index<usize> for Vector {
 
     fn index(&self, i: usize) -> &f64 {
         &self.data[i]
+    }
+}
+
+impl IndexMut<usize> for Vector {
+    fn index_mut(&mut self, i: usize) -> &mut f64 {
+        &mut self.data[i]
     }
 }
 

@@ -31,13 +31,42 @@ These features allow the use of specific solvers and functionalities while keepi
 
 **cnvx** can be used either as a library in your Rust projects or via its command-line interface (CLI).
 
-```bash
-# Library usage
-cargo add cnvx --features "lp"
+### As a library
 
-# CLI usage
+```bash
+cargo add cnvx --features "lp"
+```
+
+### As a CLI
+
+```bash
 cargo install cnvx-cli
 ```
+
+### System dependencies
+
+**cnvx**'s core math crate relies on system-level linear algebra libraries: `BLAS` and `LAPACK` for dense matrix operations, and `SuiteSparse` for sparse matrix operations. These are not managed by Cargo and must be installed separately before building.
+
+#### Ubuntu / Debian:
+
+```bash
+sudo apt-get install libblas-dev liblapack-dev libsuitesparse-dev
+```
+
+#### Arch Linux:
+
+```bash
+sudo pacman -S blas lapack suitesparse
+```
+
+#### macOS (Homebrew):
+
+```bash
+brew install openblas lapack suite-sparse
+```
+
+> **Note:** if these libraries aren't installed, building **cnvx** will fail with linker errors referencing BLAS/LAPACK/SuiteSparse symbols.
+
 
 ---
 
