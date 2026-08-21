@@ -2,8 +2,6 @@ use std::env;
 use std::process::exit;
 
 fn main() {
-    println!("cargo:rerun-if-changed=src/sparse/mumps_shim.c");
-
     let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap();
     let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap();
 
@@ -19,8 +17,26 @@ fn main() {
         return;
     }
 
+    probe_lapack();
     probe_openblas();
     probe_umfpack();
+}
+
+fn probe_lapack() {
+    let found = pkg_config::Config::new()
+        .cargo_metadata(true)
+        .probe("lapacke")
+        .or_else(|_| pkg_config::Config::new().cargo_metadata(true).probe("lapack"));
+
+    if let Err(e) = found {
+        panic!(
+            "could not find LAPACK or LAPACKE via pkg-config: {e}\n\
+             Install LAPACK, e.g.:\n\
+             Arch:   pacman -S lapack pkgconf\n\
+             Ubuntu: apt install liblapacke-dev pkg-config\n\
+             Brew:  brew install lapack pkg-config"
+        );
+    }
 }
 
 fn probe_openblas() {
