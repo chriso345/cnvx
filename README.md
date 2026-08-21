@@ -113,13 +113,13 @@ fn main() -> Result<(), SolveError> {
 
 Contributions to **cnvx** are welcome via pull requests and issues.
 
-To ensure certain quality standards, this project uses [pre-commit hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks). These hooks can be registerd by running the following command:
+To ensure certain quality standards, this project uses [pre-commit hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks). These hooks can be registered by running the following command:
 
 ```sh
 cp .githooks/pre-commit .git/hooks
 ```
 
-To make use of some more advanced formatting rules, the [nightly toolchain](https://doc.rust-lang.org/beta/book/appendix-07-nightly-rust.html) is required. *Note that the nightly toolchain is only used for formatting.* The nightly version can be installed using the following command:
+To make use of some more advanced formatting rules, the [nightly toolchain](https://doc.rust-lang.org/beta/book/appendix-07-nightly-rust.html) is required. *Note that the nightly toolchain is only used for formatting and linting.* The nightly version can be installed using the following command:
 
 ```sh
 rustup toolchain install --component rustfmt -- nightly
