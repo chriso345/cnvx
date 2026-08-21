@@ -7,7 +7,7 @@
 //! - Eigendecomposition, determinant, rank, and condition number
 //! - Least-squares regression via QR
 
-use cnvx_math::{Matrix, Vector};
+use cnvx::prelude::*;
 
 fn main() {
     // A symmetric positive-definite matrix (a small covariance-like matrix).

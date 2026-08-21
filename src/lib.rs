@@ -42,11 +42,13 @@
 pub use cnvx_core as core;
 #[cfg(feature = "lp")]
 pub use cnvx_lp as lp;
+pub use cnvx_math as math;
 
 pub mod prelude {
     pub use crate::core::*;
     #[cfg(feature = "lp")]
     pub use crate::lp::*;
+    pub use crate::math::*;
 }
 
 /// Returns the version of the `cnvx` crate.

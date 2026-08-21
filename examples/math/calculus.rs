@@ -6,8 +6,8 @@
 //! - Root of cos(t) - t = 0, via bisection and Newton's method
 //! - Definite integral of sin(t) e^t via Simpson's rule
 
-use cnvx_math::Vector;
-use cnvx_math::calculus::{DEFAULT_STEP, bisection, gradient, hessian, newton, simpson};
+use calculus::*;
+use cnvx::prelude::*;
 
 fn main() {
     // Finite-difference gradient and Hessian of a scalar function. This

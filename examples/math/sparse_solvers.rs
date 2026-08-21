@@ -8,7 +8,7 @@
 //! - A direct solve for comparison
 //! - Partial eigendecomposition via Lanczos
 
-use cnvx_math::{IterativeOptions, Preconditioner, SparseMatrix, Vector};
+use cnvx::prelude::*;
 
 fn main() {
     // A tridiagonal SPD matrix (2 on the diagonal, -1 on the off-diagonals).

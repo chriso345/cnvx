@@ -6,8 +6,8 @@
 //! - Drawing correlated samples from a MultivariateNormal distribution and
 //!   recovering the target correlation
 
-use cnvx_math::random::{Distribution, MultivariateNormal, Normal, Rng};
-use cnvx_math::{Matrix, Vector, stats};
+use cnvx::prelude::*;
+use random::*;
 
 fn main() {
     // A fixed seed makes this reproducible across runs.
