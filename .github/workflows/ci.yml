@@ -190,5 +190,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+      - name: Install OpenBLAS and SuiteSparse
+        run: sudo apt-get update && sudo apt-get install -y libopenblas-dev liblapacke-dev libsuitesparse-dev
       - name: Run netlib tests
         run: timeout 240s cargo netlib -- --nocapture
