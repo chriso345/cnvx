@@ -79,6 +79,7 @@ jobs:
     needs:
       - build
       - integration-test
+      - examples
       - lint
       - test
     steps:
@@ -153,6 +154,28 @@ jobs:
         env:
           LIBRARY_PATH: /usr/lib/x86_64-linux-gnu/openblas-pthread:/usr/lib/x86_64-linux-gnu/lapack
         run: 'cargo test -p ${{ matrix.crate }}'
+
+  # TODO: Have a way to target specific examples to run (based on features) and
+  # only run those examples when the corresponding features are changed.
+  examples:
+    name: Examples
+    runs-on: ubuntu-latest
+    needs:
+      - changes
+      - build
+      - test
+    if: |
+      needs.changes.outputs.testing == 'true' &&
+      needs.test.result != 'failure'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Install OpenBLAS and SuiteSparse
+        run: sudo apt-get update && sudo apt-get install -y libopenblas-dev liblapacke-dev libsuitesparse-dev
+      - name: Run examples
+        env:
+          LIBRARY_PATH: /usr/lib/x86_64-linux-gnu/openblas-pthread:/usr/lib/x86_64-linux-gnu/lapack
+        run: ./scripts/run_examples.sh
 
   # TODO: Not needed for now, as the integration tests are minor.
   # This should be added back once there are more substantial integration tests, and the project
