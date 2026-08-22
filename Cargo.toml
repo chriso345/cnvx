@@ -89,20 +89,44 @@ path = "examples/lp/power.rs"
 required-features = ["lp"]
 
 [[example]]
-name = "calculus"
-path = "examples/math/calculus.rs"
+name = "finite_element_1d"
+path = "examples/math/finite_element_1d.rs"
 
 [[example]]
-name = "dense_linalg"
-path = "examples/math/dense_linalg.rs"
+name = "gradient_optimization"
+path = "examples/math/gradient_optimization.rs"
 
 [[example]]
-name = "random_and_stats"
-path = "examples/math/random_and_stats.rs"
+name = "interpolation"
+path = "examples/math/interpolation.rs"
 
 [[example]]
-name = "sparse_solvers"
-path = "examples/math/sparse_solvers.rs"
+name = "kalman_filter"
+path = "examples/math/kalman_filter.rs"
+
+[[example]]
+name = "markov_chain"
+path = "examples/math/markov_chain.rs"
+
+[[example]]
+name = "monte_carlo_integration"
+path = "examples/math/monte_carlo_integration.rs"
+
+[[example]]
+name = "nonlinear_system"
+path = "examples/math/nonlinear_system.rs"
+
+[[example]]
+name = "polynomial_regression"
+path = "examples/math/polynomial_regression.rs"
+
+[[example]]
+name = "principal_component_analysis"
+path = "examples/math/principal_component_analysis.rs"
+
+[[example]]
+name = "signal_processing"
+path = "examples/math/signal_processing.rs"
 
 [[example]]
 name = "knapsack"

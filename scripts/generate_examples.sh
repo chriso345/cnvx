@@ -3,21 +3,6 @@
 # Recursively scans an "examples" directory for .rs files and (re)writes the
 # [[example]] blocks in Cargo.toml, based on each file's doc-comment.
 #
-# For a file like examples/lp/cocktail.rs containing:
-#
-#   //! Cocktail Blending LP
-#   //!
-#   //! ...
-#   //! Category: Linear Programming
-#   //! Features: `lp`
-#
-# it generates:
-#
-#   [[example]]
-#   name = "cocktail"
-#   path = "examples/lp/cocktail.rs"
-#   required-features = ["lp"]
-#
 # Usage:
 #   ./generate_examples.sh [examples_dir] [Cargo.toml path]
 #
