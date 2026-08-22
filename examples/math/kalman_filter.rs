@@ -44,8 +44,8 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
     p.set(1, 0, 0.0);
     p.set(1, 1, 10.0); // High uncertainty
 
-    println!("Initial state: {x:?}");
-    println!("Initial covariance:\n{p:?}\n");
+    println!("Initial state: {:.6}", x);
+    println!("Initial covariance:\n{:.6}\n", p);
 
     // Simulate true trajectory
     let n_steps = 50;
@@ -162,9 +162,9 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
     //
     // === Kalman Filter: 1D Position/Velocity Tracking ===
     //
-    // Initial state: Vector { data: [0.0, 1.0] }
+    // Initial state: [0.000000, 1.000000]
     // Initial covariance:
-    // Matrix { rows: 2, cols: 2, data: [10.0, 0.0, 0.0, 10.0] }
+    // Matrix { rows: 2, cols: 2, data: [10.000000, 0.000000, 0.000000, 10.000000] }
     //
     // Step  0: meas=0.655, est=0.628, true=0.100, pos_std=0.690
     // Step 10: meas=1.267, est=1.066, true=1.101, pos_std=0.392

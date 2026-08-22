@@ -6,7 +6,6 @@
 use cnvx::math::random::{Distribution, Normal, Rng};
 use cnvx::prelude::*;
 
-#[rustfmt::skip]
 fn main() -> Result<(), cnvx_core::CnvxError> {
     println!("=== PCA on Synthetic Correlated Data ===\n");
 
@@ -74,7 +73,7 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
 
     // Eigendecomposition
     let eigen = cov.eigen_symmetric()?;
-    println!("\nEigenvalues (variance explained): {:?}", eigen.values);
+    println!("\nEigenvalues (variance explained): {:.6}", eigen.values);
     println!("Total variance: {:.3}", eigen.values.iter().sum::<f64>());
 
     // Proportion of variance
@@ -136,7 +135,7 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
     let cov = centered_t.mul(&centered)?.mul_scalar(1.0 / (n_samples - 1) as f64);
     let eigen = cov.eigen_symmetric()?;
 
-    println!("Eigenvalues: {:?}", eigen.values);
+    println!("Eigenvalues: {:.6}", eigen.values);
     let total: f64 = eigen.values.iter().sum();
     for (i, &val) in eigen.values.iter().enumerate() {
         println!("  PC{}: {:.1}%", i + 1, val / total * 100.0);
@@ -170,7 +169,7 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
     //   [7.683, 6.510, 2.274]
     //   [2.752, 2.274, 0.890]
     //
-    // Eigenvalues (variance explained): Vector { data: [16.494089188679922, 0.09620401279751634, 0.04810276705892071] }
+    // Eigenvalues (variance explained): [16.494089, 0.096204, 0.048103]
     // Total variance: 16.638
     //   PC1: 99.1% (16.494)
     //   PC2: 0.6% (0.096)
@@ -186,7 +185,7 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
     // Reconstruction MSE (2D -> 3D): 0.016002
     //
     // === PCA on Iris-like Data ===
-    // Eigenvalues: Vector { data: [4.129951572829542, 0.3257843247841365, 0.13110150651733898, 0.06661411218569556] }
+    // Eigenvalues: [4.129952, 0.325784, 0.131102, 0.066614]
     //   PC1: 88.8%
     //   PC2: 7.0%
     //   PC3: 2.8%

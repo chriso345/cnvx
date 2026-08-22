@@ -1,3 +1,4 @@
+use std::fmt;
 use std::iter::FromIterator;
 use std::ops::{Add, Deref, Index, IndexMut, Mul, Neg, Sub};
 
@@ -337,5 +338,23 @@ impl Mul<&Vector> for f64 {
 
     fn mul(self, rhs: &Vector) -> Vector {
         rhs * self
+    }
+}
+
+impl fmt::Display for Vector {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "[")?;
+        for (i, &val) in self.data.iter().enumerate() {
+            if i > 0 {
+                write!(f, ", ")?;
+            }
+            // Use the formatter's precision if specified
+            if let Some(prec) = f.precision() {
+                write!(f, "{:.*}", prec, val)?;
+            } else {
+                write!(f, "{:?}", val)?;
+            }
+        }
+        write!(f, "]")
     }
 }
