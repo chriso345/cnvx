@@ -8,7 +8,6 @@
 use cnvx::math::calculus::*;
 use cnvx::prelude::*;
 
-#[rustfmt::skip]
 fn main() -> Result<(), cnvx_core::CnvxError> {
     // Rosenbrock function: f(x,y) = (1-x)^2 + 100(y-x^2)^2
     // Global minimum at (1, 1) with f = 0
@@ -42,7 +41,7 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
 
     let start = Vector::from_slice(&[-1.2, 1.0]);
     println!("=== Optimization of Rosenbrock Function ===");
-    println!("Start: {start:?}, f(start) = {:.6}", rosenbrock(&start));
+    println!("Start: {:.6}, f(start) = {:.6}", start, rosenbrock(&start));
     println!("True minimum: [1, 1], f = 0\n");
 
     // 1. Gradient Descent with backtracking line search
@@ -56,7 +55,7 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
     for iter in 0..max_iter {
         let grad_norm = grad.norm();
         if grad_norm < tol {
-            println!("Converged in {iter} iterations: f = {f:.6}, x = {x:?}");
+            println!("Converged in {iter} iterations: f = {f:.6}, x = {:.6}", x);
             break;
         }
 
@@ -94,7 +93,7 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
     for iter in 0..100 {
         let grad_norm = grad.norm();
         if grad_norm < tol {
-            println!("Converged in {iter} iterations: f = {f:.6}, x = {x:?}");
+            println!("Converged in {iter} iterations: f = {f:.6}, x = {:.6}", x);
             break;
         }
 
@@ -128,7 +127,7 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
         let grad = gradient(rosenbrock, &x, 1e-6);
         let grad_norm = grad.norm();
         if grad_norm < tol {
-            println!("Converged in {iter} iterations: f = {f:.6}, x = {x:?}");
+            println!("Converged in {iter} iterations: f = {f:.6}, x = {:.6}", x);
             break;
         }
 
@@ -175,7 +174,7 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
         for _iter in 0..500 {
             let grad = gradient(himmelblau, &x, 1e-6);
             if grad.norm() < 1e-8 {
-                println!("  Start {i}: {start:?} -> x = {x:?}, f = {f:.6}");
+                println!("  Start {i}: {:.6} -> x = {:.6}, f = {f:.6}", start, x);
                 break;
             }
             let hess = hessian(himmelblau, &x, 1e-4);
@@ -206,21 +205,21 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
     // Expected output:
     //
     // === Optimization of Rosenbrock Function ===
-    // Start: Vector { data: [-1.2, 1.0] }, f(start) = 24.200000
+    // Start: [-1.200000, 1.000000], f(start) = 24.200000
     // True minimum: [1, 1], f = 0
     //
     // --- Gradient Descent (backtracking line search) ---
     //
     // --- Newton's Method ---
-    // Converged in 21 iterations: f = 0.000000, x = Vector { data: [0.9999999999400667, 0.9999999998789006] }
+    // Converged in 21 iterations: f = 0.000000, x = [1.000000, 1.000000]
     //
     // --- Finite-Difference Newton (no analytic Hessian) ---
-    // Converged in 21 iterations: f = 0.000000, x = Vector { data: [0.9999999997345376, 0.9999999994678155] }
+    // Converged in 21 iterations: f = 0.000000, x = [1.000000, 1.000000]
     //
     // --- Black-box optimization (finite-diff gradient only) ---
-    //   Start 1: Vector { data: [5.0, 5.0] } -> x = Vector { data: [2.9999999999998823, 1.9999999999998368] }, f = 0.000000
-    //   Start 2: Vector { data: [-5.0, 5.0] } -> x = Vector { data: [-2.805118086952577, 3.131312518250415] }, f = 0.000000
-    //   Start 3: Vector { data: [5.0, -5.0] } -> x = Vector { data: [3.584428340330345, -1.8481265269642182] }, f = 0.000000
+    //   Start 1: [5.000000, 5.000000] -> x = [3.000000, 2.000000], f = 0.000000
+    //   Start 2: [-5.000000, 5.000000] -> x = [-2.805118, 3.131313], f = 0.000000
+    //   Start 3: [5.000000, -5.000000] -> x = [3.584428, -1.848127], f = 0.000000
 
     Ok(())
 }

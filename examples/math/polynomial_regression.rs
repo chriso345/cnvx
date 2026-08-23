@@ -7,7 +7,6 @@
 use cnvx::math::random::{Distribution, Normal, Rng};
 use cnvx::prelude::*;
 
-#[rustfmt::skip]
 fn main() -> Result<(), cnvx_core::CnvxError> {
     // Generate noisy data from y = 2x^3 - 3x^2 + x + 5 + noise
     let true_coeffs = [5.0, 1.0, -3.0, 2.0]; // constant, x, x^2, x^3
@@ -59,7 +58,7 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
         let cond = design.condition_number().unwrap_or(f64::INFINITY);
 
         println!(
-            "Degree {degree}: RMSE = {rmse:.4}, cond(A) = {cond:.2e}, coeffs = [{}]",
+            "Degree {degree}:\n  RMSE = {rmse:.4}\n  cond(A) = {cond:.2e}\n  coeffs = [{}]",
             fit.iter().map(|c| format!("{c:.3}")).collect::<Vec<_>>().join(", ")
         );
     }
@@ -86,12 +85,30 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
     // True model: y = 2x^3 - 3x^2 + x + 5
     // Data points: 30
     //
-    // Degree 1: RMSE = 4.6940, cond(A) = 1.19e0, coeffs = [0.704, 6.034]
-    // Degree 2: RMSE = 2.7398, cond(A) = 3.36e0, coeffs = [4.972, 6.034, -2.995]
-    // Degree 3: RMSE = 0.4560, cond(A) = 7.78e0, coeffs = [4.972, 0.825, -2.995, 2.034]
-    // Degree 4: RMSE = 0.4044, cond(A) = 2.06e1, coeffs = [5.210, 0.825, -3.555, 2.034, 0.153]
-    // Degree 5: RMSE = 0.3881, cond(A) = 5.90e1, coeffs = [5.210, 1.172, -3.555, 1.652, 0.153, 0.081]
-    // Degree 6: RMSE = 0.3566, cond(A) = 1.71e2, coeffs = [5.036, 1.172, -2.687, 1.652, -0.463, 0.081, 0.107]
+    // Degree 1:
+    //   RMSE = 4.6940
+    //   cond(A) = 1.19e0
+    //   coeffs = [0.704, 6.034]
+    // Degree 2:
+    //   RMSE = 2.7398
+    //   cond(A) = 3.36e0
+    //   coeffs = [4.972, 6.034, -2.995]
+    // Degree 3:
+    //   RMSE = 0.4560
+    //   cond(A) = 7.78e0
+    //   coeffs = [4.972, 0.825, -2.995, 2.034]
+    // Degree 4:
+    //   RMSE = 0.4044
+    //   cond(A) = 2.06e1
+    //   coeffs = [5.210, 0.825, -3.555, 2.034, 0.153]
+    // Degree 5:
+    //   RMSE = 0.3881
+    //   cond(A) = 5.90e1
+    //   coeffs = [5.210, 1.172, -3.555, 1.652, 0.153, 0.081]
+    // Degree 6:
+    //   RMSE = 0.3566
+    //   cond(A) = 1.71e2
+    //   coeffs = [5.036, 1.172, -2.687, 1.652, -0.463, 0.081, 0.107]
     //
     // === Best Model (Degree 3) ===
     // Fitted: y = 2.034x^3 -2.995x^2 +0.825x +4.972

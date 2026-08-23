@@ -1,5 +1,7 @@
 //! [`Matrix`]: a dense, row-major matrix.
 
+use std::fmt;
+
 #[cfg(not(target_arch = "wasm32"))]
 use cblas::{Layout, Transpose, dgemm, dgemv};
 
@@ -655,5 +657,27 @@ impl Matrix {
             )));
         }
         Ok(())
+    }
+}
+
+impl fmt::Display for Matrix {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Matrix {{ rows: {}, cols: {}, data: [", self.rows, self.cols)?;
+        let mut first = true;
+        for i in 0..self.rows {
+            for j in 0..self.cols {
+                if !first {
+                    write!(f, ", ")?;
+                }
+                let val = self.get(i, j);
+                if let Some(prec) = f.precision() {
+                    write!(f, "{:.*}", prec, val)?;
+                } else {
+                    write!(f, "{:?}", val)?;
+                }
+                first = false;
+            }
+        }
+        write!(f, "] }}")
     }
 }

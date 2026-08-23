@@ -6,7 +6,6 @@
 use cnvx::math::calculus::*;
 use cnvx::prelude::*;
 
-#[rustfmt::skip]
 fn main() -> Result<(), cnvx_core::CnvxError> {
     println!("=== Nonlinear System Solver ===\n");
 
@@ -35,7 +34,7 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
     ];
 
     let mut solutions = Vec::new();
-    for (i, start) in starts.iter().enumerate() {
+    for start in starts.iter() {
         if let Ok(sol) = newton_system(f1, start, 1e-12, 50) {
             // Check if this solution is new (within tolerance)
             let is_new = solutions.iter().all(|s: &Vector| {
@@ -43,7 +42,7 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
             });
             if is_new {
                 solutions.push(sol.clone());
-                println!("  Start {i}: {start:?} -> {sol:?}");
+                println!("  Start {:.6} -> {:.6}", start, sol);
             }
         }
     }
@@ -201,8 +200,8 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
     // === Nonlinear System Solver ===
     //
     // --- Circle & Parabola Intersection ---
-    //   Start 0: Vector { data: [0.5, 0.0] } -> Vector { data: [0.9306048591020997, 0.36602540378443865] }
-    //   Start 1: Vector { data: [-0.5, 0.0] } -> Vector { data: [-0.9306048591019687, 0.3660254037844393] }
+    //   Start [0.500000, 0.000000] -> [0.930605, 0.366025]
+    //   Start [-0.500000, 0.000000] -> [-0.930605, 0.366025]
     //   Found 2 unique solutions:
     //     Solution 0: x=0.930605, y=0.366025, |f|=3.14e-16
     //     Solution 1: x=-0.930605, y=0.366025, |f|=3.45e-13
