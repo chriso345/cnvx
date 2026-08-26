@@ -1,3 +1,5 @@
+use std::time::{Duration, Instant};
+
 use cnvx_core::Status;
 use cnvx_math::{Matrix, Vector};
 
@@ -27,7 +29,9 @@ pub(crate) fn solve(
     form: &StandardForm,
     tolerance: f64,
     max_iterations: u32,
+    time_limit: Option<Duration>,
 ) -> SimplexResult {
+    let deadline = time_limit.map(|d| Instant::now() + d);
     let mut tableau = form.rows.clone();
     let mut rhs: Vec<f64> = form.rhs.to_vec();
     let mut basis = form.artificial_cols.clone();
@@ -56,6 +60,7 @@ pub(crate) fn solve(
         &excluded,
         tolerance,
         max_iterations,
+        deadline,
     );
 
     if phase1_status == Status::Unbounded {
@@ -72,6 +77,15 @@ pub(crate) fn solve(
     if phase1_status == Status::IterationLimit {
         return SimplexResult {
             status: Status::IterationLimit,
+            tableau,
+            rhs: Vector::from(rhs),
+            basis,
+            reduced_costs: z_row,
+        };
+    }
+    if phase1_status == Status::TimeLimit {
+        return SimplexResult {
+            status: Status::TimeLimit,
             tableau,
             rhs: Vector::from(rhs),
             basis,
@@ -148,6 +162,7 @@ pub(crate) fn solve(
         &excluded,
         tolerance,
         max_iterations,
+        deadline,
     );
 
     SimplexResult {
@@ -176,8 +191,8 @@ fn initial_reduced_costs(tableau: &Matrix, basis: &[usize], cost: &Vector) -> Ve
 
 /// Pivots `tableau`/`rhs`/`basis`/`z_row` in place until no column outside
 /// `excluded` has a negative reduced cost (optimal), an improving column
-/// has no bounded ratio test (unbounded), or `max_iterations` is
-/// exhausted.
+/// has no bounded ratio test (unbounded), `max_iterations` is
+/// exhausted, or `deadline` is exceeded.
 fn run_phase(
     tableau: &mut Matrix,
     rhs: &mut [f64],
@@ -187,6 +202,7 @@ fn run_phase(
     excluded: &[bool],
     tolerance: f64,
     max_iterations: u32,
+    deadline: Option<Instant>,
 ) -> Status {
     let num_rows = tableau.rows();
     let num_cols = tableau.cols();
@@ -197,6 +213,13 @@ fn run_phase(
     }
 
     for _ in 0..max_iterations {
+        // Check deadline at the start of each iteration.
+        if let Some(dl) = deadline
+            && Instant::now() >= dl
+        {
+            return Status::TimeLimit;
+        }
+
         // Bland's rule: enter the smallest-index column with a negative
         // reduced cost under the current basis.
         let mut entering = None;

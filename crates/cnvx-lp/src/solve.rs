@@ -27,7 +27,12 @@ impl Solve<LpSolver> for Model {
         }
 
         let form = standard_form::build(self)?;
-        let result = simplex::solve(&form, solver.tolerance, solver.max_iterations);
+        let result = simplex::solve(
+            &form,
+            solver.tolerance,
+            solver.max_iterations,
+            solver.time_limit,
+        );
 
         if result.status != Status::Optimal {
             return Ok(LpSolution {

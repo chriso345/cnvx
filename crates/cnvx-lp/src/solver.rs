@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use crate::{Basis, LpMethod};
 
 /// A configured LP solver.
@@ -13,6 +15,7 @@ pub struct LpSolver {
     method: LpMethod,
     pub(crate) tolerance: f64,
     pub(crate) max_iterations: u32,
+    pub(crate) time_limit: Option<Duration>,
     pub(crate) warm_start: Option<Basis>,
 }
 
@@ -22,6 +25,7 @@ impl LpSolver {
             method,
             tolerance: 1e-9,
             max_iterations: 10_000,
+            time_limit: None,
             warm_start: None,
         }
     }
@@ -67,6 +71,18 @@ impl LpSolver {
     /// Not yet used by any solver.
     pub fn warm_start(mut self, basis: Basis) -> Self {
         self.warm_start = Some(basis);
+        self
+    }
+
+    /// Sets a time limit for the solve in seconds.
+    pub fn time_limit<T: Into<f64>>(mut self, seconds: T) -> Self {
+        let seconds = seconds.into();
+        assert!(
+            seconds.is_finite() && seconds >= 0.0,
+            "time limit must be a non-negative finite number"
+        );
+
+        self.time_limit = Some(Duration::from_secs_f64(seconds));
         self
     }
 }

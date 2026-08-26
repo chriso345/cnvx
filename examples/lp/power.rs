@@ -34,7 +34,8 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
     // Gas = $50/MW, Coal = $80/MW, Wind = $0/MW.
     model.set_objective(Sense::Minimize, 50.0 * gas + 80.0 * coal + 0.0 * wind)?;
 
-    let solution = model.solve(&LpSolver::primal_simplex())?;
+    let solution =
+        model.solve(&LpSolver::primal_simplex().time_limit(1.5).max_iterations(10))?;
 
     println!("status: {}", solution.status);
     println!("cost: {:.2}", solution.objective);
