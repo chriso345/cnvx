@@ -1,0 +1,18 @@
+[package]
+name = "cnvx-graph"
+description = "cnvx graph optimization library"
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
+repository = { workspace = true }
+license = { workspace = true }
+keywords = { workspace = true }
+readme = { workspace = true }
+
+[dependencies]
+cnvx-core = { workspace = true }
+cnvx-math = { workspace = true }
+thiserror = { workspace = true }
+
+[lints]
+workspace = true

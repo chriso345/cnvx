@@ -220,6 +220,7 @@ name = "cnvx"
 version = "0.0.1"
 dependencies = [
  "cnvx-core",
+ "cnvx-graph",
  "cnvx-lp",
  "cnvx-math",
  "cnvx-milp",
@@ -231,6 +232,15 @@ version = "0.0.1"
 dependencies = [
  "cnvx-math",
  "strum",
+ "thiserror",
+]
+
+[[package]]
+name = "cnvx-graph"
+version = "0.0.1"
+dependencies = [
+ "cnvx-core",
+ "cnvx-math",
  "thiserror",
 ]
 

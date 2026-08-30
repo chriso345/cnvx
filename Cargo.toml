@@ -10,17 +10,18 @@ keywords = { workspace = true }
 readme = { workspace = true }
 
 [features]
-default = ["lp"]
-all = ["lp", "milp"]
+default = ["all"]
+all = ["lp", "milp", "graph"]
 lp = ["cnvx-lp"]
 milp = ["cnvx-milp"]
+graph = ["cnvx-graph"]
 
 [dependencies]
 cnvx-core = { workspace = true }
 cnvx-lp = { workspace = true, optional = true }
 cnvx-math = { workspace = true }
 cnvx-milp = { workspace = true, optional = true }
-# cnvx-graph = { workspace = true, optional = true }
+cnvx-graph = { workspace = true, optional = true }
 
 [lints]
 workspace = true
@@ -46,7 +47,7 @@ cnvx-core = { path = "crates/cnvx-core", version = "0.0.1" }
 cnvx-lp = { path = "crates/cnvx-lp", version = "0.0.1" }
 cnvx-math = { path = "crates/cnvx-math", version = "0.0.1" }
 cnvx-milp = { path = "crates/cnvx-milp", version = "0.0.1" }
-# cnvx-graph = { path = "crates/cnvx-graph", version = "0.0.1" }
+cnvx-graph = { path = "crates/cnvx-graph", version = "0.0.1" }
 clap = { version = "4.5.57", features = ["derive"] }
 cblas = { version = "0.5.0" }
 lapacke = { version = "0.5.0" }
@@ -72,6 +73,21 @@ overflow-checks = true
 incremental = true
 
 ## AUTO GENERATED EXAMPLES - DO NOT EDIT MANUALLY
+
+[[example]]
+name = "multi_criteria_routing"
+path = "examples/graph/multi_criteria_routing.rs"
+required-features = ["graph"]
+
+[[example]]
+name = "network_flow"
+path = "examples/graph/network_flow.rs"
+required-features = ["graph"]
+
+[[example]]
+name = "shortest_route"
+path = "examples/graph/shortest_route.rs"
+required-features = ["graph"]
 
 [[example]]
 name = "cocktail"
