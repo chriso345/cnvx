@@ -1,3 +1,5 @@
+use cnvx_core::CnvxError;
+
 use crate::NodeId;
 use crate::graph::GraphRef;
 
@@ -66,7 +68,7 @@ impl LandmarkHeuristic {
         landmarks: &[NodeId],
         weight: impl Fn(&E) -> f64 + Copy,
         goal: NodeId,
-    ) -> crate::Result<Self>
+    ) -> std::result::Result<Self, CnvxError>
     where
         G: GraphRef<N, E> + Copy,
     {
@@ -77,7 +79,7 @@ impl LandmarkHeuristic {
                 &crate::shortest_path::Dijkstra::new(landmark).weight(weight),
             )
             .map_err(|_| {
-                crate::GraphError::InvalidArgument(
+                CnvxError::InvalidArgument(
                     "landmark heuristic precomputation failed (negative weight?)"
                         .to_string(),
                 )

@@ -2,9 +2,7 @@
 //!
 //! Features: `graph`
 
-use cnvx_core::Solve;
-use cnvx_graph::Graph;
-use cnvx_graph::shortest_path::Dijkstra;
+use cnvx::prelude::*;
 
 struct Road {
     distance_km: f64,

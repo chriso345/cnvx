@@ -12,8 +12,7 @@
 //!
 //! Features: `lp`, `milp`
 
-use cnvx_core::{Model, Sense, Solve, sum};
-use cnvx_milp::MilpSolver;
+use cnvx::prelude::*;
 
 fn main() -> Result<(), cnvx_core::CnvxError> {
     let mut model = Model::new("tsp");

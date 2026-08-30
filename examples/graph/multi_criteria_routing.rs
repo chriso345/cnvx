@@ -2,13 +2,7 @@
 //!
 //! Features: `graph`
 
-use cnvx_core::Solve;
-use cnvx_graph::Graph;
-use cnvx_graph::multi_criteria::{
-    LexPriority, LexicographicShortestPath, ParetoShortestPath, scalarize_weighted_sum,
-};
-use cnvx_graph::shortest_path::Dijkstra;
-use cnvx_math::Vector;
+use cnvx::prelude::*;
 
 struct Road {
     distance_km: f64,

@@ -1,4 +1,5 @@
-use crate::error::GraphError;
+use cnvx_core::CnvxError;
+
 use crate::ids::{EdgeId, NodeId};
 
 static NEXT_GENERATION: std::sync::atomic::AtomicU32 =
@@ -69,16 +70,16 @@ impl<N, E> Graph<N, E> {
         self.edges.len()
     }
 
-    fn check_node(&self, id: NodeId) -> crate::Result<()> {
+    fn check_node(&self, id: NodeId) -> std::result::Result<(), CnvxError> {
         if id.generation != self.generation || id.index() >= self.nodes.len() {
-            return Err(GraphError::ForeignHandle);
+            return Err(CnvxError::ForeignHandle);
         }
         Ok(())
     }
 
-    fn check_edge(&self, id: EdgeId) -> crate::Result<()> {
+    fn check_edge(&self, id: EdgeId) -> std::result::Result<(), CnvxError> {
         if id.generation != self.generation || id.index() >= self.edges.len() {
-            return Err(GraphError::ForeignHandle);
+            return Err(CnvxError::ForeignHandle);
         }
         Ok(())
     }
@@ -109,7 +110,7 @@ impl<N, E> Graph<N, E> {
         source: NodeId,
         target: NodeId,
         data: E,
-    ) -> crate::Result<EdgeId> {
+    ) -> std::result::Result<EdgeId, CnvxError> {
         self.check_node(source)?;
         self.check_node(target)?;
         let index = self.edges.len() as u32;

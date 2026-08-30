@@ -56,6 +56,5 @@ impl Dominance for cnvx_math::Vector {
 pub type WeightFn<'a, E> = Box<dyn Fn(&E) -> f64 + 'a>;
 
 /// A caller-supplied projection from an edge's full data to a vector of
-/// criteria values, used by [`multi_criteria`](crate::multi_criteria)
-/// algorithms.
+/// criteria values.
 pub type CriteriaFn<'a, E> = Box<dyn Fn(&E) -> cnvx_math::Vector + 'a>;

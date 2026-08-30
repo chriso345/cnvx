@@ -1,7 +1,12 @@
 //! # CNVX
 //!
 //! This crate provides a unified interface for the CNVX optimization library,
-//! re-exporting functionality from [`cnvx_core`] and [`cnvx_lp`].
+//! re-exporting functionality from:
+//! - [`cnvx_core`] for core optimization features,
+//! - [`cnvx_lp`] for linear programming (LP) features
+//! - [`cnvx_math`] for mathematical utilities.
+//! - [`cnvx_graph`] for graph algorithms and network flow problems.
+//! - [`cnvx_milp`] for mixed-integer linear programming (MILP) features.
 //!
 //! `cnvx` allows you to define optimization models, constraints, objectives,
 //! and solve linear programming (LP) problems using solvers such as the simplex
@@ -40,15 +45,23 @@
 //! ```
 
 pub use cnvx_core as core;
+#[cfg(feature = "graph")]
+pub use cnvx_graph as graph;
 #[cfg(feature = "lp")]
 pub use cnvx_lp as lp;
 pub use cnvx_math as math;
+#[cfg(feature = "milp")]
+pub use cnvx_milp as milp;
 
 pub mod prelude {
     pub use crate::core::*;
+    #[cfg(feature = "graph")]
+    pub use crate::graph::*;
     #[cfg(feature = "lp")]
     pub use crate::lp::*;
     pub use crate::math::*;
+    #[cfg(feature = "milp")]
+    pub use crate::milp::*;
 }
 
 /// Returns the version of the `cnvx` crate.

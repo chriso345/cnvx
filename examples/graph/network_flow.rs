@@ -2,9 +2,7 @@
 //!
 //! Features: `graph`
 
-use cnvx_core::Solve;
-use cnvx_graph::Graph;
-use cnvx_graph::flow::MaxFlow;
+use cnvx::prelude::*;
 
 fn main() {
     let mut g = Graph::<&str, f64>::directed();

@@ -12,8 +12,7 @@
 //!
 //! Features: `lp`
 
-use cnvx_core::{Model, Sense, Solve};
-use cnvx_lp::LpSolver;
+use cnvx::prelude::*;
 
 fn main() -> Result<(), cnvx_core::CnvxError> {
     let mut model = Model::new("power_grid_dispatch");

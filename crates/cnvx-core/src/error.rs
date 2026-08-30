@@ -28,4 +28,10 @@ pub enum CnvxError {
     /// A lower-level [`cnvx_math::MathError`] propagated up unchanged.
     #[error(transparent)]
     Math(#[from] cnvx_math::MathError),
+    /// A negative-weight cycle was detected in a graph where it is not allowed.
+    #[error("negative-weight cycle present")]
+    NegativeCycle,
+    /// An argument was invalid (e.g. a negative capacity).
+    #[error("invalid argument: {0}")]
+    InvalidArgument(String),
 }
