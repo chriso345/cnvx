@@ -260,7 +260,8 @@ fn parse_expr(input: &str) -> Result<(Vec<(String, f64)>, f64), CnvxError> {
             "-" => sign = -1.0,
             token => {
                 if let Ok(value) = token.parse::<f64>() {
-                    // Either a bare constant, or a coefficient followed by a name.
+                    // Either a bare constant, or a coefficient followed by a
+                    // name.
                     if i + 1 < tokens.len()
                         && tokens[i + 1] != "+"
                         && tokens[i + 1] != "-"

@@ -146,7 +146,8 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
     let h = 1.0 / n as f64;
 
     let f_bvp = |u: &Vector| -> Vector {
-        // u has interior points only (n-1 elements), boundaries are u(0)=0, u(1)=1
+        // u has interior points only (n-1 elements), boundaries are u(0)=0,
+        // u(1)=1
         let mut f = Vector::zeros(n - 1);
         for i in 1..n {
             let ui = u[i - 1]; // Interior index
@@ -221,7 +222,7 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
     // --- Nonlinear BVP: u'' + u^2 = 0 ---
     //   Solved with Newton (interior points)
     //   u(0.25) = 0.262444, u(0.5) = 0.541251, u(0.75) = 0.780902
-    //   Max residual: 4.07e-13
+    //   Max residual: 3.56e-13
 
     Ok(())
 }

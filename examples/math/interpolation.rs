@@ -98,7 +98,8 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
     // h[i] = x[i+1] - x[i]
     let h: Vec<f64> = (0..n).map(|i| x_data[i + 1] - x_data[i]).collect();
 
-    // System: h[i-1]M[i-1] + 2(h[i-1]+h[i])M[i] + h[i]M[i+1] = 6((y[i+1]-y[i])/h[i]
+    // System: h[i-1]M[i-1] + 2(h[i-1]+h[i])M[i] + h[i]M[i+1] =
+    // 6((y[i+1]-y[i])/h[i]
     // - (y[i]-y[i-1])/h[i-1])
     let mut a = Matrix::zeros(n + 1, n + 1);
     let mut b = Vector::zeros(n + 1);

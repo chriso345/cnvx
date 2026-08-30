@@ -10,7 +10,8 @@ pub(crate) fn solve(a: &Matrix, b: &Vector, tri: TriType) -> Result<Vector, Math
     let n = a.rows() as i32;
     let mut x = b.to_vec();
 
-    // Check for exact zeros on the diagonal to avoid NaN pollution before CBLAS.
+    // Check for exact zeros on the diagonal to avoid NaN pollution before
+    // CBLAS.
     for i in 0..a.rows() {
         if a.get(i, i).abs() < 1e-12 {
             return Err(MathError::Singular);

@@ -41,7 +41,7 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
 
     let start = Vector::from_slice(&[-1.2, 1.0]);
     println!("=== Optimization of Rosenbrock Function ===");
-    println!("Start: {:.6}, f(start) = {:.6}", start, rosenbrock(&start));
+    println!("Start: {:.3}, f(start) = {:.3}", start, rosenbrock(&start));
     println!("True minimum: [1, 1], f = 0\n");
 
     // 1. Gradient Descent with backtracking line search
@@ -55,7 +55,7 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
     for iter in 0..max_iter {
         let grad_norm = grad.norm();
         if grad_norm < tol {
-            println!("Converged in {iter} iterations: f = {f:.6}, x = {:.6}", x);
+            println!("Converged in {iter} iterations: f = {f:.3}, x = {:.3}", x);
             break;
         }
 
@@ -174,7 +174,7 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
         for _iter in 0..500 {
             let grad = gradient(himmelblau, &x, 1e-6);
             if grad.norm() < 1e-8 {
-                println!("  Start {i}: {:.6} -> x = {:.6}, f = {f:.6}", start, x);
+                println!("  Start {i}: {:.3} -> x = {:.3}, f = {f:.3}", start, x);
                 break;
             }
             let hess = hessian(himmelblau, &x, 1e-4);
@@ -205,7 +205,7 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
     // Expected output:
     //
     // === Optimization of Rosenbrock Function ===
-    // Start: [-1.200000, 1.000000], f(start) = 24.200000
+    // Start: [-1.200, 1.000], f(start) = 24.200
     // True minimum: [1, 1], f = 0
     //
     // --- Gradient Descent (backtracking line search) ---
@@ -217,9 +217,9 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
     // Converged in 21 iterations: f = 0.000000, x = [1.000000, 1.000000]
     //
     // --- Black-box optimization (finite-diff gradient only) ---
-    //   Start 1: [5.000000, 5.000000] -> x = [3.000000, 2.000000], f = 0.000000
-    //   Start 2: [-5.000000, 5.000000] -> x = [-2.805118, 3.131313], f = 0.000000
-    //   Start 3: [5.000000, -5.000000] -> x = [3.584428, -1.848127], f = 0.000000
+    //   Start 1: [5.000, 5.000] -> x = [3.000, 2.000], f = 0.000
+    //   Start 2: [-5.000, 5.000] -> x = [-2.805, 3.131], f = 0.000
+    //   Start 3: [5.000, -5.000] -> x = [3.584, -1.848], f = 0.000
 
     Ok(())
 }

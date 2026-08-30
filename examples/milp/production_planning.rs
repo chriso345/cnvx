@@ -22,7 +22,8 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
     // Continuous production can be used to top up the requirement.
     let extra = model.add_named_var(0.0.., "Extra");
 
-    // Whole batches cost $5 each, while additional production costs $8 per unit.
+    // Whole batches cost $5 each, while additional production costs $8 per
+    // unit.
     model.set_objective(Sense::Minimize, 5.0 * batches + 8.0 * extra)?;
 
     // Total production must meet the required 37 units.

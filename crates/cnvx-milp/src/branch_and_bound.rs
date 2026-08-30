@@ -81,7 +81,8 @@ pub(crate) fn solve(
 
         match branch_var {
             None => {
-                // Every integer-kind variable is already integral: a candidate solution.
+                // Every integer-kind variable is already integral: a candidate
+                // solution.
                 let values: HashMap<Var, f64> = model
                     .vars()
                     .map(|v| {
