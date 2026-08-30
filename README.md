@@ -18,10 +18,10 @@ Additionally, **cnvx** offers a command-line interface (CLI) for solving models 
 
 **cnvx** can be customized using Cargo features:
 
-* `lp` – enable linear programming solvers (**default**)
-* `mop` – enable multi-objective problem support (planned)
-* `sat` – enable satisfiability problem support (planned)
-* `nlp` – enable non-linear problem support (planned)
+* `lp` - enable linear programming solvers (**default**)
+* `mop` - enable multi-objective problem support (planned)
+* `sat` - enable satisfiability problem support (planned)
+* `nlp` - enable non-linear problem support (planned)
 
 These features allow the use of specific solvers and functionalities while keeping the core library lightweight.
 
@@ -31,13 +31,42 @@ These features allow the use of specific solvers and functionalities while keepi
 
 **cnvx** can be used either as a library in your Rust projects or via its command-line interface (CLI).
 
-```bash
-# Library usage
-cargo add cnvx --features "lp"
+### As a library
 
-# CLI usage
+```bash
+cargo add cnvx --features "lp"
+```
+
+### As a CLI
+
+```bash
 cargo install cnvx-cli
 ```
+
+### System dependencies
+
+**cnvx**'s core math crate relies on system-level linear algebra libraries: `BLAS` and `LAPACK` for dense matrix operations, and `SuiteSparse` for sparse matrix operations. These are not managed by Cargo and must be installed separately before building.
+
+#### Ubuntu / Debian:
+
+```bash
+sudo apt-get install libblas-dev liblapack-dev libsuitesparse-dev
+```
+
+#### Arch Linux:
+
+```bash
+sudo pacman -S blas lapack suitesparse
+```
+
+#### macOS (Homebrew):
+
+```bash
+brew install openblas lapack suite-sparse
+```
+
+> **Note:** if these libraries aren't installed, building **cnvx** will fail with linker errors referencing BLAS/LAPACK/SuiteSparse symbols.
+
 
 ---
 
@@ -84,13 +113,13 @@ fn main() -> Result<(), SolveError> {
 
 Contributions to **cnvx** are welcome via pull requests and issues.
 
-To ensure certain quality standards, this project uses [pre-commit hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks). These hooks can be registerd by running the following command:
+To ensure certain quality standards, this project uses [pre-commit hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks). These hooks can be registered by running the following command:
 
 ```sh
 cp .githooks/pre-commit .git/hooks
 ```
 
-To make use of some more advanced formatting rules, the [nightly toolchain](https://doc.rust-lang.org/beta/book/appendix-07-nightly-rust.html) is required. *Note that the nightly toolchain is only used for formatting.* The nightly version can be installed using the following command:
+To make use of some more advanced formatting rules, the [nightly toolchain](https://doc.rust-lang.org/beta/book/appendix-07-nightly-rust.html) is required. *Note that the nightly toolchain is only used for formatting and linting.* The nightly version can be installed using the following command:
 
 ```sh
 rustup toolchain install --component rustfmt -- nightly

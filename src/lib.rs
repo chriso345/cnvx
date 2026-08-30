@@ -1,27 +1,16 @@
 //! # CNVX
 //!
 //! This crate provides a unified interface for the CNVX optimization library,
-//! re-exporting functionality from [`cnvx_core`] and [`cnvx_lp`].
+//! re-exporting functionality from:
+//! - [`cnvx_core`] for core optimization features,
+//! - [`cnvx_lp`] for linear programming (LP) features
+//! - [`cnvx_math`] for mathematical utilities.
+//! - [`cnvx_graph`] for graph algorithms and network flow problems.
+//! - [`cnvx_milp`] for mixed-integer linear programming (MILP) features.
 //!
 //! `cnvx` allows you to define optimization models, constraints, objectives,
 //! and solve linear programming (LP) problems using solvers such as the simplex
 //! method, all through a single crate.
-//!
-//! # Features
-//!
-//! - Unified interface for core modeling and LP solvers.
-//! - Easy access to core types, constraints, variables, and objectives via
-//!   [`prelude`].
-//! - LP solvers accessible via [`solvers`].
-//! - Versioning information via [`version`].
-//!
-//! # Modules
-//!
-//! - [`prelude`]: Re-exports the main types and functions from [`cnvx_core`]
-//!   and [`cnvx_lp`] for convenient usage.
-//! - [`solvers`]: Contains LP solvers enabled by features, such as the
-//!   [`PrimalSimplexSolver`](::cnvx_lp::PrimalSimplexSolver) and
-//!   [`DualSimplexSolver`](::cnvx_lp::DualSimplexSolver).
 //!
 //! # Examples
 //!
@@ -29,21 +18,21 @@
 //! use cnvx::prelude::*;
 //!
 //! // Create a model
-//! let mut model = LpModel::new();
-//! let x = model.add_var().finish();
-//! let y = model.add_var().finish();
+//! let mut model = Model::new("Z");
+//! let x = model.add_var(..);
+//! let y = model.add_var(..);
 //!
 //! // Add constraints
-//! model += (x + y).leq(5.0);
-//! model += (x + 0.5 * y).geq(10.0);
+//! model.add_constraint((x + y).leq(5.0)).unwrap();
+//! model.add_constraint((x + 0.5 * y).geq(10.0)).unwrap();
 //!
 //! // Set objective
-//! model.add_objective(Objective::maximize(x + 2.0 * y).name("Z"));
+//! model.set_objective(Sense::Maximize, x + 2.0 * y).unwrap();
 //!
 //! // Solve using the simplex solver
-//! let mut solver = PrimalSimplexSolver::new();
-//! let solution = solver.solve(&model).unwrap();
+//! let solution = model.solve(&LpSolver::default()).unwrap();
 //!
+//! println!("Optimal objective: {}", solution.objective);
 //! println!("Optimal solution: x = {}, y = {}", solution.value(x), solution.value(y));
 //! ```
 //!
@@ -60,6 +49,9 @@ pub use cnvx_core as core;
 pub use cnvx_graph as graph;
 #[cfg(feature = "lp")]
 pub use cnvx_lp as lp;
+pub use cnvx_math as math;
+#[cfg(feature = "milp")]
+pub use cnvx_milp as milp;
 
 pub mod prelude {
     pub use crate::core::*;
@@ -67,18 +59,9 @@ pub mod prelude {
     pub use crate::graph::*;
     #[cfg(feature = "lp")]
     pub use crate::lp::*;
-}
-
-// Simple re-export of main solver types for easy access without prelude
-// baggage.
-pub mod solvers {
-    #[cfg(feature = "lp")]
-    pub use crate::lp::{
-        DualSimplexSolver,
-        LpSolver,
-        PrimalSimplexSolver,
-        Solver, // Trait
-    };
+    pub use crate::math::*;
+    #[cfg(feature = "milp")]
+    pub use crate::milp::*;
 }
 
 /// Returns the version of the `cnvx` crate.

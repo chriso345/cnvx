@@ -10,23 +10,25 @@ keywords = { workspace = true }
 readme = { workspace = true }
 
 [features]
-default = ["lp"]
-all = ["lp", "graph"]
+default = ["all"]
+all = ["lp", "milp", "graph"]
 lp = ["cnvx-lp"]
+milp = ["cnvx-milp"]
 graph = ["cnvx-graph"]
 
 [dependencies]
 cnvx-core = { workspace = true }
 cnvx-lp = { workspace = true, optional = true }
 cnvx-math = { workspace = true }
+cnvx-milp = { workspace = true, optional = true }
 cnvx-graph = { workspace = true, optional = true }
 
 [lints]
 workspace = true
 
 [workspace]
-members = ["crates/*", "tests", "bindings/*"]
-default-members = ["crates/cnvx-cli"]
+members = ["crates/*", "tests"]
+# default-members = ["crates/cnvx-cli"]
 resolver = "2"
 
 [workspace.package]
@@ -40,20 +42,17 @@ readme = "README.md"
 
 [workspace.dependencies]
 cnvx = { path = ".", version = "0.0.1" }
-cnvx-cli = { path = "crates/cnvx-cli", version = "0.0.1" }
+# cnvx-cli = { path = "crates/cnvx-cli", version = "0.0.1" }
 cnvx-core = { path = "crates/cnvx-core", version = "0.0.1" }
 cnvx-lp = { path = "crates/cnvx-lp", version = "0.0.1" }
 cnvx-math = { path = "crates/cnvx-math", version = "0.0.1" }
+cnvx-milp = { path = "crates/cnvx-milp", version = "0.0.1" }
 cnvx-graph = { path = "crates/cnvx-graph", version = "0.0.1" }
-cnvx-parse = { path = "crates/cnvx-parse", version = "0.0.1" }
 clap = { version = "4.5.57", features = ["derive"] }
 cblas = { version = "0.5.0" }
 lapacke = { version = "0.5.0" }
-openblas-src = { version = "0.10.16", features = [
-    "cblas",
-    "lapacke",
-    "system",
-] }
+thiserror = { version = "2.0.20" }
+strum = { version = "0.28.0", features = ["derive"] }
 
 [workspace.lints]
 
@@ -73,9 +72,31 @@ debug = 2
 overflow-checks = true
 incremental = true
 
+## AUTO GENERATED EXAMPLES - DO NOT EDIT MANUALLY
+
+[[example]]
+name = "multi_criteria_routing"
+path = "examples/graph/multi_criteria_routing.rs"
+required-features = ["graph"]
+
+[[example]]
+name = "network_flow"
+path = "examples/graph/network_flow.rs"
+required-features = ["graph"]
+
+[[example]]
+name = "shortest_route"
+path = "examples/graph/shortest_route.rs"
+required-features = ["graph"]
+
 [[example]]
 name = "cocktail"
 path = "examples/lp/cocktail.rs"
+required-features = ["lp"]
+
+[[example]]
+name = "diet"
+path = "examples/lp/diet.rs"
 required-features = ["lp"]
 
 [[example]]
@@ -84,6 +105,57 @@ path = "examples/lp/power.rs"
 required-features = ["lp"]
 
 [[example]]
-name = "shortest_path"
-path = "examples/network/shortest_path.rs"
-required-features = ["graph"]
+name = "finite_element_1d"
+path = "examples/math/finite_element_1d.rs"
+
+[[example]]
+name = "gradient_optimization"
+path = "examples/math/gradient_optimization.rs"
+
+[[example]]
+name = "interpolation"
+path = "examples/math/interpolation.rs"
+
+[[example]]
+name = "kalman_filter"
+path = "examples/math/kalman_filter.rs"
+
+[[example]]
+name = "markov_chain"
+path = "examples/math/markov_chain.rs"
+
+[[example]]
+name = "monte_carlo_integration"
+path = "examples/math/monte_carlo_integration.rs"
+
+[[example]]
+name = "nonlinear_system"
+path = "examples/math/nonlinear_system.rs"
+
+[[example]]
+name = "polynomial_regression"
+path = "examples/math/polynomial_regression.rs"
+
+[[example]]
+name = "principal_component_analysis"
+path = "examples/math/principal_component_analysis.rs"
+
+[[example]]
+name = "signal_processing"
+path = "examples/math/signal_processing.rs"
+
+[[example]]
+name = "knapsack"
+path = "examples/milp/knapsack.rs"
+required-features = ["lp", "milp"]
+
+[[example]]
+name = "production_planning"
+path = "examples/milp/production_planning.rs"
+required-features = ["lp", "milp"]
+
+[[example]]
+name = "tsp"
+path = "examples/milp/tsp.rs"
+required-features = ["lp", "milp"]
+

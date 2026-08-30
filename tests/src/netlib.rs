@@ -4,9 +4,8 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::sync::LazyLock;
 
-use cnvx_core::SolveStatus;
-use cnvx_lp::{LpModel, LpSolution, LpSolver, Solver};
-use cnvx_parse::parse;
+use cnvx_core::{Model, Solve, Status};
+use cnvx_lp::{LpModelIo, LpSolution, LpSolver};
 use test_case::test_case;
 
 // URLs for Netlib data
@@ -124,30 +123,23 @@ fn run_emps(lp: &Path) {
     );
 }
 
-// Run cnvx solver on the produced MPS
 fn run_cnvx(mps: &Path) -> Result<LpSolution, String> {
-    let contents = fs::read_to_string(mps).expect("Failed to read MPS file");
-
-    let ext = "mps"; // or infer from file extension
-    let model: LpModel = match parse(&contents, ext) {
-        Ok(m) => m,
-        Err(e) => return Err(format!("Failed to parse MPS file: {}", e)),
-    };
-
-    let mut solver = LpSolver::new();
-    match solver.solve(&model) {
-        Ok(sol) => Ok(sol),
-        Err(e) => Err(format!("Solver failed: {}", e)),
-    }
+    let model = Model::read(mps)
+        .map_err(|e| format!("Failed to parse {}: {e}", mps.display()))?;
+    let solver = LpSolver::default();
+    model
+        .solve(&solver)
+        .map_err(|e| format!("Solver failed on {}: {e}", mps.display()))
 }
 
 #[test_case("afiro", Some(-4.6475314286E+02))]
 #[test_case("adlittle", Some(2.2549496316E+05))]
 #[test_case("sc50a", Some(-6.4575077059E+01))]
 #[test_case("sc50b", Some(-7.0000000000E+01))]
-// #[test_case("sc105", Some(-5.2202061212E+01))]
-// #[test_case("share1b", Some(-7.6589318579E+04))]
-// #[test_case("share2b", Some(-4.1573224074E+02))]
+#[test_case("sc105", Some(-5.2202061212E+01))]
+#[test_case("share1b", Some(-7.6589318579E+04))]
+#[test_case("share2b", Some(-4.1573224074E+02))]
+#[test_case("lotfi", Some(-2.5264706062E+01))]
 fn netlib_test(name: &str, expected: Option<f64>) {
     let lp = ensure_lp_file(name, expected);
     run_emps(&lp);
@@ -157,30 +149,33 @@ fn netlib_test(name: &str, expected: Option<f64>) {
         panic!("emps did not produce expected file {}", mps.display());
     }
 
-    let output: LpSolution = match run_cnvx(&mps) {
-        Ok(sol) => sol,
+    let solution = match run_cnvx(&mps) {
+        Ok(solution) => solution,
         Err(e) => panic!("cnvx failed on {}: {}", mps.display(), e),
     };
 
-    if output.status != SolveStatus::Optimal {
-        panic!("cnvx did not find optimal solution for {}", mps.display());
+    if solution.status != Status::Optimal {
+        panic!(
+            "cnvx did not find an optimal solution for {} (status: {})",
+            mps.display(),
+            solution.status
+        );
     }
 
-    let obj = match output.objective_value {
-        Some(obj) => obj,
-        None => panic!("cnvx did not return objective value for {}", mps.display()),
-    };
-
     if let Some(expected) = expected {
-        if (obj - expected).abs() > TOL {
+        if (solution.objective - expected).abs() > TOL {
             panic!(
                 "Objective value mismatch for {}: expected {}, got {}",
                 mps.display(),
                 expected,
-                obj
+                solution.objective
             );
         }
     } else {
-        println!("No expected objective provided for {}, got {}", mps.display(), obj);
+        println!(
+            "No expected objective provided for {}, got {}",
+            mps.display(),
+            solution.objective
+        );
     }
 }

@@ -10,6 +10,9 @@ keywords = { workspace = true }
 readme = { workspace = true }
 
 [dependencies]
+cnvx-math = { workspace = true }
+strum = { workspace = true }
+thiserror = { workspace = true }
 
 [lints]
 workspace = true
