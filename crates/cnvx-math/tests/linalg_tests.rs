@@ -34,9 +34,9 @@ fn lu_reconstructs_original_matrix() {
     let lu = a.lu().unwrap();
     let reconstructed = lu.l.mul(&lu.u).unwrap();
     // reconstructed == P * a, so compare against a permuted by lu.p.
-    for i in 0..3 {
+    for (i, &pi) in lu.p.iter().take(3).enumerate() {
         for j in 0..3 {
-            assert!((reconstructed.get(i, j) - a.get(lu.p[i], j)).abs() < 1e-9);
+            assert!((reconstructed.get(i, j) - a.get(pi, j)).abs() < 1e-9);
         }
     }
 }
