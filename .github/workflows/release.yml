@@ -53,8 +53,6 @@ jobs:
       - name: Package (Linux)
         if: matrix.os == 'ubuntu-latest'
         run: |
-          set -euo pipefail
-
           mkdir -p dist
 
           cp "target/${{ matrix.target }}/release/cnvx" "dist/${{ matrix.bin_name }}"
@@ -94,7 +92,7 @@ jobs:
     name: Create GitHub Release
     runs-on: ubuntu-latest
     needs: build-cli
-    # if: github.event_name != 'workflow_dispatch'
+    if: github.event_name != 'workflow_dispatch'
 
     steps:
       - name: Download artifacts
@@ -125,23 +123,23 @@ jobs:
       - name: Cache cargo
         uses: Swatinem/rust-cache@v2
 
+      - name: Get Dependency Order
+        id: dep_order
+        run: |
+          ./scripts/dependency_order.sh > /tmp/publish_order.txt
+          echo "Publish order:"
+          cat /tmp/publish_order.txt
+
       - name: Publish crates (ordered)
         run: |
-          if [ "${{ env.DRY_RUN }}" = "true" ]; then
-            echo "Running cargo publish --dry-run"
-            cargo publish -p cnvx-core --dry-run
-            cargo publish -p cnvx-math --dry-run
-            cargo publish -p cnvx-parse --dry-run
-            cargo publish -p cnvx-lp --dry-run
-            cargo publish -p cnvx-graph --dry-run
-            cargo publish -p cnvx --dry-run
-            cargo publish -p cnvx-cli --dry-run
-          else
-            cargo publish -p cnvx-core
-            cargo publish -p cnvx-math
-            cargo publish -p cnvx-parse
-            cargo publish -p cnvx-lp
-            cargo publish -p cnvx-graph
-            cargo publish -p cnvx
-            cargo publish -p cnvx-cli
-          fi
+          while IFS= read -r pkg; do
+            [ -z "$pkg" ] && continue
+
+            if [ "${{ env.DRY_RUN }}" = "true" ]; then
+              echo "Running cargo publish --dry-run for $pkg"
+              cargo publish -p "$pkg" --dry-run
+            else
+              echo "Publishing $pkg"
+              cargo publish -p "$pkg"
+            fi
+          done < /tmp/publish_order.txt
