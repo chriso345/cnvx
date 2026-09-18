@@ -36,6 +36,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Install OpenBLAS and SuiteSparse
+        run: sudo apt-get update && sudo apt-get install -y libopenblas-dev liblapacke-dev libsuitesparse-dev
+
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -52,6 +55,8 @@ jobs:
 
       - name: Package (Linux)
         if: matrix.os == 'ubuntu-latest'
+        env:
+          LIBRARY_PATH: /usr/lib/x86_64-linux-gnu/openblas-pthread:/usr/lib/x86_64-linux-gnu/lapack
         run: |
           mkdir -p dist
 
@@ -117,6 +122,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Install OpenBLAS and SuiteSparse
+        run: sudo apt-get update && sudo apt-get install -y libopenblas-dev liblapacke-dev libsuitesparse-dev
+
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
@@ -131,6 +139,8 @@ jobs:
           cat /tmp/publish_order.txt
 
       - name: Publish crates (ordered)
+        env:
+          LIBRARY_PATH: /usr/lib/x86_64-linux-gnu/openblas-pthread:/usr/lib/x86_64-linux-gnu/lapack
         run: |
           while IFS= read -r pkg; do
             [ -z "$pkg" ] && continue
