@@ -193,7 +193,6 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
             let res = (u_xx + ui * ui).abs();
             max_residual = max_residual.max(res);
         }
-        println!("  Max residual: {max_residual:.2e}");
     }
 
     // Expected output:
@@ -222,7 +221,6 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
     // --- Nonlinear BVP: u'' + u^2 = 0 ---
     //   Solved with Newton (interior points)
     //   u(0.25) = 0.262444, u(0.5) = 0.541251, u(0.75) = 0.780902
-    //   Max residual: 3.56e-13
 
     Ok(())
 }
