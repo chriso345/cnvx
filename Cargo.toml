@@ -43,7 +43,6 @@ keywords = ["optimization", "linear-programming", "convex"]
 readme = "README.md"
 
 [workspace.dependencies]
-cnvx = { path = ".", version = "0.0.1" }
 # cnvx-cli = { path = "crates/cnvx-cli", version = "0.0.1" }
 cnvx-core = { path = "crates/cnvx-core", version = "0.0.1" }
 cnvx-lp = { path = "crates/cnvx-lp", version = "0.0.1" }
@@ -58,9 +57,6 @@ thiserror = { version = "2.0.20" }
 strum = { version = "0.28.0", features = ["derive"] }
 
 [workspace.lints]
-
-[workspace.lints.cargo]
-unused_workspace_dependencies = "allow"
 
 [profile.release]
 opt-level = 3
