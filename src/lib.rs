@@ -7,6 +7,7 @@
 //! - [`cnvx_math`] for mathematical utilities.
 //! - [`cnvx_graph`] for graph algorithms and network flow problems.
 //! - [`cnvx_milp`] for mixed-integer linear programming (MILP) features.
+//! - [`cnvx_mop`] for multi-objective optimization (MOP) features.
 //!
 //! `cnvx` allows you to define optimization models, constraints, objectives,
 //! and solve linear programming (LP) problems using solvers such as the simplex
@@ -52,6 +53,8 @@ pub use cnvx_lp as lp;
 pub use cnvx_math as math;
 #[cfg(feature = "milp")]
 pub use cnvx_milp as milp;
+#[cfg(feature = "mop")]
+pub use cnvx_mop as mop;
 
 pub mod prelude {
     pub use crate::core::*;
@@ -62,6 +65,8 @@ pub mod prelude {
     pub use crate::math::*;
     #[cfg(feature = "milp")]
     pub use crate::milp::*;
+    #[cfg(feature = "mop")]
+    pub use crate::mop::*;
 }
 
 /// Returns the version of the `cnvx` crate.

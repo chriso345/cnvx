@@ -18,7 +18,6 @@ lapacke = { workspace = true }
 
 [build-dependencies]
 pkg-config = { version = "0.3.33" }
-cc = { version = "1.0" }
 
 [lints]
 workspace = true

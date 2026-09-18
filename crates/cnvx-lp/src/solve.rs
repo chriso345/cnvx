@@ -11,6 +11,13 @@ impl Solve<LpSolver> for Model {
     type Solution = LpSolution;
 
     fn solve(&self, solver: &LpSolver) -> Result<LpSolution, CnvxError> {
+        if self.num_additional_objectives() > 0 {
+            return Err(CnvxError::InvalidArgument(format!(
+                "model has {} additional objective(s) beyond the primary",
+                self.num_additional_objectives()
+            )));
+        }
+
         // TODO: split into separate methods for each solver type.
         match solver.method() {
             LpMethod::DualSimplex => {

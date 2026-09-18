@@ -8,6 +8,7 @@ use crate::error::CnvxError;
 use crate::expr::Expression;
 use crate::sense::Sense;
 use crate::var::{Con, Var, VarKind};
+use crate::{Objective, ObjectiveId};
 
 /// Generation ids are handed out from a single process-wide counter, so
 /// every `Model` gets a distinct one and a `Var`/`Con` created by one
@@ -39,6 +40,7 @@ pub struct Model {
     vars: Rc<Vec<VarData>>,
     objective_sense: Sense,
     objective: Expression,
+    additional_objectives: Rc<Vec<Objective>>,
     constraints: Rc<Vec<Constraint>>,
 }
 
@@ -59,6 +61,7 @@ impl Model {
             vars: Rc::new(Vec::new()),
             objective_sense: Sense::Minimize,
             objective: Expression::zero(),
+            additional_objectives: Rc::new(Vec::new()),
             constraints: Rc::new(Vec::new()),
         }
     }
@@ -230,6 +233,165 @@ impl Model {
     /// The objective expression.
     pub fn objective(&self) -> &Expression {
         &self.objective
+    }
+
+    /// Adds an additional objective beyond the primary one (set via
+    /// [`Model::set_objective`]) and returns its handle.
+    ///
+    /// # Errors
+    /// Returns `Err(CnvxError::ForeignHandle)` if `expr` references a
+    /// variable from a different `Model`.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use cnvx_core::{Model, Sense};
+    /// let mut model = Model::new("bicriteria");
+    /// let x = model.add_var(0.0..);
+    /// model.set_objective(Sense::Minimize, 2.0 * x)?;
+    /// let risk = model.add_objective(Sense::Minimize, 3.0 * x, 0)?;
+    /// assert_eq!(model.num_objectives(), 2);
+    /// # Ok::<(), cnvx_core::CnvxError>(())
+    /// ```
+    pub fn add_objective(
+        &mut self,
+        sense: Sense,
+        expr: Expression,
+        priority: i32,
+    ) -> Result<ObjectiveId, CnvxError> {
+        self.add_named_objective(sense, expr, priority, "")
+    }
+
+    /// Equivalent to [`Model::add_objective`], with a name attached for
+    /// reporting/debugging.
+    ///
+    /// # Errors
+    /// Returns `Err(CnvxError::ForeignHandle)` if `expr` references a
+    /// variable from a different `Model`.
+    pub fn add_named_objective(
+        &mut self,
+        sense: Sense,
+        expr: Expression,
+        priority: i32,
+        name: &str,
+    ) -> Result<ObjectiveId, CnvxError> {
+        self.check_expr(&expr)?;
+        let index = 1 + self.additional_objectives.len() as u32;
+        let name = if name.is_empty() { None } else { Some(name.to_string()) };
+        Rc::make_mut(&mut self.additional_objectives).push(Objective {
+            sense,
+            expr,
+            priority,
+            name,
+        });
+        Ok(ObjectiveId { index, generation: self.generation })
+    }
+
+    /// The number of additional objectives on this model, i.e. how many
+    /// times [`Model::add_objective`] has been called. Does not count the
+    /// primary objective.
+    pub fn num_additional_objectives(&self) -> usize {
+        self.additional_objectives.len()
+    }
+
+    /// The total number of objectives on this model: the primary one,
+    /// plus every additional objective added with [`Model::add_objective`].
+    /// Always at least `1`.
+    pub fn num_objectives(&self) -> usize {
+        1 + self.additional_objectives.len()
+    }
+
+    /// The objective referenced by `id`.
+    ///
+    /// # Errors
+    /// Returns `Err(CnvxError::ForeignHandle)` if `id` came from a
+    /// different `Model`.
+    pub fn objective_at(&self, id: ObjectiveId) -> Result<Objective, CnvxError> {
+        let i = self.resolve_objective(id)?;
+        if i == 0 {
+            Ok(Objective {
+                sense: self.objective_sense,
+                expr: self.objective.clone(),
+                priority: 0,
+                name: None,
+            })
+        } else {
+            Ok(self.additional_objectives[i - 1].clone())
+        }
+    }
+
+    /// Iterates over every objective on this model: the primary one
+    /// first (as [`ObjectiveId`] index `0`), then each additional one
+    /// added with [`Model::add_objective`], in the order it was added.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use cnvx_core::{Model, Sense};
+    /// let mut model = Model::new("bicriteria");
+    /// let x = model.add_var(0.0..);
+    /// model.set_objective(Sense::Minimize, 2.0 * x)?;
+    /// model.add_objective(Sense::Minimize, 3.0 * x, 0)?;
+    /// assert_eq!(model.objectives().count(), 2);
+    /// # Ok::<(), cnvx_core::CnvxError>(())
+    /// ```
+    pub fn objectives(&self) -> impl Iterator<Item = (ObjectiveId, Objective)> + '_ {
+        let generation = self.generation;
+        let primary = std::iter::once((
+            ObjectiveId { index: 0, generation },
+            Objective {
+                sense: self.objective_sense,
+                expr: self.objective.clone(),
+                priority: 0,
+                name: None,
+            },
+        ));
+        let additional =
+            self.additional_objectives.iter().enumerate().map(move |(i, obj)| {
+                (ObjectiveId { index: i as u32 + 1, generation }, obj.clone())
+            });
+        primary.chain(additional)
+    }
+
+    fn resolve_objective(&self, id: ObjectiveId) -> Result<usize, CnvxError> {
+        if id.generation != self.generation {
+            return Err(CnvxError::ForeignHandle);
+        }
+        Ok(id.index as usize)
+    }
+
+    /// Returns a copy of this model with `sense`/`expr` as its sole
+    /// objective and no additional objectives: the same variables and
+    /// constraints.
+    ///
+    /// # Errors
+    /// Returns `Err(CnvxError::ForeignHandle)` if `expr` references a
+    /// variable from a different `Model`.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use cnvx_core::{Model, Sense};
+    /// let mut model = Model::new("bicriteria");
+    /// let x = model.add_var(0.0..);
+    /// model.set_objective(Sense::Minimize, 2.0 * x)?;
+    /// let cost = model.add_objective(Sense::Minimize, 5.0 * x, 0)?;
+    /// let cost_expr = model.objective_at(cost)?.expr;
+    /// let single = model.with_objective(Sense::Minimize, cost_expr)?;
+    /// assert_eq!(single.num_objectives(), 1);
+    /// # Ok::<(), cnvx_core::CnvxError>(())
+    /// ```
+    pub fn with_objective(
+        &self,
+        sense: Sense,
+        expr: Expression,
+    ) -> Result<Model, CnvxError> {
+        self.check_expr(&expr)?;
+        let mut model = self.clone();
+        model.objective_sense = sense;
+        model.objective = expr;
+        model.additional_objectives = Rc::new(Vec::new());
+        Ok(model)
     }
 
     /// Adds a constraint built from [`Expression::leq`], [`Expression::geq`],

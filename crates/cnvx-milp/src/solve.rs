@@ -9,6 +9,13 @@ impl Solve<MilpSolver> for Model {
     type Solution = MilpSolution;
 
     fn solve(&self, solver: &MilpSolver) -> Result<MilpSolution, CnvxError> {
+        if self.num_additional_objectives() > 0 {
+            return Err(CnvxError::InvalidArgument(format!(
+                "model has {} additional objective(s) beyond the primary",
+                self.num_additional_objectives()
+            )));
+        }
+
         match solver.method() {
             MilpMethod::BranchAndCut => Err(CnvxError::Numerical(
                 "MilpMethod::BranchAndCut is not implemented yet; use MilpMethod::BranchAndBound".to_string(),
