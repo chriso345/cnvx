@@ -19,7 +19,4 @@ features = ["pyo3/extension-module"]
 include = [{ path = "src/cnvx/**/*.pyi", format = "wheel" }]
 
 [dependency-groups]
-dev = [
-    "maturin[patchelf]>=1.13.3",
-    "pytest>=9.1.1",
-]
+dev = ["maturin[patchelf]>=1.13.3", "pytest>=9.1.1"]
