@@ -7,7 +7,7 @@ on:
       - "v[0-9]+.[0-9]+.[0-9]+"
       - "v[0-9]+.[0-9]+.[0-9]+rc[0-9]+"
       - "v[0-9]+.[0-9]+.[0-9]+[ab][0-9]+"
-  pull_request: {} # FIXME: Remove this once the namespace has been reserved on PyPI
+  workflow_dispatch: {} # FIXME: Remove this once the namespace has been reserved on PyPI
 
 defaults:
   run:
@@ -22,6 +22,10 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v6
 
+      - name: Create Virtual Environment
+        run: uv sync --group dev
+        working-directory: bindings/python
+
       - name: Build extension in place
         uses: PyO3/maturin-action@v1
         with:
@@ -31,6 +35,7 @@ jobs:
 
       - name: Run tests
         run: uv run --group dev pytest
+        working-directory: bindings/python
 
   sdist:
     needs: test
