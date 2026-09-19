@@ -29,7 +29,7 @@ cnvx-graph = { workspace = true, optional = true }
 workspace = true
 
 [workspace]
-members = ["crates/*", "tests"]
+members = ["crates/*", "tests", "bindings/*"]
 default-members = ["crates/cnvx-cli"]
 resolver = "2"
 
@@ -160,4 +160,3 @@ required-features = ["lp", "milp"]
 name = "tsp"
 path = "examples/milp/tsp.rs"
 required-features = ["lp", "milp"]
-
