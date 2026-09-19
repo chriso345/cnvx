@@ -16,7 +16,10 @@ manifest-path = "Cargo.toml"
 module-name = "cnvx"
 python-source = "src"
 features = ["pyo3/extension-module"]
-include = [{ path = "src/cnvx/**/*.pyi", format = "wheel" }]
+include = [
+    { path = "src/cnvx/**/*.pyi", format = "wheel" },
+    { path = "LICENSE", format = "sdist" },
+]
 
 [dependency-groups]
 dev = ["maturin[patchelf]>=1.13.3", "pytest>=9.1.1"]
