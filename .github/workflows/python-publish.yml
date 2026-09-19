@@ -141,7 +141,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           pattern: dist-*
-          path: dist/
+          path: bindings/python/dist
           merge-multiple: true
 
       - name: Install uv
