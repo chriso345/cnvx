@@ -15,6 +15,7 @@ defaults:
 
 jobs:
   test:
+    name: Test Python Bindings
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -38,6 +39,7 @@ jobs:
         working-directory: bindings/python
 
   sdist:
+    name: Build Source Distribution
     needs: test
     runs-on: ubuntu-latest
     steps:
@@ -56,6 +58,7 @@ jobs:
           path: bindings/python/dist
 
   linux:
+    name: Build Wheels - Linux
     needs: test
     runs-on: ubuntu-latest
     strategy:
@@ -78,6 +81,7 @@ jobs:
           path: bindings/python/dist
 
   # macos:
+  #   name: Build Wheels - macOS
   #   needs: test
   #   runs-on: macos-latest
   #   strategy:
@@ -99,6 +103,7 @@ jobs:
   #         path: bindings/python/dist
   #
   # windows:
+  #   name: Build Wheels - Windows
   #   needs: test
   #   runs-on: windows-latest
   #   strategy:
@@ -120,6 +125,7 @@ jobs:
   #         path: bindings/python/dist
 
   publish:
+    name: Publish to PyPI
     # needs: [sdist, linux, macos, windows]
     needs: [sdist, linux]
     runs-on: ubuntu-latest
@@ -129,6 +135,8 @@ jobs:
     permissions:
       id-token: write   # required for trusted publishing (OIDC)
     steps:
+      - uses: actions/checkout@v4
+
       - name: Download dist artifacts
         uses: actions/download-artifact@v4
         with:
