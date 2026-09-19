@@ -1,0 +1,18 @@
+[package]
+name = "cnvx-milp"
+description = "branch and bound solvers for mixed-integer linear programs, on top of cnvx-lp"
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
+repository = { workspace = true }
+license = { workspace = true }
+keywords = { workspace = true }
+readme = { workspace = true }
+
+[dependencies]
+cnvx-core = { workspace = true }
+cnvx-lp = { workspace = true }
+strum = { workspace = true }
+
+[lints]
+workspace = true
