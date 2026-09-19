@@ -107,6 +107,8 @@ fn main() -> Result<(), SolveError> {
 }
 ```
 
+More examples can be found in the [examples](examples) directory of the repository.
+
 ---
 
 ## Contributing

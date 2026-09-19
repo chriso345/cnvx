@@ -144,7 +144,7 @@ for file in "${files[@]}"; do
   features="$(extract_features "$file")"
   expected="$(extract_expected_output "$file")"
 
-  cmd=(cargo run --quiet --example "$name")
+  cmd=(cargo run --quiet -p cnvx --example "$name")
   [[ -n "$MANIFEST_PATH" ]] && cmd+=(--manifest-path "$MANIFEST_PATH")
   [[ -n "$features" ]] && cmd+=(--features "$features")
 
