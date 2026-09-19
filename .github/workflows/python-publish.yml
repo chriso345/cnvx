@@ -1,0 +1,138 @@
+name: Publish Python Bindings to PyPI
+
+on:
+  push:
+    tags:
+      # Publish on version tags, e.g. v0.1.0
+      - "v[0-9]+.[0-9]+.[0-9]+"
+      - "v[0-9]+.[0-9]+.[0-9]+rc[0-9]+"
+      - "v[0-9]+.[0-9]+.[0-9]+[ab][0-9]+"
+  workflow_dispatch: {} # FIXME: Remove this once the namespace has been reserved on PyPI
+
+defaults:
+  run:
+    working-directory: bindings/python
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Build extension in place
+        uses: PyO3/maturin-action@v1
+        with:
+          working-directory: bindings/python
+          command: develop
+          args: --uv
+
+      - name: Run tests
+        run: uv run --group dev pytest
+
+  sdist:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build sdist
+        uses: PyO3/maturin-action@v1
+        with:
+          working-directory: bindings/python
+          command: sdist
+          args: --out dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist-sdist
+          path: bindings/python/dist
+
+  linux:
+    needs: test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: [x86_64, aarch64]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          working-directory: bindings/python
+          target: ${{ matrix.target }}
+          args: --release --out dist
+          manylinux: auto
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist-linux-${{ matrix.target }}
+          path: bindings/python/dist
+
+  # macos:
+  #   needs: test
+  #   runs-on: macos-latest
+  #   strategy:
+  #     matrix:
+  #       target: [x86_64, aarch64]
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #
+  #     - name: Build wheels
+  #       uses: PyO3/maturin-action@v1
+  #       with:
+  #         working-directory: bindings/python
+  #         target: ${{ matrix.target }}
+  #         args: --release --out dist
+  #
+  #     - uses: actions/upload-artifact@v4
+  #       with:
+  #         name: dist-macos-${{ matrix.target }}
+  #         path: bindings/python/dist
+  #
+  # windows:
+  #   needs: test
+  #   runs-on: windows-latest
+  #   strategy:
+  #     matrix:
+  #       target: [x64]
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #
+  #     - name: Build wheels
+  #       uses: PyO3/maturin-action@v1
+  #       with:
+  #         working-directory: bindings/python
+  #         target: ${{ matrix.target }}
+  #         args: --release --out dist
+  #
+  #     - uses: actions/upload-artifact@v4
+  #       with:
+  #         name: dist-windows-${{ matrix.target }}
+  #         path: bindings/python/dist
+
+  publish:
+    # needs: [sdist, linux, macos, windows]
+    needs: [sdist, linux]
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/cnvx
+    permissions:
+      id-token: write   # required for trusted publishing (OIDC)
+    steps:
+      - name: Download dist artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: dist-*
+          path: dist/
+          merge-multiple: true
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Publish to PyPI
+        run: uv publish
