@@ -161,3 +161,23 @@ name = "tsp"
 path = "examples/milp/tsp.rs"
 required-features = ["lp", "milp"]
 
+[[example]]
+name = "biobjective"
+path = "examples/mop/biobjective.rs"
+required-features = ["lp", "mop"]
+
+[[example]]
+name = "epsilon"
+path = "examples/mop/epsilon.rs"
+required-features = ["lp", "mop"]
+
+[[example]]
+name = "lexicographic"
+path = "examples/mop/lexicographic.rs"
+required-features = ["lp", "mop"]
+
+[[example]]
+name = "weighted_sum"
+path = "examples/mop/weighted_sum.rs"
+required-features = ["lp", "mop"]
+
