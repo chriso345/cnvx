@@ -1,9 +1,3 @@
-//! Build script for the `cnvx` crate. It sets environment variables for the
-//! version and commit SHA.
-//!
-//! This allows for the version and the commit SHA to be baked into the binary
-//! at compile time.
-
 use std::process::Command;
 
 fn main() {

@@ -1,12 +1,11 @@
 # pyrefly: ignore [missing-import]
 from .cnvx import (
     __version__,
-    # Submodules
-    lp,
 )
 
 __all__ = [
     "__version__",
-    # Submodules
-    "lp",
 ]
+
+# Prenvent the cnvx submodule namespace leaking
+del cnvx  # noqa: F821

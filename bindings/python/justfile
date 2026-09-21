@@ -7,13 +7,13 @@ init:
     uv sync --all-extras
 
 # Build the project using maturin to create a Python package
-build: clean # temp fix for malformed elf
+build: clean
     uv run maturin develop
 
 # Run the specified command inside the virtual environment
 [arg("no_build", long="no-build", value="true")]
 run no_build="false" +ARGS:
-    @if [ "{{no_build}}" = "false" ]; then just build; fi
+    @if [ "{{ no_build }}" = "false" ]; then just build; fi
     uv run {{ ARGS }}
 
 # Remove build artifacts

@@ -1,6 +1,6 @@
 [package]
 name = "cnvx-graph"
-description = "graph and network optimization solvers for cnvx optimization library"
+description = "cnvx graph optimization library"
 version = { workspace = true }
 authors = { workspace = true }
 edition = { workspace = true }
@@ -11,6 +11,8 @@ readme = { workspace = true }
 
 [dependencies]
 cnvx-core = { workspace = true }
+cnvx-math = { workspace = true }
+thiserror = { workspace = true }
 
 [lints]
 workspace = true
