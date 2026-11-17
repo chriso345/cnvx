@@ -8,9 +8,9 @@ use cnvx::prelude::*;
 fn main() -> Result<(), cnvx_core::CnvxError> {
     println!("=== Markov Chain Analysis ===\n");
 
-    // --- Example 1: Weather Model (3-state) ---
+    // Example 1: Weather Model (3-state)
     // States: 0=Sunny, 1=Cloudy, 2=Rainy
-    println!("--- Weather Model (3-state) ---");
+    println!("--- Weather Model (3-state)");
     let mut p = Matrix::zeros(3, 3);
     p.set(0, 0, 0.7);
     p.set(0, 1, 0.2);
@@ -79,8 +79,8 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
         pi_eigen[2] / sum
     );
 
-    // --- Example 2: PageRank-style Computation ---
-    println!("\n--- PageRank (4 pages) ---");
+    // Example 2: PageRank-style Computation
+    println!("\n--- PageRank (4 pages)");
     // 4 pages with links: 0->1, 0->2, 1->2, 1->3, 2->0, 3->0, 3->1
     let mut links = Matrix::zeros(4, 4);
     links.set(0, 1, 1.0);
@@ -145,8 +145,8 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
     }
     println!("PageRank: [{:.4}, {:.4}, {:.4}, {:.4}]", pi[0], pi[1], pi[2], pi[3]);
 
-    // --- Example 3: Absorbing Markov Chain ---
-    println!("\n--- Absorbing Chain: Gambler's Ruin ---");
+    // Example 3: Absorbing Markov Chain
+    println!("\n--- Absorbing Chain: Gambler's Ruin");
     // States: 0 (ruin), 1, 2, ..., N-1, N (win)
     // From i: go to i+1 with prob p, i-1 with prob q=1-p
     // States 0 and N are absorbing
@@ -204,8 +204,8 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
         println!("  From state {}: {:.2} steps", i + 1, t[i]);
     }
 
-    // --- Example 4: Continuous-Time Markov Chain (CTMC) ---
-    println!("\n--- CTMC: M/M/1 Queue (truncated) ---");
+    // Example 4: Continuous-Time Markov Chain (CTMC)
+    println!("\n--- CTMC: M/M/1 Queue (truncated)");
     // States: 0, 1, 2, ..., N (N=5)
     // Arrival rate lambda, service rate mu
     let lambda = 1.0;
@@ -276,7 +276,7 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
     //
     // === Markov Chain Analysis ===
     //
-    // --- Weather Model (3-state) ---
+    // --- Weather Model (3-state)
     // Transition matrix P:
     //   [0.7, 0.2, 0.1]
     //   [0.3, 0.4, 0.3]
@@ -288,7 +288,7 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
     //
     // Via eigendecomposition:  [0.3979, 0.3063, 0.2958]
     //
-    // --- PageRank (4 pages) ---
+    // --- PageRank (4 pages)
     // Google matrix G (alpha=0.85):
     //   [0.038, 0.463, 0.463, 0.038]
     //   [0.038, 0.038, 0.463, 0.887]
@@ -297,7 +297,7 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
     // Power iteration converged in 55 steps
     // PageRank: [0.2402, 0.3373, 0.1396, 0.2829]
     //
-    // --- Absorbing Chain: Gambler's Ruin ---
+    // --- Absorbing Chain: Gambler's Ruin
     // Transition matrix:
     //   [1.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     //   [0.6, 0.0, 0.4, 0.0, 0.0, 0.0]
@@ -319,7 +319,7 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
     //   From state 3: 6.00 steps
     //   From state 4: 4.60 steps
     //
-    // --- CTMC: M/M/1 Queue (truncated) ---
+    // --- CTMC: M/M/1 Queue (truncated)
     // Generator matrix Q:
     //   [ -1.0,   1.0,   0.0,   0.0,   0.0,   0.0]
     //   [  1.5,  -2.5,   1.0,   0.0,   0.0,   0.0]

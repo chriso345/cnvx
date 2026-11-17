@@ -9,14 +9,14 @@ use cnvx::prelude::*;
 fn main() -> Result<(), cnvx_core::CnvxError> {
     println!("=== Nonlinear System Solver ===\n");
 
-    // --- Example 1: Intersection of Circle and Parabola ---
+    // Example 1: Intersection of Circle and Parabola
     // x^2 + y^2 = 1 (unit circle)
     // y = x^2 - 0.5 (parabola)
     // Solutions: substitute y: x^2 + (x^2 - 0.5)^2 = 1
     // x^2 + x^4 - x^2 + 0.25 = 1 => x^4 + 0.25 = 1 => x^4 = 0.75 => x =
     // +/-0.75^(1/4) x ~= +/-0.9306, y = x^2 - 0.5 ~= 0.366
 
-    println!("--- Circle & Parabola Intersection ---");
+    println!("--- Circle & Parabola Intersection");
     let f1 = |v: &Vector| -> Vector {
         let x = v[0];
         let y = v[1];
@@ -56,7 +56,7 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
         );
     }
 
-    // --- Example 2: Chemical Equilibrium ---
+    // Example 2: Chemical Equilibrium
     // A + B <-> C,  K1 = 10
     // C + B <-> D,  K2 = 5
     // Initial: A=1, B=1, C=0, D=0
@@ -65,7 +65,7 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
     // K1 = C/(A*B) = (x-y)/((1-x)*(1-x-y)) = 10
     // K2 = D/(C*B) = y/((x-y)*(1-x-y)) = 5
 
-    println!("\n--- Chemical Equilibrium ---");
+    println!("\n--- Chemical Equilibrium");
     let f2 = |v: &Vector| -> Vector {
         let x = v[0].max(1e-12);
         let y = v[1].max(1e-12);
@@ -103,7 +103,7 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
         }
     };
 
-    // --- Example 3: Combustion / Reactor Design ---
+    // Example 3: Combustion / Reactor Design
     // Stoichiometric combustion of methane: CH4 + 2O2 -> CO2 + 2H2O
     // With dissociation at high temperature:
     // CO2 <-> CO + 0.5 O2
@@ -111,7 +111,7 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
     // H2O <-> OH + 0.5 H2
     // Solve for equilibrium composition
 
-    println!("\n--- Combustion Equilibrium (simplified) ---");
+    println!("\n--- Combustion Equilibrium (simplified)");
     // Species: CH4, O2, CO2, H2O, CO, H2, OH (7 species)
     // Elements: C, H, O (3 elements)
     // Use element conservation + equilibrium constants
@@ -137,11 +137,11 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
         println!("  Composition: CO2={:.4}, CO={:.4}, O2={:.4}", 1.0 - x, x, 0.5 * x);
     }
 
-    // --- Example 4: Finite Difference Nonlinear BVP ---
+    // Example 4: Finite Difference Nonlinear BVP
     // u'' + u^2 = 0, u(0)=0, u(1)=1
     // Discretize with central differences
 
-    println!("\n--- Nonlinear BVP: u'' + u^2 = 0 ---");
+    println!("\n--- Nonlinear BVP: u'' + u^2 = 0");
     let n = 50;
     let h = 1.0 / n as f64;
 
@@ -199,14 +199,14 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
     //
     // === Nonlinear System Solver ===
     //
-    // --- Circle & Parabola Intersection ---
+    // --- Circle & Parabola Intersection
     //   Start [0.500000, 0.000000] -> [0.930605, 0.366025]
     //   Start [-0.500000, 0.000000] -> [-0.930605, 0.366025]
     //   Found 2 unique solutions:
     //     Solution 0: x=0.930605, y=0.366025, |f|=3.14e-16
     //     Solution 1: x=-0.930605, y=0.366025, |f|=3.45e-13
     //
-    // --- Chemical Equilibrium ---
+    // --- Chemical Equilibrium
     //   Extent of reaction 1: x = 0.646769
     //   Extent of reaction 2: y = 0.237314
     //   Equilibrium concentrations:
@@ -214,11 +214,11 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
     //   Check: K1 = C/(A*B) = 10.000
     //          K2 = D/(C*B) = 5.000
     //
-    // --- Combustion Equilibrium (simplified) ---
+    // --- Combustion Equilibrium (simplified)
     //   CO2 dissociation fraction: x = 0.228360
     //   Composition: CO2=0.7716, CO=0.2284, O2=0.1142
     //
-    // --- Nonlinear BVP: u'' + u^2 = 0 ---
+    // --- Nonlinear BVP: u'' + u^2 = 0
     //   Solved with Newton (interior points)
     //   u(0.25) = 0.262444, u(0.5) = 0.541251, u(0.75) = 0.780902
 

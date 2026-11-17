@@ -45,7 +45,7 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
     println!("True minimum: [1, 1], f = 0\n");
 
     // 1. Gradient Descent with backtracking line search
-    println!("--- Gradient Descent (backtracking line search) ---");
+    println!("--- Gradient Descent (backtracking line search)");
     let mut x = start.clone();
     let mut f = rosenbrock(&x);
     let mut grad = rosenbrock_grad(&x);
@@ -85,7 +85,7 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
     }
 
     // 2. Newton's Method
-    println!("\n--- Newton's Method ---");
+    println!("\n--- Newton's Method");
     let mut x = start.clone();
     let mut f = rosenbrock(&x);
     let mut grad = rosenbrock_grad(&x);
@@ -119,7 +119,7 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
     }
 
     // 3. Finite-difference Newton (no analytic Hessian)
-    println!("\n--- Finite-Difference Newton (no analytic Hessian) ---");
+    println!("\n--- Finite-Difference Newton (no analytic Hessian)");
     let mut x = start.clone();
     let mut f = rosenbrock(&x);
 
@@ -151,7 +151,7 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
     }
 
     // 4. Using finite-difference for a black-box function
-    println!("\n--- Black-box optimization (finite-diff gradient only) ---");
+    println!("\n--- Black-box optimization (finite-diff gradient only)");
     // Himmelblau's function: f(x,y) = (x^2+y-11)^2 + (x+y^2-7)^2
     // Four minima at (3,2), (-2.805, 3.131), (-3.779, -3.283), (3.584, -1.848)
     let himmelblau = |p: &Vector| {
@@ -208,15 +208,15 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
     // Start: [-1.200, 1.000], f(start) = 24.200
     // True minimum: [1, 1], f = 0
     //
-    // --- Gradient Descent (backtracking line search) ---
+    // --- Gradient Descent (backtracking line search)
     //
-    // --- Newton's Method ---
+    // --- Newton's Method
     // Converged in 21 iterations: f = 0.000000, x = [1.000000, 1.000000]
     //
-    // --- Finite-Difference Newton (no analytic Hessian) ---
+    // --- Finite-Difference Newton (no analytic Hessian)
     // Converged in 21 iterations: f = 0.000000, x = [1.000000, 1.000000]
     //
-    // --- Black-box optimization (finite-diff gradient only) ---
+    // --- Black-box optimization (finite-diff gradient only)
     //   Start 1: [5.000, 5.000] -> x = [3.000, 2.000], f = 0.000
     //   Start 2: [-5.000, 5.000] -> x = [-2.805, 3.131], f = 0.000
     //   Start 3: [5.000, -5.000] -> x = [3.584, -1.848], f = 0.000

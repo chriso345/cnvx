@@ -9,9 +9,9 @@ use cnvx::prelude::*;
 fn main() -> Result<(), cnvx_core::CnvxError> {
     println!("=== Interpolation Examples ===\n");
 
-    // --- Example 1: Polynomial Interpolation (Vandermonde) ---
+    // Example 1: Polynomial Interpolation (Vandermonde)
     // Runge's function: f(x) = 1/(1+25*x^2) on [-1,1]
-    println!("--- Polynomial Interpolation (Runge's Function) ---");
+    println!("--- Polynomial Interpolation (Runge's Function)");
     let runge = |x: f64| 1.0 / (1.0 + 25.0 * x * x);
 
     for &n in &[5, 10, 15, 20] {
@@ -50,8 +50,8 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
         println!("  n={n:2}: max error = {max_err:.2e}");
     }
 
-    // --- Example 2: Chebyshev Nodes (avoids Runge phenomenon) ---
-    println!("\n--- Chebyshev Nodes ---");
+    // Example 2: Chebyshev Nodes (avoids Runge phenomenon)
+    println!("\n--- Chebyshev Nodes");
     for &n in &[5, 10, 15, 20] {
         // Chebyshev nodes of the second kind
         let x_nodes: Vector = (0..=n)
@@ -87,8 +87,8 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
         println!("  n={n:2}: max error = {max_err:.2e}");
     }
 
-    // --- Example 3: Cubic Spline Interpolation ---
-    println!("\n--- Cubic Spline Interpolation ---");
+    // Example 3: Cubic Spline Interpolation
+    println!("\n--- Cubic Spline Interpolation");
     // Natural cubic spline: S''(x₀) = S''(xₙ) = 0
     let x_data = Vector::from_slice(&[0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0]);
     let y_data = Vector::from_slice(&[0.0, 0.5, 1.0, 0.5, 0.0, -0.5, 0.0]);
@@ -156,8 +156,8 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
 
     println!("  Max error vs sin(pi*x): {max_err:.2e}");
 
-    // --- Example 4: Radial Basis Function (RBF) Interpolation ---
-    println!("\n--- RBF Interpolation (Multiquadric) ---");
+    // Example 4: Radial Basis Function (RBF) Interpolation
+    println!("\n--- RBF Interpolation (Multiquadric)");
     // Scattered 2D data: f(x,y) = sin(x)cos(y)
     let n_centers = 20;
     let mut rng = Rng::new(42);
@@ -233,8 +233,8 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
 
     println!("  Max error on 100x100 grid: {max_err:.4}");
 
-    // --- Example 5: Least Squares Approximation (not interpolation) ---
-    println!("\n--- Least Squares Polynomial Fit (degree 5) ---");
+    // Example 5: Least Squares Approximation (not interpolation)
+    println!("\n--- Least Squares Polynomial Fit (degree 5)");
     // Fit degree 5 polynomial to Runge function with many points
     let n_fit = 50;
     let x_fit: Vector = (0..n_fit)
@@ -274,25 +274,25 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
     //
     // === Interpolation Examples ===
     //
-    // --- Polynomial Interpolation (Runge's Function) ---
+    // --- Polynomial Interpolation (Runge's Function)
     //   n= 5: max error = 4.33e-1
     //   n=10: max error = 1.92e0
     //   n=15: max error = 2.10e0
     //   n=20: max error = 5.86e1
     //
-    // --- Chebyshev Nodes ---
+    // --- Chebyshev Nodes
     //   n= 5: max error = 6.39e-1
     //   n=10: max error = 1.32e-1
     //   n=15: max error = 9.93e-2
     //   n=20: max error = 1.77e-2
     //
-    // --- Cubic Spline Interpolation ---
+    // --- Cubic Spline Interpolation
     //   Max error vs sin(pi*x): 1.72e0
     //
-    // --- RBF Interpolation (Multiquadric) ---
+    // --- RBF Interpolation (Multiquadric)
     //   Max error on 100x100 grid: 1.0285
     //
-    // --- Least Squares Polynomial Fit (degree 5) ---
+    // --- Least Squares Polynomial Fit (degree 5)
     //   Degree 5 LS fit max error: 3.37e-1
 
     Ok(())

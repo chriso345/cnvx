@@ -80,12 +80,12 @@ fn main() -> Result<(), cnvx_core::CnvxError> {
     let mut k_gain = Matrix::zeros(2, 1); // Will store last gain
 
     for k in 0..n_steps {
-        // --- Predict ---
+        // Predict
         let x_pred = f.mul_vec(&x);
         let f_t = f.transpose();
         let p_pred = f.mul(&p)?.mul(&f_t)?.add(&q)?;
 
-        // --- Update ---
+        // Update
         let z = Vector::from_slice(&[measurements[k]]);
 
         // Innovation covariance: S = H * P_pred * H' + R
