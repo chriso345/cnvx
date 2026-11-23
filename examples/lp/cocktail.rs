@@ -4,53 +4,51 @@
 //! - Mojito
 //! - Margarita
 //!
-//! Subject to limited supplies of rum and tequila.
+//! Subject to limited supplies of rum and tequila and a bartender
+//! capacity limit.
 //!
-//! Category: Linear Programming
+//! Features: `lp`
 
 use cnvx::prelude::*;
 
-fn main() {
-    let mut model = LpModel::new();
+fn main() -> Result<(), cnvx_core::CnvxError> {
+    let mut model = Model::new("cocktail_blending");
 
-    let mojito = model.add_var().name("Mojito").lower_bound(0.0).integer().finish();
-    let margarita = model.add_var().name("Margarita").lower_bound(0.0).integer().finish();
+    // Mojitos and margaritas can be produced in any nonnegative amount.
+    let mojito = model.add_named_var(0.0.., "Mojito");
+    let margarita = model.add_named_var(0.0.., "Margarita");
 
-    // Resource constraints
+    // Resource constraints.
     //
-    // Rum available: 100 units
-    // Mojito uses 2 rum
-    model += (mojito * 2.0).leq(100.0);
+    // Rum available: 100 units.
+    // Each mojito uses 2 units of rum.
+    model.add_named_constraint((2.0 * mojito).leq(100.0), "rum")?;
 
-    // Tequila available: 80 units
-    // Margarita uses 4 tequila
-    model += (margarita * 4.0).leq(80.0);
+    // Tequila available: 80 units.
+    // Each margarita uses 4 units of tequila.
+    model.add_named_constraint((4.0 * margarita).leq(80.0), "tequila")?;
 
-    // Bartender is only able to make 60 cocktails total
-    model += (mojito + margarita).leq(60.0);
+    // The bartender can make at most 60 cocktails total.
+    model.add_named_constraint((mojito + margarita).leq(60.0), "bartender_capacity")?;
 
     // Profit:
     // Mojito     = $8
     // Margarita  = $10
-    model.add_objective(
-        Objective::maximize(mojito * 8.0 + margarita * 10.0).name("Profit"),
-    );
+    model.set_objective(Sense::Maximize, 8.0 * mojito + 10.0 * margarita)?;
 
-    let mut solver = LpSolver::new();
-    if let Some(name) = solver.selected_for(&model) {
-        println!("Selected solver: {name}");
-    }
+    let solution = model.solve(&LpSolver::primal_simplex())?;
 
-    let solution = solver.solve(&model).unwrap();
-
-    println!("Optimal profit: {}", solution.objective_value.unwrap_or(0.0));
+    println!("status: {}", solution.status);
+    println!("profit: {}", solution.objective);
     println!("Mojitos: {}", solution.value(mojito));
     println!("Margaritas: {}", solution.value(margarita));
 
     // Expected output:
     //
-    // Selected solver: primal-simplex
-    // Optimal profit: 520
+    // status: Optimal
+    // profit: 520
     // Mojitos: 40
     // Margaritas: 20
+
+    Ok(())
 }

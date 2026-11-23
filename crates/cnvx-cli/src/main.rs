@@ -7,7 +7,6 @@ use clap::Parser;
 use crate::args::{CliArguments, Command};
 
 mod args;
-mod solve;
 mod style;
 mod version;
 
@@ -37,7 +36,6 @@ fn main() -> ExitCode {
 fn dispatch() -> Result<(), Box<dyn std::error::Error>> {
     match &ARGS.command {
         Command::Version(command) => crate::version::version(command)?,
-        Command::Solve(command) => crate::solve::solve(command)?,
     }
 
     Ok(())

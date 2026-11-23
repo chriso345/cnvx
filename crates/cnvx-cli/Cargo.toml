@@ -10,13 +10,14 @@ keywords = { workspace = true }
 readme = { workspace = true }
 
 [dependencies]
-# cnvx = { workspace = true }
-cnvx-core = { workspace = true }
-cnvx-lp = { workspace = true }
-cnvx-parse = { workspace = true }
-cnvx-math = { workspace = true }
+# cnvx-core = { workspace = true }
+# cnvx-lp =  { workspace = true }
+# cnvx-math = { workspace = true }
+# cnvx-milp = { workspace = true }
+# cnvx-mop = { workspace = true }
+# cnvx-graph ={ workspace = true }
 clap = { workspace = true, features = ["derive"] }
-sigpipe = "0.1.3"
+sigpipe = { workspace = true }
 
 [lints]
 workspace = true

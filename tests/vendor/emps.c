@@ -1,4 +1,3 @@
-
 /* Expand compressed LP programs (in netlib format) to MPS format.
  * This is similar to the Fortran program emps.f , except that it
  * understands command-line arguments, including the -m option,

@@ -14,7 +14,6 @@ path = "src/tests.rs"
 cnvx-core = { workspace = true }
 cnvx-lp = { workspace = true }
 cnvx-math = { workspace = true }
-cnvx-parse = { workspace = true }
 clap = { workspace = true, features = ["derive"] }
 reqwest = { version = "0.13.2", features = ["blocking"] }
 tempfile = "3.24.0"

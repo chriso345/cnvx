@@ -1,6 +1,6 @@
 //! Power Grid Dispatch Optimization
 //!
-//! Minimize cost of producing electricity while meeting demand:
+//! Minimize the cost of producing electricity while meeting demand:
 //! - Gas plant (flexible, medium cost)
 //! - Coal plant (high emissions, higher cost)
 //! - Wind farm (free but limited capacity)
@@ -10,61 +10,45 @@
 //! - Emissions cap
 //! - Minimum thermal generation requirement
 //!
-//! Category: Linear Programming
+//! Features: `lp`
 
 use cnvx::prelude::*;
 
-fn main() {
-    let mut model = LpModel::new();
+fn main() -> Result<(), cnvx_core::CnvxError> {
+    let mut model = Model::new("power_grid_dispatch");
 
-    let gas = model
-        .add_var()
-        .name("Gas")
-        .lower_bound(0.0)
-        .upper_bound(200.0)
-        .finish();
+    let gas = model.add_named_var(0.0..=200.0, "Gas");
+    let coal = model.add_named_var(0.0..=180.0, "Coal");
+    let wind = model.add_named_var(0.0..=120.0, "Wind");
 
-    let coal = model
-        .add_var()
-        .name("Coal")
-        .lower_bound(0.0)
-        .upper_bound(180.0)
-        .finish();
+    // Total electricity generation must exactly match demand: 300 MW.
+    model.add_named_constraint((gas + coal + wind).eq(300.0), "demand")?;
 
-    let wind = model
-        .add_var()
-        .name("Wind")
-        .lower_bound(0.0)
-        .upper_bound(120.0)
-        .finish();
+    // Gas emissions must be less than or equal to half of coal emissions.
+    model.add_named_constraint(gas.leq(0.5 * coal), "emissions")?;
 
-    // Total electricity generation must exactly match demand (300 MW)
-    model += (gas + coal + wind).eq(300.0);
+    // At least 150 MW must come from thermal generation.
+    model.add_named_constraint((gas + coal).geq(150.0), "minimum_thermal")?;
 
-    // Gas Emissions must be less that half of coal emissions
-    model += gas.leq(0.5 * coal);
+    // Gas = $50/MW, Coal = $80/MW, Wind = $0/MW.
+    model.set_objective(Sense::Minimize, 50.0 * gas + 80.0 * coal + 0.0 * wind)?;
 
-    // At least 150 MW must come from thermal generation (gas + coal)
-    model += (gas + coal).geq(150.0);
+    let solution =
+        model.solve(&LpSolver::primal_simplex().time_limit(1.5).max_iterations(10))?;
 
-    // Gas = $50/MW, Coal = $80/MW, Wind = $0/MW
-    model.add_objective(
-        Objective::minimize(gas * 50.0 + coal * 80.0 + wind * 0.0).name("TotalCost"),
-    );
-
-    let mut solver = LpSolver::new();
-    let solution = solver.solve(&model).unwrap();
-
-    println!("Optimal cost: {}", solution.objective_value.unwrap_or(0.0));
-    println!("Gas generation: {}", solution.value(gas));
-    println!("Coal generation: {}", solution.value(coal));
-    println!("Wind generation: {}", solution.value(wind));
+    println!("status: {}", solution.status);
+    println!("cost: {:.2}", solution.objective);
+    println!("Gas generation: {:.2}", solution.value(gas));
+    println!("Coal generation: {:.2}", solution.value(coal));
+    println!("Wind generation: {:.2}", solution.value(wind));
 
     // Expected output:
     //
-    // Selected solver: primal-simplex
-    // Optimal profit: 12600
-    // Gas generation: 60
-    // Coal generation: 120
-    // Wind generation: 120
+    // status: Optimal
+    // cost: 12600.00
+    // Gas generation: 60.00
+    // Coal generation: 120.00
+    // Wind generation: 120.00
+
+    Ok(())
 }
